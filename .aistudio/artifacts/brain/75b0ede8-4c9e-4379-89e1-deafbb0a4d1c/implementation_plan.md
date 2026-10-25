@@ -8,10 +8,15 @@
   - Canlı radyo oynatımı için düşük gecikmeli tamponlama (`minBufferMs: 4000`, `bufferForPlaybackMs: 500`) yapılandırıldı.
   - Süper FM, Metro FM, Joy FM, Joy Türk ve Virgin Radio için çoklu yedek CDN akış zincirleri entegre edildi.
 
-## 2. GitHub Sayfası ve Doğrudan APK İndirme Bağlantıları (vizyontele)
+## 2. GitHub Sayfası ve Doğrudan APK İndirme Bağlantıları (V-ZYON-TV-PRO)
 - **Bağlantılar:**
-  - GitHub Sayfası / Depo: `https://github.com/vizyontele/vizyontele`
-  - Doğrudan APK İndirme Bağlantısı: `https://github.com/vizyontele/vizyontele/releases/latest/download/vizyontele.apk`
+  - GitHub Sayfası / Depo: `https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO`
+  - GitHub Sürümler (Releases): `https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO/releases`
+  - Doğrudan APK İndirme Bağlantısı: `https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO/releases/latest/download/vizyontv.apk`
+- **404 Hatası Koruması (Smart Safe URL Resolver):**
+  - GitHub üzerinde henüz v2.9.0 Release'i yayınlanmadığında doğrudan indirme bağlantısına basıldığında tarayıcıda 404 "Not Found" sayfası çıkması engellendi.
+  - Arka planda `HEAD` kontrolü yapılarak bağlantı 404 verdiğinde kullanıcıya bilgi verilir ve otomatik olarak çalışan GitHub deposu ana sayfasına (`HTTP 200`) yönlendirilir.
+  - Proje ana dizinine `vizyontv.apk` dosyası yerleştirildi. Release yayınlandığında doğrudan indirme kesintisiz çalışır.
 - **Ana Ekran Güncelleme Kartı (Banner):**
   - **"APK İndir"** butonu: Tıklandığında doğrudan APK dosyasının indirilmesini tetikler.
   - **"GitHub"** butonu: Tıklandığında kullanıcıyı projenin GitHub releases/proje sayfasına yönlendirir.

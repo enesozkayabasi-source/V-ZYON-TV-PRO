@@ -210,8 +210,63 @@ fun HomeScreen(
 
     var showAddDialog by remember { mutableStateOf(false) }
     var showSettingsDialog by remember { mutableStateOf(false) }
-
     val gridState = rememberLazyGridState()
+
+    val openSafeUpdateUrl: (String) -> Unit = { targetUrl ->
+        scope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            var urlToLaunch = targetUrl
+            var warningMessage: String? = null
+
+            // If it's a direct release download link, check if it returns 404
+            if (targetUrl.contains("releases/latest/download") || targetUrl.endsWith(".apk")) {
+                try {
+                    val urlObj = java.net.URL(targetUrl)
+                    val conn = (urlObj.openConnection() as java.net.HttpURLConnection).apply {
+                        requestMethod = "HEAD"
+                        connectTimeout = 3000
+                        readTimeout = 3000
+                        instanceFollowRedirects = true
+                        setRequestProperty("User-Agent", "Mozilla/5.0 (Android; Mobile)")
+                    }
+                    val code = conn.responseCode
+                    if (code == 404) {
+                        // Check if raw repo file exists on GitHub
+                        val rawRepoUrl = "https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO/raw/main/vizyontv.apk"
+                        val rawConn = (java.net.URL(rawRepoUrl).openConnection() as java.net.HttpURLConnection).apply {
+                            requestMethod = "HEAD"
+                            connectTimeout = 2000
+                            readTimeout = 2000
+                            instanceFollowRedirects = true
+                            setRequestProperty("User-Agent", "Mozilla/5.0")
+                        }
+                        if (rawConn.responseCode in 200..399) {
+                            urlToLaunch = rawRepoUrl
+                        } else {
+                            // Direct release not yet published on GitHub; open main repo page (200 OK)
+                            urlToLaunch = githubPageUrl
+                            warningMessage = "GitHub Release (APK) henüz yüklenmediği için 404 hatasını önlemek amacıyla GitHub sayfasına yönlendirildi."
+                        }
+                    }
+                } catch (_: Exception) {
+                    // In case of timeout or offline, proceed with targetUrl
+                }
+            }
+
+            kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                if (warningMessage != null) {
+                    snackbarHostState.showSnackbar(warningMessage!!)
+                }
+                try {
+                    val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(urlToLaunch)).apply {
+                        addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+                    context.startActivity(intent)
+                } catch (_: Exception) {
+                    snackbarHostState.showSnackbar("Bağlantı: $urlToLaunch")
+                }
+            }
+        }
+    }
 
     var lastClickedTab by remember { mutableStateOf<MainNavigationTab?>(null) }
     var lastClickTime by remember { androidx.compose.runtime.mutableLongStateOf(0L) }
@@ -383,12 +438,7 @@ fun HomeScreen(
                                     snackbarHostState.showSnackbar(msg)
                                 }
                             }
-                            try {
-                                val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(apkDownloadUrl)).apply {
-                                    addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
-                                }
-                                context.startActivity(intent)
-                            } catch (_: Exception) {}
+                            openSafeUpdateUrl(apkDownloadUrl)
                         },
                         onSearchChange = { viewModel.onSearchQueryChanged(it) },
                         onOpenSettings = { showSettingsDialog = true },
@@ -476,12 +526,7 @@ fun HomeScreen(
                                                     snackbarHostState.showSnackbar(msg)
                                                 }
                                             }
-                                            try {
-                                                val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(apkDownloadUrl)).apply {
-                                                    addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
-                                                }
-                                                context.startActivity(intent)
-                                            } catch (_: Exception) {}
+                                            openSafeUpdateUrl(apkDownloadUrl)
                                         },
                                         colors = ButtonDefaults.buttonColors(containerColor = NeonAmber),
                                         shape = RoundedCornerShape(8.dp),
@@ -506,12 +551,7 @@ fun HomeScreen(
                                     // GitHub Sayfası Butonu
                                     Button(
                                         onClick = {
-                                            try {
-                                                val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(githubPageUrl)).apply {
-                                                    addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
-                                                }
-                                                context.startActivity(intent)
-                                            } catch (_: Exception) {}
+                                            openSafeUpdateUrl(githubPageUrl)
                                         },
                                         colors = ButtonDefaults.buttonColors(containerColor = NeonCyan.copy(alpha = 0.22f)),
                                         border = BorderStroke(1.dp, NeonCyan),
@@ -774,16 +814,7 @@ fun HomeScreen(
                 }
             },
             onOpenUpdateLink = { url ->
-                try {
-                    val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(url)).apply {
-                        addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
-                    }
-                    context.startActivity(intent)
-                } catch (_: Exception) {
-                    scope.launch {
-                        snackbarHostState.showSnackbar("İndirme Bağlantısı: $url")
-                    }
-                }
+                openSafeUpdateUrl(url)
             },
             onDismiss = { showSettingsDialog = false }
         )

@@ -794,6 +794,20 @@ fun SettingsDialog(
                                     )
                                     .padding(10.dp)
                             ) {
+                                Surface(
+                                    color = NeonCyan.copy(alpha = 0.08f),
+                                    shape = RoundedCornerShape(6.dp),
+                                    border = androidx.compose.foundation.BorderStroke(1.dp, NeonCyan.copy(alpha = 0.3f)),
+                                    modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+                                ) {
+                                    Text(
+                                        text = "ℹ️ 404 Koruması: GitHub Releases bölümünde v2.9.0 sürümü yayınlanana kadar, 404 sayfa hatasını önlemek için indirme bağlantısı otomatik olarak GitHub ana sayfanıza yönlendirir.",
+                                        fontSize = 10.sp,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.padding(8.dp)
+                                    )
+                                }
+
                                 Text(
                                     text = "Doğrudan APK İndirme Bağlantısı (.apk):",
                                     fontSize = 11.sp,
@@ -875,7 +889,7 @@ fun SettingsDialog(
                                         shape = RoundedCornerShape(8.dp)
                                     ) {
                                         Text(
-                                            text = "vizyontele'ye Sıfırla",
+                                            text = "V-ZYON-TV-PRO'ya Sıfırla",
                                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                                             fontWeight = FontWeight.Bold,
                                             fontSize = 10.sp

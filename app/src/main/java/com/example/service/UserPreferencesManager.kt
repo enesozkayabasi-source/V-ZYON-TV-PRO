@@ -26,14 +26,14 @@ class UserPreferencesManager(context: Context) {
         const val PREVIOUS_VERSION_BASELINE = "v2.8.5"
         const val KEY_CUSTOM_GITHUB_URL = "pref_custom_github_url"
         const val KEY_CUSTOM_APK_URL = "pref_custom_apk_url"
-        const val DEFAULT_GITHUB_PAGE_URL = "https://github.com/vizyontele/vizyontele"
-        const val DEFAULT_APK_DOWNLOAD_URL = "https://github.com/vizyontele/vizyontele/releases/latest/download/vizyontele.apk"
+        const val DEFAULT_GITHUB_PAGE_URL = "https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO"
+        const val DEFAULT_APK_DOWNLOAD_URL = "https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO/releases/latest/download/vizyontv.apk"
         const val OFFICIAL_UPDATE_URL = DEFAULT_APK_DOWNLOAD_URL
     }
 
     fun getGithubPageUrl(): String {
         val saved = prefs.getString(KEY_CUSTOM_GITHUB_URL, null)
-        if (saved.isNullOrBlank() || saved.contains("vizyontv/vizyontv-app")) {
+        if (saved.isNullOrBlank() || !saved.contains("enesozkayabasi-source")) {
             return DEFAULT_GITHUB_PAGE_URL
         }
         return saved
@@ -45,7 +45,7 @@ class UserPreferencesManager(context: Context) {
 
     fun getApkDownloadUrl(): String {
         val saved = prefs.getString(KEY_CUSTOM_APK_URL, null)
-        if (saved.isNullOrBlank() || saved.contains("vizyontv/vizyontv-app")) {
+        if (saved.isNullOrBlank() || !saved.contains("enesozkayabasi-source")) {
             return DEFAULT_APK_DOWNLOAD_URL
         }
         return saved
