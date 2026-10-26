@@ -12,20 +12,6 @@ Android TV, Tablet ve Akıllı Telefonlar için optimize edilmiş; Canlı TV kan
 
 ---
 
-### ⚙️ GitHub Release Kurulumu (404 Uyarısını Önlemek İçin)
-
-GitHub üzerinde `/releases/latest/download/vizyontv.apk` doğrudan indirme linkinin çalışabilmesi için deponuzda 1 defaya mahsus sürüm oluşturulmalıdır:
-
-1. [https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO/releases/new](https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO/releases/new) adresini açın.
-2. **Choose a tag** kısmına `v2.9.0` yazın ve "Create new tag" seçin.
-3. Release title olarak `v2.9.0` yazın.
-4. Projenin ana dizininde hazır bulunan `vizyontv.apk` dosyasını "Attach binaries by dropping them here" alanına yükleyin.
-5. **Publish release** butonuna tıklayın.
-
-*Not: Uygulama içerisinde 404 koruması aktiftir; henüz Release oluşturulmamışsa kullanıcılar 404 sayfası yerine otomatik olarak GitHub ana sayfasına yönlendirilir.*
-
----
-
 ### ✨ Öne Çıkan Özellikler
 
 - **Kesintisiz Karnaval & Canlı Radyolar:**
