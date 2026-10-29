@@ -1,14 +1,6 @@
-# VİZYON TV PRO 📺 (v2.9.0)
+# VİZYON TV PRO 📺 (v2.9.1)
 
 Android TV, Tablet ve Akıllı Telefonlar için optimize edilmiş; Canlı TV kanalları, Spor, Haber, Çocuk kategorileri ve kesintisiz arka plan radyo oynatıcısı sunan modern medya platformu.
-
----
-
-### 📥 Doğrudan İndirme ve Güncelleme
-
-- 🚀 **Doğrudan APK İndir:** [VİZYON TV APK (v2.9.0)](https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO/releases/latest/download/vizyontv.apk)
-- 📦 **Tüm Sürümler & Değişiklikler:** [GitHub Releases](https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO/releases)
-- 📂 **Depo Ana Sayfası:** [GitHub V-ZYON-TV-PRO](https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO)
 
 ---
 
