@@ -22,12 +22,11 @@ class UserPreferencesManager(context: Context) {
         private const val KEY_FAVORITES = "pref_favorites"
         private const val KEY_LAST_TAB = "pref_last_tab"
         private const val KEY_APP_VERSION = "pref_app_version"
-        const val LATEST_RELEASE_VERSION = "v2.9.0"
-        const val PREVIOUS_VERSION_BASELINE = "v2.8.5"
+        const val LATEST_RELEASE_VERSION = "v2.9.4"
         const val KEY_CUSTOM_GITHUB_URL = "pref_custom_github_url"
         const val KEY_CUSTOM_APK_URL = "pref_custom_apk_url"
         const val DEFAULT_GITHUB_PAGE_URL = "https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO"
-        const val DEFAULT_APK_DOWNLOAD_URL = "https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO/releases/latest/download/vizyontv.apk"
+        const val DEFAULT_APK_DOWNLOAD_URL = "https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO/releases/download/v2.9.4/VIZYON.TV.v2.9.4.apk"
         const val OFFICIAL_UPDATE_URL = DEFAULT_APK_DOWNLOAD_URL
     }
 
@@ -45,7 +44,7 @@ class UserPreferencesManager(context: Context) {
 
     fun getApkDownloadUrl(): String {
         val saved = prefs.getString(KEY_CUSTOM_APK_URL, null)
-        if (saved.isNullOrBlank() || !saved.contains("enesozkayabasi-source")) {
+        if (saved.isNullOrBlank() || !saved.contains("enesozkayabasi-source") || saved.contains("vizyontv.apk") || saved.contains("VIZYON.TV.3.apk") || saved.contains("v2.9.2") || saved.contains("v2.9.1")) {
             return DEFAULT_APK_DOWNLOAD_URL
         }
         return saved
@@ -56,7 +55,7 @@ class UserPreferencesManager(context: Context) {
     }
 
     fun getInstalledVersion(): String {
-        return prefs.getString(KEY_APP_VERSION, PREVIOUS_VERSION_BASELINE) ?: PREVIOUS_VERSION_BASELINE
+        return prefs.getString(KEY_APP_VERSION, LATEST_RELEASE_VERSION) ?: LATEST_RELEASE_VERSION
     }
 
     fun saveInstalledVersion(version: String) {

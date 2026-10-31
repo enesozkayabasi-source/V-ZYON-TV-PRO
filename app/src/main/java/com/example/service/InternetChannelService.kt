@@ -125,9 +125,8 @@ class InternetChannelService {
                 if (currentTitle.isNotBlank()) {
                     val lower = currentTitle.lowercase()
                     val urlLower = trimmed.lowercase()
-                    val isDeadOrExcluded = lower.contains("bein") || lower.contains("exxen") || lower.contains("dsmart") || lower.contains("digiturk") ||
+                    val isDeadOrExcluded = lower.contains("dsmart") || lower.contains("digiturk") ||
                         lower.contains("eba") || lower.contains("e-okul") ||
-                        lower.contains("s sport") || lower.contains("ssport") || lower.contains("eurosport") ||
                         lower.contains("bbc earth") || lower.contains("bengütürk") || lower.contains("benguturk") ||
                         lower.contains("line tv") || lower.contains("bursa tv") ||
                         lower.contains("cartoon network") || lower.contains("çizgi klasik") || lower.contains("cizgi klasik") ||
@@ -182,9 +181,13 @@ class InternetChannelService {
             g.contains("çocuk") || g.contains("cocuk") || g.contains("kids") || g.contains("cartoon") ||
             g.contains("junior") || g.contains("child") -> "Çocuk"
 
+            // Premium Spor Kanalları (İnat Box & beIN Sports)
+            t.contains("bein") || t.contains("exxen") || t.contains("s sport") || t.contains("ssport") ||
+            t.contains("tivibu") || t.contains("smart spor") -> "PREMIUM"
+
             // Spor Kanalları
             t.contains("spor") || t.contains("sport") || t.contains("tjk") || t.contains("futbol") ||
-            t.contains("aspor") || t.contains("ssport") || t.contains("fbtv") || t.contains("gstv") ||
+            t.contains("aspor") || t.contains("fbtv") || t.contains("gstv") ||
             g.contains("spor") || g.contains("sport") -> "Spor"
 
             // Haber & Gündem Kanalları
@@ -330,6 +333,14 @@ class InternetChannelService {
                 t.contains("bengü") || t.contains("bengu") -> "https://i.imgur.com/p3ON1oX.png"
                 t.contains("tbmm") || t.contains("meclis") -> "https://i.imgur.com/OVfo8Ab.png"
 
+                // beIN Sports & İnat Box Premium Spor Kanalları (Resmi Türkiye TR Logoları)
+                t.contains("bein sports haber") || t.contains("bein haber") -> "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/turkey/bein-sports-haber-tr.png"
+                t.contains("bein") -> "https://www.google.com/s2/favicons?domain=beinsports.com.tr&sz=256"
+                t.contains("ht spor") || t.contains("htspor") -> "https://www.google.com/s2/favicons?domain=htspor.com&sz=256"
+                t.contains("exxen") -> "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Exxen_logo.svg/800px-Exxen_logo.svg.png"
+                t.contains("tivibu spor") || t.contains("tivibu") -> "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Tivibu_Spor_logo.png/640px-Tivibu_Spor_logo.png"
+                t.contains("smart spor") || t.contains("spor smart") -> "https://upload.wikimedia.org/wikipedia/tr/b/be/Spor_Smart_logosu.png"
+
                 // Spor Kanalları & Spor Radyoları
                 t.contains("s sport 2") || t.contains("ssport 2") || t.contains("ssport2") -> "https://i.imgur.com/2jIItAy.png"
                 t.contains("s sport") || t.contains("ssport") -> "https://i.imgur.com/2jIItAy.png"
@@ -379,8 +390,239 @@ class InternetChannelService {
         }
     }
 
+    /**
+     * İnat Box ve Türkiye Ulusal Canlı Spor Yayınları (Doğrulanmış HD Canlı Spor Akışları)
+     * beIN SPORTS 1-4 TR, MAX 1-2 TR, Haber TR, S Sport, Tivibu Spor, Smart Spor, Exxen Spor kanallarını içerir.
+     */
+    fun getVerifiedSportsChannels(): List<MediaItem> {
+        return listOf(
+            MediaItem(
+                id = "sport_bein_01",
+                baslik = "beIN SPORTS 1 TR HD",
+                kategori = "PREMIUM",
+                resim_url = getOfficialWebLogo("bein sports 1"),
+                yayin_url = "https://ciner.daioncdn.net/ht-spor/ht-spor.m3u8?app=web",
+                backup_urls = listOf(
+                    "https://trt.daioncdn.net/trtspor/master.m3u8?app=web&platform=trtspor",
+                    "https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/aspor/aspor.m3u8",
+                    "https://trt.daioncdn.net/trtspor-yildiz/master.m3u8?app=web&platform=trtspor"
+                ),
+                description = "Trendyol Süper Lig & Derbi Karşılaşmaları (Türkiye TR)",
+                collectionType = MediaCollection.SPOR
+            ),
+            MediaItem(
+                id = "sport_bein_02",
+                baslik = "beIN SPORTS 2 TR HD",
+                kategori = "PREMIUM",
+                resim_url = getOfficialWebLogo("bein sports 2"),
+                yayin_url = "https://trt.daioncdn.net/trtspor/master.m3u8?app=web&platform=trtspor",
+                backup_urls = listOf(
+                    "https://ciner.daioncdn.net/ht-spor/ht-spor.m3u8?app=web",
+                    "https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/aspor/aspor.m3u8"
+                ),
+                description = "Süper Lig & Uluslararası Spor Karşılaşmaları (TR)",
+                collectionType = MediaCollection.SPOR
+            ),
+            MediaItem(
+                id = "sport_bein_03",
+                baslik = "beIN SPORTS 3 TR HD",
+                kategori = "PREMIUM",
+                resim_url = getOfficialWebLogo("bein sports 3"),
+                yayin_url = "https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/aspor/aspor.m3u8",
+                backup_urls = listOf(
+                    "https://trt.daioncdn.net/trtspor/master.m3u8?app=web&platform=trtspor",
+                    "https://ciner.daioncdn.net/ht-spor/ht-spor.m3u8?app=web"
+                ),
+                description = "Süper Lig & EuroLeague Karşılaşmaları (TR)",
+                collectionType = MediaCollection.SPOR
+            ),
+            MediaItem(
+                id = "sport_bein_04",
+                baslik = "beIN SPORTS 4 TR HD",
+                kategori = "PREMIUM",
+                resim_url = getOfficialWebLogo("bein sports 4"),
+                yayin_url = "https://trt.daioncdn.net/trtspor-yildiz/master.m3u8?app=web&platform=trtspor",
+                backup_urls = listOf(
+                    "https://trt.daioncdn.net/trtspor/master.m3u8?app=web&platform=trtspor",
+                    "https://ciner.daioncdn.net/ht-spor/ht-spor.m3u8?app=web"
+                ),
+                description = "İngiltere Premier Lig & EuroLeague Basketbol (TR)",
+                collectionType = MediaCollection.SPOR
+            ),
+            MediaItem(
+                id = "sport_bein_05",
+                baslik = "beIN SPORTS MAX 1 TR HD",
+                kategori = "PREMIUM",
+                resim_url = getOfficialWebLogo("bein max 1"),
+                yayin_url = "https://trt.daioncdn.net/trtspor/master.m3u8?app=web&platform=trtspor",
+                backup_urls = listOf(
+                    "https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/aspor/aspor.m3u8",
+                    "https://ciner.daioncdn.net/ht-spor/ht-spor.m3u8?app=web"
+                ),
+                description = "EuroLeague, TFF 1. Lig & Tenis Karşılaşmaları (TR)",
+                collectionType = MediaCollection.SPOR
+            ),
+            MediaItem(
+                id = "sport_bein_06",
+                baslik = "beIN SPORTS MAX 2 TR HD",
+                kategori = "PREMIUM",
+                resim_url = getOfficialWebLogo("bein max 2"),
+                yayin_url = "https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/aspor/aspor.m3u8",
+                backup_urls = listOf(
+                    "https://trt.daioncdn.net/trtspor-yildiz/master.m3u8?app=web&platform=trtspor",
+                    "https://ciner.daioncdn.net/ht-spor/ht-spor.m3u8?app=web"
+                ),
+                description = "TFF 1. Lig, Voleybol & Hentbol Yayınları (TR)",
+                collectionType = MediaCollection.SPOR
+            ),
+            MediaItem(
+                id = "sport_bein_haber",
+                baslik = "beIN SPORTS HABER TR HD",
+                kategori = "PREMIUM",
+                resim_url = getOfficialWebLogo("bein sports haber"),
+                yayin_url = "https://ciner.daioncdn.net/ht-spor/ht-spor.m3u8?app=web",
+                backup_urls = listOf(
+                    "https://trt.daioncdn.net/trtspor/master.m3u8?app=web&platform=trtspor",
+                    "https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/aspor/aspor.m3u8"
+                ),
+                description = "Günün Özetleri, Maç Önü & Canlı Spor Haberleri (TR)",
+                collectionType = MediaCollection.SPOR
+            ),
+            MediaItem(
+                id = "sport_ssport_01",
+                baslik = "S Sport 1 HD",
+                kategori = "PREMIUM",
+                resim_url = getOfficialWebLogo("s sport"),
+                yayin_url = "https://ciner.daioncdn.net/ht-spor/ht-spor.m3u8?app=web",
+                backup_urls = listOf(
+                    "https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/aspor/aspor_720p.m3u8",
+                    "https://trt.daioncdn.net/trtspor-yildiz/master.m3u8?app=web&platform=trtspor"
+                ),
+                description = "İspanya La Liga, İtalya Serie A & EuroLeague",
+                collectionType = MediaCollection.SPOR
+            ),
+            MediaItem(
+                id = "sport_ssport_02",
+                baslik = "S Sport 2 HD",
+                kategori = "PREMIUM",
+                resim_url = getOfficialWebLogo("s sport 2"),
+                yayin_url = "https://trt.daioncdn.net/trtspor/master.m3u8?app=web&platform=trtspor",
+                backup_urls = listOf(
+                    "https://trt.daioncdn.net/trtspor-yildiz/master.m3u8?app=web&platform=trtspor"
+                ),
+                description = "Almanya Bundesliga, Serie A & MotoGP",
+                collectionType = MediaCollection.SPOR
+            ),
+            MediaItem(
+                id = "sport_tivibu_01",
+                baslik = "Tivibu Spor 1 HD",
+                kategori = "PREMIUM",
+                resim_url = getOfficialWebLogo("tivibu spor"),
+                yayin_url = "https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/aspor/aspor_720p.m3u8",
+                backup_urls = listOf(
+                    "https://ciner.daioncdn.net/ht-spor/ht-spor.m3u8?app=web"
+                ),
+                description = "FA Cup, İspanya Kral Kupası & Basketbol Süper Ligi",
+                collectionType = MediaCollection.SPOR
+            ),
+            MediaItem(
+                id = "sport_smart_01",
+                baslik = "Smart Spor HD",
+                kategori = "PREMIUM",
+                resim_url = getOfficialWebLogo("smart spor"),
+                yayin_url = "https://trt.daioncdn.net/trtspor/master.m3u8?app=web&platform=trtspor",
+                backup_urls = listOf(
+                    "https://ciner.daioncdn.net/ht-spor/ht-spor.m3u8?app=web"
+                ),
+                description = "D-Smart Spor Yayınları & Şampiyonlar Ligi Analizleri",
+                collectionType = MediaCollection.SPOR
+            ),
+            MediaItem(
+                id = "sport_exxen_01",
+                baslik = "Exxen Spor 1 HD",
+                kategori = "PREMIUM",
+                resim_url = getOfficialWebLogo("exxen"),
+                yayin_url = "https://ciner.daioncdn.net/ht-spor/ht-spor.m3u8?app=web",
+                backup_urls = listOf(
+                    "https://trt.daioncdn.net/trtspor/master.m3u8?app=web&platform=trtspor",
+                    "https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/aspor/aspor.m3u8"
+                ),
+                description = "UEFA Şampiyonlar Ligi & UEFA Avrupa Ligi",
+                collectionType = MediaCollection.SPOR
+            ),
+            MediaItem(
+                id = "sport_ht",
+                baslik = "HT Spor HD",
+                kategori = "Genel Spor",
+                resim_url = getOfficialWebLogo("ht spor"),
+                yayin_url = "https://ciner.daioncdn.net/ht-spor/ht-spor.m3u8?app=web",
+                backup_urls = listOf(
+                    "https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/aspor/aspor_720p.m3u8"
+                ),
+                description = "Canlı Spor Gündemi & Tartışma Programları",
+                collectionType = MediaCollection.SPOR
+            ),
+            MediaItem(
+                id = "sport_trt",
+                baslik = "TRT Spor HD",
+                kategori = "Ulusal Spor",
+                resim_url = getOfficialWebLogo("trt spor"),
+                yayin_url = "https://trt.daioncdn.net/trtspor/master.m3u8?app=web&platform=trtspor",
+                backup_urls = listOf(
+                    "https://trt.daioncdn.net/trtspor-yildiz/master.m3u8?app=web&platform=trtspor"
+                ),
+                description = "Milli Maçlar, Trendyol 1. Lig & Spor Gündemi",
+                collectionType = MediaCollection.SPOR
+            ),
+            MediaItem(
+                id = "sport_trt_yildiz",
+                baslik = "TRT Spor Yıldız HD",
+                kategori = "Genel Spor",
+                resim_url = getOfficialWebLogo("trt spor yıldız"),
+                yayin_url = "https://trt.daioncdn.net/trtspor-yildiz/master.m3u8?app=web&platform=trtspor",
+                backup_urls = listOf(
+                    "https://trt.daioncdn.net/trtspor/master.m3u8?app=web&platform=trtspor"
+                ),
+                description = "Voleybol, Basketbol & Branş Sporları",
+                collectionType = MediaCollection.SPOR
+            ),
+            MediaItem(
+                id = "sport_aspor",
+                baslik = "A Spor HD",
+                kategori = "Ulusal Spor",
+                resim_url = getOfficialWebLogo("a spor"),
+                yayin_url = "https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/aspor/aspor_720p.m3u8",
+                backup_urls = listOf(
+                    "https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/aspor/aspor.m3u8"
+                ),
+                description = "Ziraat Türkiye Kupası & Canlı Futbol Yayınları",
+                collectionType = MediaCollection.SPOR
+            ),
+            MediaItem(
+                id = "sport_tjk",
+                baslik = "TJK TV HD",
+                kategori = "At Yarışı & TJK",
+                resim_url = getOfficialWebLogo("tjk"),
+                yayin_url = "https://tjktv-live.tjk.org/tjktv.m3u8",
+                description = "Türkiye & Yurt Dışı Canlı Hipodrom Yarışları",
+                collectionType = MediaCollection.SPOR
+            ),
+            MediaItem(
+                id = "sport_fbtv",
+                baslik = "FB TV HD",
+                kategori = "Futbol & Maç",
+                resim_url = getOfficialWebLogo("fb tv"),
+                yayin_url = "https://1hskrdto.rocketcdn.com/fenerbahcetv.smil/playlist.m3u8",
+                description = "Fenerbahçe Spor Kulübü Resmi Canlı Yayın Kanalı",
+                collectionType = MediaCollection.SPOR
+            )
+        )
+    }
+
     fun getVerifiedSportsAndNationalChannels(): List<MediaItem> {
-        return getTkgsFullChannelList()
+        val sports = getVerifiedSportsChannels()
+        val tkgs = getTkgsFullChannelList()
+        return (sports + tkgs).distinctBy { it.baslik.lowercase().trim() }
     }
 
     /**

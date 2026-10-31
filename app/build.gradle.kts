@@ -16,8 +16,8 @@ android {
     applicationId = "com.aistudio.applet.kwnemt"
     minSdk = 24
     targetSdk = 36
-    versionCode = 290
-    versionName = "2.9.0"
+    versionCode = 294
+    versionName = "2.9.4"
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   }

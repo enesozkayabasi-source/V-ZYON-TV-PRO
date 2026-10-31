@@ -12,7 +12,10 @@ import com.example.service.InternetChannelService
 import com.example.service.RadioPlaybackService
 import com.example.service.TurkishMediaOnlineService
 import com.example.service.UserPreferencesManager
+import com.example.service.AppUpdateManager
+import com.example.ui.components.UpdateDialogState
 import com.example.ui.i18n.AppLanguage
+import java.io.File
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -161,6 +164,38 @@ class StreamViewModel(
     private val _updateStatus = MutableStateFlow<String?>(null)
     val updateStatus: StateFlow<String?> = _updateStatus.asStateFlow()
 
+    // Uygulama İçi Güncelleme Durumları (Sayfaya yönlendirmeden içeriden güncelleme)
+    private val appUpdateManager = AppUpdateManager(application)
+
+    private val _isCheckingOnlineUpdate = MutableStateFlow(false)
+    val isCheckingOnlineUpdate: StateFlow<Boolean> = _isCheckingOnlineUpdate.asStateFlow()
+
+    private val _inAppUpdateState = MutableStateFlow<UpdateDialogState?>(null)
+    val inAppUpdateState: StateFlow<UpdateDialogState?> = _inAppUpdateState.asStateFlow()
+
+    private val _isDownloadingInBackground = MutableStateFlow(false)
+    val isDownloadingInBackground: StateFlow<Boolean> = _isDownloadingInBackground.asStateFlow()
+
+    private val _inAppUpdateProgress = MutableStateFlow(0f)
+    val inAppUpdateProgress: StateFlow<Float> = _inAppUpdateProgress.asStateFlow()
+
+    private val _inAppDownloadedBytes = MutableStateFlow(0L)
+    val inAppDownloadedBytes: StateFlow<Long> = _inAppDownloadedBytes.asStateFlow()
+
+    private val _inAppTotalBytes = MutableStateFlow(0L)
+    val inAppTotalBytes: StateFlow<Long> = _inAppTotalBytes.asStateFlow()
+
+    private val _inAppUpdateError = MutableStateFlow<String?>(null)
+    val inAppUpdateError: StateFlow<String?> = _inAppUpdateError.asStateFlow()
+
+    private val _targetReleaseVersion = MutableStateFlow(latestReleaseVersion)
+    val targetReleaseVersion: StateFlow<String> = _targetReleaseVersion.asStateFlow()
+
+    private val _releaseChangelog = MutableStateFlow("VİZYON TV v2.9.4: Türkiye (TR) beIN Sports yayınları, spor kanalları güncellemeleri ve kararlılık iyileştirmeleri.")
+    val releaseChangelog: StateFlow<String> = _releaseChangelog.asStateFlow()
+
+    private var downloadedApkFile: File? = null
+
     // Media Collections: Canlı TV, Haber Kanalları, Çocuk Kanalları, Spor
     private val _liveTvList = MutableStateFlow<List<MediaItem>>(emptyList())
     val liveTvList: StateFlow<List<MediaItem>> = _liveTvList.asStateFlow()
@@ -187,11 +222,7 @@ class StreamViewModel(
         _newsList.value = internetService.getVerifiedNewsChannels()
         _kidsList.value = internetService.getVerifiedKidsChannels()
         _radioList.value = internetService.getRadioStationList()
-        _sportsList.value = initialLive.filter {
-            it.kategori.equals("Spor", ignoreCase = true) ||
-            it.baslik.contains("spor", ignoreCase = true) ||
-            it.baslik.contains("tjk", ignoreCase = true)
-        }
+        _sportsList.value = internetService.getVerifiedSportsChannels()
 
         // Fetch latest live channels and online media from internet
         refreshChannels()
@@ -211,14 +242,21 @@ class StreamViewModel(
         viewModelScope.launch {
             _isRefreshing.value = true
             try {
+                val verifiedSports = internetService.getVerifiedSportsChannels()
                 val internetChannels = internetService.fetchLiveChannelsFromInternet()
                 if (internetChannels.isNotEmpty()) {
                     _liveTvList.value = internetChannels
-                    _sportsList.value = internetChannels.filter {
+                    val parsedSports = internetChannels.filter {
+                        it.collectionType == MediaCollection.SPOR ||
+                        it.kategori.equals("PREMIUM", ignoreCase = true) ||
                         it.kategori.equals("Spor", ignoreCase = true) ||
                         it.baslik.contains("spor", ignoreCase = true) ||
+                        it.baslik.contains("bein", ignoreCase = true) ||
                         it.baslik.contains("tjk", ignoreCase = true)
                     }
+                    _sportsList.value = (verifiedSports + parsedSports).distinctBy { it.baslik.lowercase().trim() }
+                } else {
+                    _sportsList.value = verifiedSports
                 }
 
                 val news = turkishMediaService.fetchNewsChannels()
@@ -263,6 +301,14 @@ class StreamViewModel(
                 if (items.isNotEmpty()) {
                     val merged = (items + _radioList.value).distinctBy { it.baslik.lowercase().trim() }
                     _radioList.value = merged
+                }
+            }
+        }
+        viewModelScope.launch {
+            firestoreService.observeCollection(MediaCollection.SPOR).collect { items ->
+                if (items.isNotEmpty()) {
+                    val merged = (items + _sportsList.value).distinctBy { it.baslik.lowercase().trim() }
+                    _sportsList.value = merged
                 }
             }
         }
@@ -346,6 +392,8 @@ class StreamViewModel(
                 val itemKat = item.kategori.lowercase()
                 val selKat = category.lowercase()
                 itemKat == selKat || itemKat.contains(selKat) || selKat.contains(itemKat) ||
+                (selKat.contains("premium") && (itemKat.contains("premium") || item.baslik.lowercase().contains("bein") || item.baslik.lowercase().contains("exxen") || item.baslik.lowercase().contains("s sport") || item.baslik.lowercase().contains("tivibu") || item.baslik.lowercase().contains("smart spor"))) ||
+                (selKat.contains("futbol") && (item.baslik.lowercase().contains("bein") || item.baslik.lowercase().contains("spor") || item.baslik.lowercase().contains("fb tv") || item.baslik.lowercase().contains("exxen"))) ||
                 (selKat.contains("çizgi") && (itemKat.contains("çocuk") || item.baslik.lowercase().contains("disney") || item.baslik.lowercase().contains("minika"))) ||
                 (selKat.contains("okul") && (itemKat.contains("okul") || itemKat.contains("bebek") || item.baslik.lowercase().contains("baby") || item.baslik.lowercase().contains("diyanet"))) ||
                 (selKat.contains("eğitici") && itemKat.contains("eğit"))
@@ -374,7 +422,7 @@ class StreamViewModel(
             MainNavigationTab.CANLI_TV -> listOf("Tümü", "Ulusal", "Eğlence", "Müzik", "Belgesel", "Kültür")
             MainNavigationTab.HABER -> listOf("Tümü", "Gündem", "Ekonomi", "Canlı Yayın", "Uluslararası")
             MainNavigationTab.COCUK -> listOf("Tümü", "Çocuk", "Çizgi Film", "Okul Öncesi", "Eğitici", "Animasyon")
-            MainNavigationTab.SPOR -> listOf("Tümü", "Futbol & Maç", "At Yarışı & TJK", "Genel Spor")
+            MainNavigationTab.SPOR -> listOf("Tümü", "PREMIUM", "Futbol & Maç", "Ulusal Spor", "At Yarışı & TJK", "Genel Spor")
             MainNavigationTab.RADYO -> listOf("Tümü", "Haber", "Müzik", "Dini", "Spor")
             MainNavigationTab.FAVORILER -> listOf("Tümü", "Radyo", "Haber", "Çocuk", "Spor", "Ulusal")
         }
@@ -637,16 +685,127 @@ class StreamViewModel(
     }
 
     /**
-     * Sürüm kontrolü ve güncelleme denetimi
+     * Sürüm kontrolü ve online güncelleme denetimi (GitHub API ile canlı denetim)
      */
     fun checkForUpdates(onResult: (Boolean, String) -> Unit) {
-        val hasPending = userPrefs.hasPendingUpdate()
-        _hasUpdate.value = hasPending
-        if (hasPending) {
-            val current = _currentVersion.value
-            onResult(true, "Yeni VİZYON TV güncellemesi mevcut! Mevcut sürümünüz: $current -> Hedef: $latestReleaseVersion")
+        viewModelScope.launch {
+            _isCheckingOnlineUpdate.value = true
+            try {
+                val info = appUpdateManager.checkForUpdatesOnline(_currentVersion.value)
+                _targetReleaseVersion.value = info.latestVersion
+                _releaseChangelog.value = info.changelog
+                if (info.apkDownloadUrl.isNotBlank()) {
+                    _apkDownloadUrl.value = info.apkDownloadUrl
+                }
+
+                _hasUpdate.value = info.isUpdateAvailable
+                if (info.isUpdateAvailable) {
+                    _inAppUpdateState.value = UpdateDialogState.PROMPT
+                    onResult(true, "Yeni VİZYON TV sürümü (${info.latestVersion}) mevcut! Uygulama içinden doğrudan güncelleyebilirsiniz.")
+                } else {
+                    onResult(false, "VİZYON TV güncel (${_currentVersion.value}). En son sürüm ve akışlar aktif.")
+                }
+            } catch (_: Exception) {
+                val hasPending = userPrefs.hasPendingUpdate()
+                _hasUpdate.value = hasPending
+                if (hasPending) {
+                    _inAppUpdateState.value = UpdateDialogState.PROMPT
+                    onResult(true, "Yeni VİZYON TV güncellemesi mevcut! Mevcut sürümünüz: ${_currentVersion.value} -> Hedef: $latestReleaseVersion")
+                } else {
+                    onResult(false, "VİZYON TV güncel ($latestReleaseVersion).")
+                }
+            } finally {
+                _isCheckingOnlineUpdate.value = false
+            }
+        }
+    }
+
+    /**
+     * Uygulama içinden güncelleme indirme işlemini başlatır (Sayfaya yönlendirmeden)
+     */
+    fun startInAppUpdateDownload(context: android.content.Context) {
+        viewModelScope.launch {
+            _inAppUpdateState.value = UpdateDialogState.DOWNLOADING
+            _isDownloadingInBackground.value = false
+            _inAppUpdateProgress.value = 0f
+            _inAppDownloadedBytes.value = 0L
+            _inAppTotalBytes.value = 0L
+            _inAppUpdateError.value = null
+
+            val urlToDownload = _apkDownloadUrl.value
+            val result = appUpdateManager.downloadApk(urlToDownload) { downloaded, total, fraction ->
+                _inAppDownloadedBytes.value = downloaded
+                _inAppTotalBytes.value = total
+                _inAppUpdateProgress.value = fraction
+            }
+
+            result.onSuccess { apkFile ->
+                downloadedApkFile = apkFile
+                _isDownloadingInBackground.value = false
+                _inAppUpdateState.value = UpdateDialogState.READY_TO_INSTALL
+                // Otomatik olarak Android paket yükleyicisini başlat
+                installDownloadedApk()
+            }.onFailure { error ->
+                _isDownloadingInBackground.value = false
+                _inAppUpdateState.value = UpdateDialogState.ERROR
+                _inAppUpdateError.value = error.localizedMessage ?: "İndirme sırasında bağlantı hatası oluştu."
+            }
+        }
+    }
+
+    /**
+     * İndirmeyi arka plana alıp açılır pencereyi gizler (indirme kesintisiz devam eder)
+     */
+    fun runInAppUpdateInBackground() {
+        if (_inAppUpdateState.value == UpdateDialogState.DOWNLOADING) {
+            _isDownloadingInBackground.value = true
+            _inAppUpdateState.value = null
+        }
+    }
+
+    /**
+     * Arka planda devam eden veya hazır olan güncelleme penceresini ekrana geri getirir
+     */
+    fun restoreInAppUpdateDialog() {
+        if (downloadedApkFile != null && downloadedApkFile?.exists() == true) {
+            _inAppUpdateState.value = UpdateDialogState.READY_TO_INSTALL
+        } else if (_isDownloadingInBackground.value) {
+            _isDownloadingInBackground.value = false
+            _inAppUpdateState.value = UpdateDialogState.DOWNLOADING
         } else {
-            onResult(false, "VİZYON TV güncel ($latestReleaseVersion). En son kanal ve akış listesini kullanıyorsunuz.")
+            _inAppUpdateState.value = UpdateDialogState.PROMPT
+        }
+    }
+
+    /**
+     * İndirilen APK'yı Android Paket Yükleyicisi ile başlatır
+     */
+    fun installDownloadedApk(): Boolean {
+        val file = downloadedApkFile ?: return false
+        val result = appUpdateManager.installApk(file)
+        // Güncelleme başlatıldığında güncelleme ekranını/diyalogunu hemen kapat
+        _inAppUpdateState.value = null
+        _isDownloadingInBackground.value = false
+        if (result.isSuccess) {
+            userPrefs.saveInstalledVersion(_targetReleaseVersion.value)
+            _currentVersion.value = _targetReleaseVersion.value
+            _hasUpdate.value = false
+        }
+        return result.isSuccess
+    }
+
+    fun dismissInAppUpdateDialog() {
+        if (_inAppUpdateState.value == UpdateDialogState.DOWNLOADING) {
+            _isDownloadingInBackground.value = true
+        }
+        _inAppUpdateState.value = null
+    }
+
+    fun promptInAppUpdate() {
+        if (_isDownloadingInBackground.value) {
+            restoreInAppUpdateDialog()
+        } else {
+            _inAppUpdateState.value = UpdateDialogState.PROMPT
         }
     }
 
@@ -673,26 +832,12 @@ class StreamViewModel(
             userPrefs.saveInstalledVersion(latestReleaseVersion)
             _currentVersion.value = latestReleaseVersion
             _hasUpdate.value = false
+            _inAppUpdateState.value = null
             _updateProgress.value = 1.0f
             _updateStatus.value = "Güncelleme tamamlandı! VİZYON TV $latestReleaseVersion aktif."
             _isUpdating.value = false
 
             onFinished(true, "VİZYON TV başarıyla $latestReleaseVersion sürümüne güncellendi!")
-        }
-    }
-
-    /**
-     * Geliştirici / Test için önceki sürüme çekip uyarı vermesini sağlayan metod
-     */
-    fun toggleSimulatePreviousVersion() {
-        if (_currentVersion.value == latestReleaseVersion) {
-            userPrefs.saveInstalledVersion(UserPreferencesManager.PREVIOUS_VERSION_BASELINE)
-            _currentVersion.value = UserPreferencesManager.PREVIOUS_VERSION_BASELINE
-            _hasUpdate.value = true
-        } else {
-            userPrefs.saveInstalledVersion(latestReleaseVersion)
-            _currentVersion.value = latestReleaseVersion
-            _hasUpdate.value = false
         }
     }
 }

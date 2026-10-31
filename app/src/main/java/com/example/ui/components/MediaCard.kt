@@ -31,6 +31,7 @@ import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Radio
 import androidx.compose.material.icons.filled.SportsSoccer
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.Card
@@ -124,7 +125,18 @@ fun MediaCard(
         item.baslik.contains("radyo", ignoreCase = true) ||
         item.baslik.contains("fm", ignoreCase = true)
 
-    val isSport = !isHaber && !isCocuk && !isRadio && (item.collectionType == MediaCollection.SPOR ||
+    val isPremiumSport = !isHaber && !isCocuk && !isRadio && (
+        item.kategori.equals("PREMIUM", ignoreCase = true) ||
+        item.kategori.contains("PREMIUM", ignoreCase = true) ||
+        item.baslik.contains("bein", ignoreCase = true) ||
+        item.baslik.contains("exxen", ignoreCase = true) ||
+        item.baslik.contains("s sport", ignoreCase = true) ||
+        item.baslik.contains("ssport", ignoreCase = true) ||
+        item.baslik.contains("tivibu", ignoreCase = true) ||
+        item.baslik.contains("smart spor", ignoreCase = true)
+    )
+
+    val isSport = !isHaber && !isCocuk && !isRadio && (isPremiumSport || item.collectionType == MediaCollection.SPOR ||
         item.kategori.equals("Spor", ignoreCase = true) ||
         item.baslik.contains("spor", ignoreCase = true) ||
         item.baslik.contains("tjk", ignoreCase = true))
@@ -305,6 +317,32 @@ fun MediaCard(
                                     color = Color.Black,
                                     fontSize = 10.sp,
                                     fontWeight = FontWeight.ExtraBold
+                                )
+                            }
+                        }
+                    } else if (isPremiumSport) {
+                        Surface(
+                            shape = RoundedCornerShape(6.dp),
+                            color = NeonAmber.copy(alpha = 0.95f),
+                            border = BorderStroke(1.dp, Color(0xFFFFD700))
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Star,
+                                    contentDescription = null,
+                                    tint = Color.Black,
+                                    modifier = Modifier.size(11.dp)
+                                )
+                                Spacer(modifier = Modifier.width(3.dp))
+                                Text(
+                                    text = "PREMIUM",
+                                    color = Color.Black,
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    letterSpacing = 0.5.sp
                                 )
                             }
                         }

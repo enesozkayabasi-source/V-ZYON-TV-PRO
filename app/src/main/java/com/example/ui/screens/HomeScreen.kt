@@ -66,6 +66,7 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.SportsSoccer
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.SystemUpdate
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.Search
@@ -119,8 +120,10 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.model.MediaCollection
 import com.example.model.MediaItem
+import com.example.service.UserPreferencesManager
 import com.example.ui.components.AddMediaDialog
 import com.example.ui.components.AiStreamResolvingDialog
+import com.example.ui.components.InAppUpdateDialog
 import com.example.ui.components.MediaCard
 import com.example.ui.components.SettingsDialog
 import com.example.ui.i18n.AppLanguage
@@ -207,6 +210,15 @@ fun HomeScreen(
     val updateStatus by viewModel.updateStatus.collectAsState()
     val githubPageUrl by viewModel.githubPageUrl.collectAsState()
     val apkDownloadUrl by viewModel.apkDownloadUrl.collectAsState()
+
+    val inAppUpdateState by viewModel.inAppUpdateState.collectAsState()
+    val isDownloadingInBackground by viewModel.isDownloadingInBackground.collectAsState()
+    val inAppUpdateProgress by viewModel.inAppUpdateProgress.collectAsState()
+    val inAppDownloadedBytes by viewModel.inAppDownloadedBytes.collectAsState()
+    val inAppTotalBytes by viewModel.inAppTotalBytes.collectAsState()
+    val inAppUpdateError by viewModel.inAppUpdateError.collectAsState()
+    val targetReleaseVersion by viewModel.targetReleaseVersion.collectAsState()
+    val releaseChangelog by viewModel.releaseChangelog.collectAsState()
 
     var showAddDialog by remember { mutableStateOf(false) }
     var showSettingsDialog by remember { mutableStateOf(false) }
@@ -351,6 +363,79 @@ fun HomeScreen(
                         }
                     }
 
+                    // Arka Planda Güncelleme İndirme Durum Çubuğu
+                    AnimatedVisibility(
+                        visible = isDownloadingInBackground,
+                        enter = fadeIn() + expandVertically(),
+                        exit = fadeOut() + shrinkVertically()
+                    ) {
+                        Surface(
+                            onClick = { viewModel.restoreInAppUpdateDialog() },
+                            color = MaterialTheme.colorScheme.surfaceVariant,
+                            border = BorderStroke(1.dp, NeonAmber.copy(alpha = 0.5f)),
+                            shape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .testTag("bar_background_update_status")
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 14.dp, vertical = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Box(
+                                    contentAlignment = Alignment.Center,
+                                    modifier = Modifier.size(32.dp)
+                                ) {
+                                    CircularProgressIndicator(
+                                        progress = { inAppUpdateProgress },
+                                        color = NeonAmber,
+                                        strokeWidth = 3.dp,
+                                        modifier = Modifier.size(30.dp)
+                                    )
+                                    Text(
+                                        text = "${(inAppUpdateProgress * 100).toInt()}%",
+                                        fontSize = 9.sp,
+                                        fontWeight = FontWeight.ExtraBold,
+                                        color = NeonAmber
+                                    )
+                                }
+                                Spacer(modifier = Modifier.width(10.dp))
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = "VİZYON TV $targetReleaseVersion Arka Planda İndiriliyor",
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 11.sp,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                    val downloadedMb = "%.1f".format(inAppDownloadedBytes / (1024f * 1024f))
+                                    val totalMb = if (inAppTotalBytes > 0) "%.1f MB".format(inAppTotalBytes / (1024f * 1024f)) else "Bilinmiyor"
+                                    Text(
+                                        text = "$downloadedMb MB / $totalMb • Genişletmek için dokunun",
+                                        fontSize = 10.sp,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Button(
+                                    onClick = { viewModel.restoreInAppUpdateDialog() },
+                                    colors = ButtonDefaults.buttonColors(containerColor = NeonAmber),
+                                    shape = RoundedCornerShape(8.dp),
+                                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                                    modifier = Modifier.height(28.dp)
+                                ) {
+                                    Text(
+                                        text = "Aç",
+                                        color = Color.Black,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 11.sp
+                                    )
+                                }
+                            }
+                        }
+                    }
+
                     if (!isTvLayout) {
                         val isLightMode = themeMode == com.example.ui.theme.AppThemeMode.LIGHT
                         val navBarColor = if (isLightMode) Color(0xFFFFFFFF) else Color(0xFF000000)
@@ -433,12 +518,7 @@ fun HomeScreen(
                         isLandscape = isTvLayout,
                         hasUpdate = hasUpdate,
                         onOpenUpdate = {
-                            viewModel.applyAppUpdate { success, msg ->
-                                scope.launch {
-                                    snackbarHostState.showSnackbar(msg)
-                                }
-                            }
-                            openSafeUpdateUrl(apkDownloadUrl)
+                            viewModel.promptInAppUpdate()
                         },
                         onSearchChange = { viewModel.onSearchQueryChanged(it) },
                         onOpenSettings = { showSettingsDialog = true },
@@ -507,7 +587,7 @@ fun HomeScreen(
                                             color = MaterialTheme.colorScheme.onSurface
                                         )
                                         Text(
-                                            text = "Karnaval radyoları ve kesintisiz akışlar optimize edildi.",
+                                            text = "beIN Sports, premium spor kanalları ve arka planda indirme eklendi.",
                                             fontSize = 10.sp,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
@@ -518,15 +598,10 @@ fun HomeScreen(
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                                 ) {
-                                    // Doğrudan APK İndirme Butonu
+                                    // Uygulama İçinden Doğrudan Güncelleme Butonu
                                     Button(
                                         onClick = {
-                                            viewModel.applyAppUpdate { success, msg ->
-                                                scope.launch {
-                                                    snackbarHostState.showSnackbar(msg)
-                                                }
-                                            }
-                                            openSafeUpdateUrl(apkDownloadUrl)
+                                            viewModel.promptInAppUpdate()
                                         },
                                         colors = ButtonDefaults.buttonColors(containerColor = NeonAmber),
                                         shape = RoundedCornerShape(8.dp),
@@ -541,7 +616,7 @@ fun HomeScreen(
                                         )
                                         Spacer(modifier = Modifier.width(3.dp))
                                         Text(
-                                            text = "APK İndir",
+                                            text = "İçeriden Güncelle",
                                             color = Color.Black,
                                             fontWeight = FontWeight.ExtraBold,
                                             fontSize = 10.sp
@@ -582,26 +657,44 @@ fun HomeScreen(
                         ) {
                             availableCategories.forEach { category ->
                                 val isSelected = selectedCategory == category
+                                val isPremiumCategory = category.equals("PREMIUM", ignoreCase = true)
                                 FilterChip(
                                     selected = isSelected,
                                     onClick = { viewModel.selectCategory(category) },
+                                    leadingIcon = if (isPremiumCategory) {
+                                        {
+                                            Icon(
+                                                imageVector = Icons.Default.Star,
+                                                contentDescription = null,
+                                                tint = if (isSelected) Color.Black else NeonAmber,
+                                                modifier = Modifier.size(12.dp)
+                                            )
+                                        }
+                                    } else null,
                                     label = {
                                         Text(
                                             text = category,
                                             fontSize = 11.sp,
-                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                                            fontWeight = if (isSelected || isPremiumCategory) FontWeight.ExtraBold else FontWeight.Normal,
+                                            color = if (isPremiumCategory && !isSelected) NeonAmber else Color.Unspecified
                                         )
                                     },
                                     colors = FilterChipDefaults.filterChipColors(
-                                        selectedContainerColor = MaterialTheme.colorScheme.primary,
-                                        selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
-                                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                                        labelColor = MaterialTheme.colorScheme.onSurfaceVariant
+                                        selectedContainerColor = if (isPremiumCategory) NeonAmber else MaterialTheme.colorScheme.primary,
+                                        selectedLabelColor = if (isPremiumCategory) Color.Black else MaterialTheme.colorScheme.onPrimary,
+                                        containerColor = if (isPremiumCategory) NeonAmber.copy(alpha = 0.15f) else MaterialTheme.colorScheme.surfaceVariant,
+                                        labelColor = if (isPremiumCategory) NeonAmber else MaterialTheme.colorScheme.onSurfaceVariant
                                     ),
                                     border = FilterChipDefaults.filterChipBorder(
                                         enabled = true,
                                         selected = isSelected,
-                                        borderColor = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent
+                                        borderColor = if (isSelected) {
+                                            if (isPremiumCategory) Color(0xFFFFD700) else MaterialTheme.colorScheme.primary
+                                        } else if (isPremiumCategory) {
+                                            NeonAmber.copy(alpha = 0.5f)
+                                        } else {
+                                            Color.Transparent
+                                        }
                                     )
                                 )
                             }
@@ -803,20 +896,42 @@ fun HomeScreen(
                     }
                 }
             },
-            onToggleSimulatePreviousVersion = {
-                viewModel.toggleSimulatePreviousVersion()
-                scope.launch {
-                    val alertText = if (viewModel.hasUpdate.value) 
-                        "Önceki sürüme (v2.8.5) alındı! Güncelleme uyarısı aktif." 
-                    else 
-                        "En güncel sürüme (v2.9.0) eşitlendi."
-                    snackbarHostState.showSnackbar(alertText)
-                }
-            },
             onOpenUpdateLink = { url ->
                 openSafeUpdateUrl(url)
             },
+            onStartInAppUpdate = {
+                viewModel.promptInAppUpdate()
+            },
             onDismiss = { showSettingsDialog = false }
+        )
+    }
+
+    // Uygulama İçi Doğrudan Güncelleme İletişim Kutusu (Sayfaya yönlendirmeden)
+    if (inAppUpdateState != null) {
+        InAppUpdateDialog(
+            state = inAppUpdateState!!,
+            currentVersion = currentVersion,
+            targetVersion = targetReleaseVersion,
+            changelog = releaseChangelog,
+            progress = inAppUpdateProgress,
+            downloadedBytes = inAppDownloadedBytes,
+            totalBytes = inAppTotalBytes,
+            errorMessage = inAppUpdateError,
+            onStartDownload = {
+                viewModel.startInAppUpdateDownload(context)
+            },
+            onRunInBackground = {
+                viewModel.runInAppUpdateInBackground()
+            },
+            onInstall = {
+                viewModel.installDownloadedApk()
+            },
+            onOpenBrowser = {
+                openSafeUpdateUrl(apkDownloadUrl)
+            },
+            onDismiss = {
+                viewModel.dismissInAppUpdateDialog()
+            }
         )
     }
 

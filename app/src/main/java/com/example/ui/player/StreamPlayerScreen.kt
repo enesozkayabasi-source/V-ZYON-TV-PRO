@@ -1205,19 +1205,23 @@ fun StreamPlayerScreen(
                                                     modifier = Modifier.padding(end = 4.dp)
                                                 ) {
                                                     Text(
-                                                        text = when (ch.collectionType) {
-                                                            MediaCollection.CANLI_TV -> "CANLI"
-                                                            MediaCollection.HABER -> "HABER"
-                                                            MediaCollection.COCUK -> "ÇOCUK"
-                                                            MediaCollection.SPOR -> "SPOR"
-                                                            MediaCollection.RADYO -> "RADYO"
+                                                        text = when {
+                                                            ch.collectionType == MediaCollection.SPOR && (ch.kategori.contains("PREMIUM", ignoreCase = true) || ch.baslik.contains("bein", ignoreCase = true) || ch.baslik.contains("exxen", ignoreCase = true) || ch.baslik.contains("s sport", ignoreCase = true)) -> "PREMIUM"
+                                                            ch.collectionType == MediaCollection.CANLI_TV -> "CANLI"
+                                                            ch.collectionType == MediaCollection.HABER -> "HABER"
+                                                            ch.collectionType == MediaCollection.COCUK -> "ÇOCUK"
+                                                            ch.collectionType == MediaCollection.SPOR -> "SPOR"
+                                                            ch.collectionType == MediaCollection.RADYO -> "RADYO"
+                                                            else -> "CANLI"
                                                         },
-                                                        color = when (ch.collectionType) {
-                                                            MediaCollection.CANLI_TV -> NeonRed
-                                                            MediaCollection.HABER -> NeonAmber
-                                                            MediaCollection.COCUK -> NeonCyan
-                                                            MediaCollection.SPOR -> NeonAmber
-                                                            MediaCollection.RADYO -> NeonAmber
+                                                        color = when {
+                                                            ch.collectionType == MediaCollection.SPOR && (ch.kategori.contains("PREMIUM", ignoreCase = true) || ch.baslik.contains("bein", ignoreCase = true) || ch.baslik.contains("exxen", ignoreCase = true) || ch.baslik.contains("s sport", ignoreCase = true)) -> Color(0xFFFFD700)
+                                                            ch.collectionType == MediaCollection.CANLI_TV -> NeonRed
+                                                            ch.collectionType == MediaCollection.HABER -> NeonAmber
+                                                            ch.collectionType == MediaCollection.COCUK -> NeonCyan
+                                                            ch.collectionType == MediaCollection.SPOR -> NeonAmber
+                                                            ch.collectionType == MediaCollection.RADYO -> NeonAmber
+                                                            else -> NeonRed
                                                         },
                                                         fontSize = 8.sp,
                                                         fontWeight = FontWeight.Bold,
@@ -1383,12 +1387,14 @@ fun StreamPlayerScreen(
                                         )
                                         Spacer(modifier = Modifier.width(4.dp))
                                         Text(
-                                            text = when (item.collectionType) {
-                                                MediaCollection.CANLI_TV -> "CANLI"
-                                                MediaCollection.HABER -> "HABER"
-                                                MediaCollection.COCUK -> "ÇOCUK"
-                                                MediaCollection.SPOR -> "SPOR"
-                                                MediaCollection.RADYO -> "RADYO"
+                                            text = when {
+                                                item.collectionType == MediaCollection.SPOR && (item.kategori.contains("PREMIUM", ignoreCase = true) || item.baslik.contains("bein", ignoreCase = true) || item.baslik.contains("exxen", ignoreCase = true) || item.baslik.contains("s sport", ignoreCase = true)) -> "PREMIUM SPOR"
+                                                item.collectionType == MediaCollection.CANLI_TV -> "CANLI"
+                                                item.collectionType == MediaCollection.HABER -> "HABER"
+                                                item.collectionType == MediaCollection.COCUK -> "ÇOCUK"
+                                                item.collectionType == MediaCollection.SPOR -> "SPOR"
+                                                item.collectionType == MediaCollection.RADYO -> "RADYO"
+                                                else -> "CANLI"
                                             },
                                             color = if (item.collectionType == MediaCollection.COCUK) Color.Black else Color.White,
                                             fontSize = 9.sp,

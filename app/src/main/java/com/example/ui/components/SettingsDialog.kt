@@ -88,8 +88,8 @@ fun SettingsDialog(
     onImportM3u: (input: String, isUrl: Boolean) -> Unit,
     isDataSaverEnabled: Boolean = false,
     onToggleDataSaver: ((Boolean) -> Unit)? = null,
-    currentVersion: String = "v2.9.0",
-    latestVersion: String = "v2.9.0",
+    currentVersion: String = "v2.9.2",
+    latestVersion: String = "v2.9.2",
     hasUpdate: Boolean = false,
     isUpdating: Boolean = false,
     updateProgress: Float = 0f,
@@ -100,8 +100,8 @@ fun SettingsDialog(
     onSaveCustomUrls: ((githubUrl: String, apkUrl: String) -> Unit)? = null,
     onCheckForUpdates: () -> Unit = {},
     onApplyUpdate: () -> Unit = {},
-    onToggleSimulatePreviousVersion: () -> Unit = {},
     onOpenUpdateLink: (String) -> Unit = {},
+    onStartInAppUpdate: () -> Unit = {},
     onDismiss: () -> Unit
 ) {
     var showM3uInputSection by remember { mutableStateOf(false) }
@@ -677,31 +677,56 @@ fun SettingsDialog(
 
                         Spacer(modifier = Modifier.height(12.dp))
 
-                        // Buton Grubu 1: Dahili Güncelleme ve Denetim
-                        if (hasUpdate) {
-                            Button(
-                                onClick = onApplyUpdate,
-                                enabled = !isUpdating,
-                                colors = ButtonDefaults.buttonColors(containerColor = NeonAmber),
-                                shape = RoundedCornerShape(8.dp),
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.CloudDownload,
-                                    contentDescription = null,
-                                    tint = Color.Black,
-                                    modifier = Modifier.size(16.dp)
-                                )
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text(
-                                    text = "Uygulama İçi Şimdi Güncelle (v$latestVersion)",
-                                    color = Color.Black,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 12.sp
-                                )
-                            }
-                            Spacer(modifier = Modifier.height(8.dp))
+                        // Buton 1: Canlı Güncellemeleri Denetle
+                        Button(
+                            onClick = onCheckForUpdates,
+                            colors = ButtonDefaults.buttonColors(containerColor = NeonCyan.copy(alpha = 0.22f)),
+                            border = androidx.compose.foundation.BorderStroke(1.2.dp, NeonCyan),
+                            shape = RoundedCornerShape(8.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .testTag("btn_check_updates_live")
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.SystemUpdate,
+                                contentDescription = null,
+                                tint = NeonCyan,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = "Güncellemeleri Canlı Denetle",
+                                color = NeonCyan,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 12.sp
+                            )
                         }
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        // Buton 2: Uygulama İçinden Doğrudan Güncelleme (Sayfaya yönlendirmeden)
+                        Button(
+                            onClick = onStartInAppUpdate,
+                            colors = ButtonDefaults.buttonColors(containerColor = NeonAmber),
+                            shape = RoundedCornerShape(8.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .testTag("btn_start_inapp_update_direct")
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Download,
+                                contentDescription = null,
+                                tint = Color.Black,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = if (hasUpdate) "Uygulama İçinden Şimdi Güncelle (İndir & Kur)" else "Uygulama İçi Doğrudan İndir & Kur",
+                                color = Color.Black,
+                                fontWeight = FontWeight.ExtraBold,
+                                fontSize = 12.sp
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
 
                         // Buton Grubu 2: Doğrudan APK İndirme ve GitHub Sayfamız
                         Row(
@@ -801,7 +826,7 @@ fun SettingsDialog(
                                     modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
                                 ) {
                                     Text(
-                                        text = "ℹ️ 404 Koruması: GitHub Releases bölümünde v2.9.0 sürümü yayınlanana kadar, 404 sayfa hatasını önlemek için indirme bağlantısı otomatik olarak GitHub ana sayfanıza yönlendirir.",
+                                        text = "✅ GitHub Release: İndirme bağlantısı GitHub v2.9.2 sürümündeki VIZYON.TV.v2.9.2.apk dosyasına bağlıdır. Tıklandığında doğrudan indirme başlar.",
                                         fontSize = 10.sp,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                         modifier = Modifier.padding(8.dp)
@@ -899,23 +924,7 @@ fun SettingsDialog(
                             }
                         }
 
-                        // Sürüm Değişiklik Uyarısı Test Butonu
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Surface(
-                            shape = RoundedCornerShape(6.dp),
-                            color = Color.Transparent,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { onToggleSimulatePreviousVersion() }
-                                .padding(vertical = 4.dp)
-                        ) {
-                            Text(
-                                text = if (hasUpdate) "🔄 Güncel Sürüme Zorla (Test)" else "🧪 Önceki Sürüm Uyarısını Test Et (${UserPreferencesManager.PREVIOUS_VERSION_BASELINE})",
-                                fontSize = 10.sp,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                                textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                            )
-                        }
+
                     }
                 }
 

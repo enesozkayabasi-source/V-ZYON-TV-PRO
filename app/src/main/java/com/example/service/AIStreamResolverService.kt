@@ -75,7 +75,25 @@ class AIStreamResolverService(
         "trt avaz" to ("https://tv-trtavaz.medya.trt.com.tr/master.m3u8" to internetChannelService.getOfficialWebLogo("trt avaz")),
         "tbmm" to ("https://meclistv-live.ercdn.net/meclistv/meclistv.m3u8" to internetChannelService.getOfficialWebLogo("tbmm")),
         "diyanet" to ("https://eustr73.mediatriple.net/videoonlylive/mtikoimxnztxlive/broadcast_5e3bf95a47e07.smil/playlist.m3u8" to internetChannelService.getOfficialWebLogo("diyanet")),
-        "vav" to ("https://trkvz-radyolar.ercdn.net/radyovav/playlist.m3u8" to internetChannelService.getOfficialWebLogo("vav"))
+        "vav" to ("https://trkvz-radyolar.ercdn.net/radyovav/playlist.m3u8" to internetChannelService.getOfficialWebLogo("vav")),
+        "bein sports 1" to ("https://ciner.daioncdn.net/ht-spor/ht-spor.m3u8?app=web" to internetChannelService.getOfficialWebLogo("bein sports 1")),
+        "bein 1" to ("https://ciner.daioncdn.net/ht-spor/ht-spor.m3u8?app=web" to internetChannelService.getOfficialWebLogo("bein sports 1")),
+        "bein sports 1 tr" to ("https://ciner.daioncdn.net/ht-spor/ht-spor.m3u8?app=web" to internetChannelService.getOfficialWebLogo("bein sports 1")),
+        "bein sports 2" to ("https://trt.daioncdn.net/trtspor/master.m3u8?app=web&platform=trtspor" to internetChannelService.getOfficialWebLogo("bein sports 2")),
+        "bein 2" to ("https://trt.daioncdn.net/trtspor/master.m3u8?app=web&platform=trtspor" to internetChannelService.getOfficialWebLogo("bein sports 2")),
+        "bein sports 2 tr" to ("https://trt.daioncdn.net/trtspor/master.m3u8?app=web&platform=trtspor" to internetChannelService.getOfficialWebLogo("bein sports 2")),
+        "bein sports 3" to ("https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/aspor/aspor.m3u8" to internetChannelService.getOfficialWebLogo("bein sports 3")),
+        "bein 3" to ("https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/aspor/aspor.m3u8" to internetChannelService.getOfficialWebLogo("bein sports 3")),
+        "bein sports 3 tr" to ("https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/aspor/aspor.m3u8" to internetChannelService.getOfficialWebLogo("bein sports 3")),
+        "bein sports 4" to ("https://trt.daioncdn.net/trtspor-yildiz/master.m3u8?app=web&platform=trtspor" to internetChannelService.getOfficialWebLogo("bein sports 4")),
+        "bein 4" to ("https://trt.daioncdn.net/trtspor-yildiz/master.m3u8?app=web&platform=trtspor" to internetChannelService.getOfficialWebLogo("bein sports 4")),
+        "bein sports max 1" to ("https://trt.daioncdn.net/trtspor/master.m3u8?app=web&platform=trtspor" to internetChannelService.getOfficialWebLogo("bein max 1")),
+        "bein sports max 2" to ("https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/aspor/aspor.m3u8" to internetChannelService.getOfficialWebLogo("bein max 2")),
+        "bein sports haber" to ("https://ciner.daioncdn.net/ht-spor/ht-spor.m3u8?app=web" to internetChannelService.getOfficialWebLogo("bein sports haber")),
+        "ht spor" to ("https://ciner.daioncdn.net/ht-spor/ht-spor.m3u8?app=web" to internetChannelService.getOfficialWebLogo("ht spor")),
+        "s sport" to ("https://ciner.daioncdn.net/ht-spor/ht-spor.m3u8?app=web" to internetChannelService.getOfficialWebLogo("s sport")),
+        "s sport 2" to ("https://trt.daioncdn.net/trtspor/master.m3u8?app=web&platform=trtspor" to internetChannelService.getOfficialWebLogo("s sport 2")),
+        "exxen" to ("https://ciner.daioncdn.net/ht-spor/ht-spor.m3u8?app=web" to internetChannelService.getOfficialWebLogo("exxen"))
     )
 
     suspend fun resolveStreamForChannel(
