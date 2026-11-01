@@ -191,7 +191,7 @@ class StreamViewModel(
     private val _targetReleaseVersion = MutableStateFlow(latestReleaseVersion)
     val targetReleaseVersion: StateFlow<String> = _targetReleaseVersion.asStateFlow()
 
-    private val _releaseChangelog = MutableStateFlow("VİZYON TV v2.9.4: Türkiye (TR) beIN Sports yayınları, spor kanalları güncellemeleri ve kararlılık iyileştirmeleri.")
+    private val _releaseChangelog = MutableStateFlow("VİZYON TV v2.9.5: Canlı TV ve açık spor kanalları güncellemeleri, kararlılık iyileştirmeleri.")
     val releaseChangelog: StateFlow<String> = _releaseChangelog.asStateFlow()
 
     private var downloadedApkFile: File? = null
@@ -247,12 +247,14 @@ class StreamViewModel(
                 if (internetChannels.isNotEmpty()) {
                     _liveTvList.value = internetChannels
                     val parsedSports = internetChannels.filter {
-                        it.collectionType == MediaCollection.SPOR ||
-                        it.kategori.equals("PREMIUM", ignoreCase = true) ||
+                        (it.collectionType == MediaCollection.SPOR ||
                         it.kategori.equals("Spor", ignoreCase = true) ||
                         it.baslik.contains("spor", ignoreCase = true) ||
-                        it.baslik.contains("bein", ignoreCase = true) ||
-                        it.baslik.contains("tjk", ignoreCase = true)
+                        it.baslik.contains("tjk", ignoreCase = true)) &&
+                        !it.baslik.contains("bein", ignoreCase = true) &&
+                        !it.baslik.contains("s sport", ignoreCase = true) &&
+                        !it.baslik.contains("ssport", ignoreCase = true) &&
+                        !it.baslik.contains("exxen", ignoreCase = true)
                     }
                     _sportsList.value = (verifiedSports + parsedSports).distinctBy { it.baslik.lowercase().trim() }
                 } else {
@@ -392,8 +394,7 @@ class StreamViewModel(
                 val itemKat = item.kategori.lowercase()
                 val selKat = category.lowercase()
                 itemKat == selKat || itemKat.contains(selKat) || selKat.contains(itemKat) ||
-                (selKat.contains("premium") && (itemKat.contains("premium") || item.baslik.lowercase().contains("bein") || item.baslik.lowercase().contains("exxen") || item.baslik.lowercase().contains("s sport") || item.baslik.lowercase().contains("tivibu") || item.baslik.lowercase().contains("smart spor"))) ||
-                (selKat.contains("futbol") && (item.baslik.lowercase().contains("bein") || item.baslik.lowercase().contains("spor") || item.baslik.lowercase().contains("fb tv") || item.baslik.lowercase().contains("exxen"))) ||
+                (selKat.contains("futbol") && (item.baslik.lowercase().contains("spor") || item.baslik.lowercase().contains("fb tv"))) ||
                 (selKat.contains("çizgi") && (itemKat.contains("çocuk") || item.baslik.lowercase().contains("disney") || item.baslik.lowercase().contains("minika"))) ||
                 (selKat.contains("okul") && (itemKat.contains("okul") || itemKat.contains("bebek") || item.baslik.lowercase().contains("baby") || item.baslik.lowercase().contains("diyanet"))) ||
                 (selKat.contains("eğitici") && itemKat.contains("eğit"))
@@ -422,7 +423,7 @@ class StreamViewModel(
             MainNavigationTab.CANLI_TV -> listOf("Tümü", "Ulusal", "Eğlence", "Müzik", "Belgesel", "Kültür")
             MainNavigationTab.HABER -> listOf("Tümü", "Gündem", "Ekonomi", "Canlı Yayın", "Uluslararası")
             MainNavigationTab.COCUK -> listOf("Tümü", "Çocuk", "Çizgi Film", "Okul Öncesi", "Eğitici", "Animasyon")
-            MainNavigationTab.SPOR -> listOf("Tümü", "PREMIUM", "Futbol & Maç", "Ulusal Spor", "At Yarışı & TJK", "Genel Spor")
+            MainNavigationTab.SPOR -> listOf("Tümü", "Futbol & Maç", "Ulusal Spor", "At Yarışı & TJK", "Genel Spor")
             MainNavigationTab.RADYO -> listOf("Tümü", "Haber", "Müzik", "Dini", "Spor")
             MainNavigationTab.FAVORILER -> listOf("Tümü", "Radyo", "Haber", "Çocuk", "Spor", "Ulusal")
         }

@@ -587,7 +587,7 @@ fun HomeScreen(
                                             color = MaterialTheme.colorScheme.onSurface
                                         )
                                         Text(
-                                            text = "beIN Sports, premium spor kanalları ve arka planda indirme eklendi.",
+                                            text = "Canlı TV, spor kanalları ve kararlılık güncellemeleri.",
                                             fontSize = 10.sp,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
@@ -657,44 +657,21 @@ fun HomeScreen(
                         ) {
                             availableCategories.forEach { category ->
                                 val isSelected = selectedCategory == category
-                                val isPremiumCategory = category.equals("PREMIUM", ignoreCase = true)
                                 FilterChip(
                                     selected = isSelected,
                                     onClick = { viewModel.selectCategory(category) },
-                                    leadingIcon = if (isPremiumCategory) {
-                                        {
-                                            Icon(
-                                                imageVector = Icons.Default.Star,
-                                                contentDescription = null,
-                                                tint = if (isSelected) Color.Black else NeonAmber,
-                                                modifier = Modifier.size(12.dp)
-                                            )
-                                        }
-                                    } else null,
                                     label = {
                                         Text(
                                             text = category,
                                             fontSize = 11.sp,
-                                            fontWeight = if (isSelected || isPremiumCategory) FontWeight.ExtraBold else FontWeight.Normal,
-                                            color = if (isPremiumCategory && !isSelected) NeonAmber else Color.Unspecified
+                                            fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.Normal
                                         )
                                     },
                                     colors = FilterChipDefaults.filterChipColors(
-                                        selectedContainerColor = if (isPremiumCategory) NeonAmber else MaterialTheme.colorScheme.primary,
-                                        selectedLabelColor = if (isPremiumCategory) Color.Black else MaterialTheme.colorScheme.onPrimary,
-                                        containerColor = if (isPremiumCategory) NeonAmber.copy(alpha = 0.15f) else MaterialTheme.colorScheme.surfaceVariant,
-                                        labelColor = if (isPremiumCategory) NeonAmber else MaterialTheme.colorScheme.onSurfaceVariant
-                                    ),
-                                    border = FilterChipDefaults.filterChipBorder(
-                                        enabled = true,
-                                        selected = isSelected,
-                                        borderColor = if (isSelected) {
-                                            if (isPremiumCategory) Color(0xFFFFD700) else MaterialTheme.colorScheme.primary
-                                        } else if (isPremiumCategory) {
-                                            NeonAmber.copy(alpha = 0.5f)
-                                        } else {
-                                            Color.Transparent
-                                        }
+                                        selectedContainerColor = MaterialTheme.colorScheme.primary,
+                                        selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
+                                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                        labelColor = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 )
                             }

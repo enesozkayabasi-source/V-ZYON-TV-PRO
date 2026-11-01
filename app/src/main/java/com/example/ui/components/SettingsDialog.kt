@@ -88,8 +88,8 @@ fun SettingsDialog(
     onImportM3u: (input: String, isUrl: Boolean) -> Unit,
     isDataSaverEnabled: Boolean = false,
     onToggleDataSaver: ((Boolean) -> Unit)? = null,
-    currentVersion: String = "v2.9.2",
-    latestVersion: String = "v2.9.2",
+    currentVersion: String = "v2.9.5",
+    latestVersion: String = "v2.9.5",
     hasUpdate: Boolean = false,
     isUpdating: Boolean = false,
     updateProgress: Float = 0f,
@@ -826,7 +826,7 @@ fun SettingsDialog(
                                     modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
                                 ) {
                                     Text(
-                                        text = "✅ GitHub Release: İndirme bağlantısı GitHub v2.9.2 sürümündeki VIZYON.TV.v2.9.2.apk dosyasına bağlıdır. Tıklandığında doğrudan indirme başlar.",
+                                        text = "✅ GitHub Release: İndirme bağlantısı GitHub v2.9.5 sürümündeki VIZYON.TV.v2.9.5.apk dosyasına bağlıdır. Tıklandığında doğrudan indirme başlar.",
                                         fontSize = 10.sp,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                         modifier = Modifier.padding(8.dp)
