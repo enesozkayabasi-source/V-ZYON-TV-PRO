@@ -124,6 +124,7 @@ import com.example.service.UserPreferencesManager
 import com.example.ui.components.AddMediaDialog
 import com.example.ui.components.AiStreamResolvingDialog
 import com.example.ui.components.InAppUpdateDialog
+import com.example.ui.components.LiquidGlassFloatingDock
 import com.example.ui.components.MediaCard
 import com.example.ui.components.SettingsDialog
 import com.example.ui.i18n.AppLanguage
@@ -437,51 +438,12 @@ fun HomeScreen(
                     }
 
                     if (!isTvLayout) {
-                        val isLightMode = themeMode == com.example.ui.theme.AppThemeMode.LIGHT
-                        val navBarColor = if (isLightMode) Color(0xFFFFFFFF) else Color(0xFF000000)
-                        val unselectedColor = if (isLightMode) Color(0xFF64748B) else Color(0xFF94A3B8)
-
-                        val visibleTabs = listOf(
-                            MainNavigationTab.CANLI_TV,
-                            MainNavigationTab.HABER,
-                            MainNavigationTab.COCUK,
-                            MainNavigationTab.SPOR,
-                            MainNavigationTab.RADYO
+                        LiquidGlassFloatingDock(
+                            selectedTab = selectedTab,
+                            onTabSelected = { onTabItemClick(it) },
+                            currentLanguage = currentLanguage,
+                            isDarkTheme = themeMode != com.example.ui.theme.AppThemeMode.LIGHT
                         )
-
-                        NavigationBar(
-                            containerColor = navBarColor,
-                            tonalElevation = 8.dp
-                        ) {
-                            visibleTabs.forEach { tab ->
-                                val isSelected = selectedTab == tab
-                                NavigationBarItem(
-                                    selected = isSelected,
-                                    onClick = { onTabItemClick(tab) },
-                                    icon = {
-                                        Icon(
-                                            imageVector = getTabIcon(tab),
-                                            contentDescription = tab.name,
-                                            modifier = Modifier.size(22.dp)
-                                        )
-                                    },
-                                    label = {
-                                        Text(
-                                            text = AppStrings.get(tab.key, currentLanguage),
-                                            fontSize = 10.sp,
-                                            fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.Normal
-                                        )
-                                    },
-                                    colors = NavigationBarItemDefaults.colors(
-                                        indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.22f),
-                                        selectedIconColor = MaterialTheme.colorScheme.primary,
-                                        selectedTextColor = MaterialTheme.colorScheme.primary,
-                                        unselectedIconColor = unselectedColor,
-                                        unselectedTextColor = unselectedColor
-                                    )
-                                )
-                            }
-                        }
                     }
                 }
             }
