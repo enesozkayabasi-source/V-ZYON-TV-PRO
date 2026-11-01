@@ -16,12 +16,12 @@ enum class AppThemeMode(
     val description: String,
     val primaryColorHex: Long
 ) {
-    LUXURY_GOLD("Premium Altın", "Lüks Gece Siyahı & Parlak Altın Vurgular", 0xFFFFD700),
+    LUXURY_GOLD("Safir & Elektrik Mavisi", "Derin obsidyen zemin & Parlak Safir Mavi Vurgular", 0xFF38BDF8),
     MIDNIGHT("OLED Siyah", "Saf siyah zemin & Neon Mavi (Pil tasarrufu)", 0xFF00E5FF),
     NAVY("Gece Mavisi", "Derin lacivert & Safir mavisi tonları", 0xFF38BDF8),
     CRIMSON("Sinema Kırmızı", "Netflix & Sinema tarzı koyu kömür & Canlı Kırmızı", 0xFFFF3366),
     EMERALD("Zümrüt Yeşil", "Koyu zümrüt & Canlı Yeşil vurgular", 0xFF00E676),
-    TITANIUM("Koyu Titanyum", "Füme metalik gri & Amber Altın ışıltısı", 0xFFFFB300),
+    TITANIUM("Koyu Titanyum", "Füme metalik gri & Safir Mavi ışıltısı", 0xFF0EA5E9),
     LIGHT("Açık Modern", "Gündüz kullanımına özel ferah açık tema", 0xFF0284C7)
 }
 
@@ -31,15 +31,15 @@ enum class AppLayoutMode(val title: String, val description: String) {
     TV("Android TV Modu", "Geniş ekran TV arayüzü, sol menü rayı, büyük kumanda odaklı kartlar")
 }
 
-// 0. Luxury Gold & Obsidian Theme
+// 0. Luxury Sapphire & Obsidian Theme (Mavi & Safir)
 val LuxuryGoldColorScheme = darkColorScheme(
-    primary = Color(0xFFFFD700), // Pure luxury gold
-    onPrimary = Color(0xFF0D0F14),
-    primaryContainer = Color(0xFF241C0A),
-    onPrimaryContainer = Color(0xFFFFE57F),
+    primary = Color(0xFF38BDF8), // Electric cyan blue
+    onPrimary = Color(0xFF070D18),
+    primaryContainer = Color(0xFF0C2440),
+    onPrimaryContainer = Color(0xFFBAE6FD),
     secondary = Color(0xFF00D2FF), // Sapphire neon accent
     onSecondary = Color(0xFF050B14),
-    tertiary = Color(0xFFFFA000), // Amber gold
+    tertiary = Color(0xFF0EA5E9), // Sky blue
     onTertiary = Color(0xFF000000),
     background = Color(0xFF070A12), // Deep obsidian midnight
     onBackground = Color(0xFFF9FAFB),
@@ -47,7 +47,7 @@ val LuxuryGoldColorScheme = darkColorScheme(
     onSurface = Color(0xFFF9FAFB),
     surfaceVariant = Color(0xFF161F33),
     onSurfaceVariant = Color(0xFFA1ADC7),
-    outline = Color(0xFFFFD700)
+    outline = Color(0xFF38BDF8)
 )
 
 // 1. OLED Pure Black
@@ -58,7 +58,7 @@ val MidnightDarkColorScheme = darkColorScheme(
     onPrimaryContainer = Color(0xFF00E5FF),
     secondary = Color(0xFFFF3366),
     onSecondary = Color(0xFFFFFFFF),
-    tertiary = Color(0xFFFFB300),
+    tertiary = Color(0xFF38BDF8),
     onTertiary = Color(0xFF000000),
     background = Color(0xFF000000), // Pure OLED black
     onBackground = Color(0xFFF8FAFC),
@@ -128,10 +128,10 @@ val EmeraldColorScheme = darkColorScheme(
 
 // 5. Titanium Dark Gray ColorScheme
 val TitaniumColorScheme = darkColorScheme(
-    primary = Color(0xFFFFB300), // Amber
+    primary = Color(0xFF0EA5E9), // Sky blue
     onPrimary = Color(0xFF12141A),
-    primaryContainer = Color(0xFF282C37),
-    onPrimaryContainer = Color(0xFFFFD54F),
+    primaryContainer = Color(0xFF1E293B),
+    onPrimaryContainer = Color(0xFFBAE6FD),
     secondary = Color(0xFF00E5FF),
     onSecondary = Color(0xFF12141A),
     tertiary = Color(0xFFFF5252),
@@ -142,7 +142,7 @@ val TitaniumColorScheme = darkColorScheme(
     onSurface = Color(0xFFECEFF4),
     surfaceVariant = Color(0xFF242B3A),
     onSurfaceVariant = Color(0xFFA0AABF),
-    outline = Color(0xFFFFB300)
+    outline = Color(0xFF0EA5E9)
 )
 
 // 6. Light Modern ColorScheme

@@ -164,7 +164,7 @@ fun SplashScreen(
                     .background(Color(0xFF10141E))
                     .border(
                         width = 2.5.dp,
-                        color = Color(0xFFD4AF37).copy(alpha = glowPulse),
+                        color = Color(0xFF38BDF8).copy(alpha = glowPulse),
                         shape = RoundedCornerShape(32.dp)
                     )
                     .testTag("splash_logo_box")
@@ -196,7 +196,7 @@ fun SplashScreen(
                     text = "TV",
                     fontSize = 34.sp,
                     fontWeight = FontWeight.Black,
-                    color = Color(0xFFD4AF37),
+                    color = Color(0xFF38BDF8),
                     letterSpacing = 4.sp
                 )
             }
@@ -245,7 +245,7 @@ fun SplashScreen(
                             modifier = Modifier
                                 .size(8.dp)
                                 .clip(CircleShape)
-                                .background(Color(0xFFD4AF37))
+                                .background(Color(0xFF38BDF8))
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
@@ -263,7 +263,7 @@ fun SplashScreen(
                         text = "${(progress * 100).toInt()}%",
                         fontSize = 13.sp,
                         fontWeight = FontWeight.ExtraBold,
-                        color = Color(0xFFD4AF37)
+                        color = Color(0xFF38BDF8)
                     )
                 }
 
@@ -276,7 +276,7 @@ fun SplashScreen(
                         .fillMaxWidth()
                         .height(6.dp)
                         .clip(RoundedCornerShape(3.dp)),
-                    color = Color(0xFFD4AF37),
+                    color = Color(0xFF38BDF8),
                     trackColor = Color.White.copy(alpha = 0.15f)
                 )
 
@@ -286,7 +286,7 @@ fun SplashScreen(
                 Surface(
                     shape = RoundedCornerShape(24.dp),
                     color = Color.White.copy(alpha = 0.10f),
-                    border = BorderStroke(1.dp, Color(0xFFD4AF37).copy(alpha = 0.4f)),
+                    border = BorderStroke(1.dp, Color(0xFF38BDF8).copy(alpha = 0.4f)),
                     modifier = Modifier
                         .clickable { onFinished() }
                         .testTag("splash_skip_button")

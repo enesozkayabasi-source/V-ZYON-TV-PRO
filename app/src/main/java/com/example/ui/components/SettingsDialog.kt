@@ -943,7 +943,7 @@ fun SettingsDialog(
                             Surface(
                                 shape = RoundedCornerShape(8.dp),
                                 color = Color(0xFF0F1523),
-                                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFFFD700)),
+                                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF38BDF8)),
                                 modifier = Modifier
                                     .size(28.dp)
                                     .clip(RoundedCornerShape(8.dp))

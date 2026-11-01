@@ -2054,7 +2054,7 @@ private fun RadioVisualizerView(
             Surface(
                 shape = CircleShape,
                 color = Color(0xFF0A0F1D),
-                border = BorderStroke(3.dp, Brush.linearGradient(listOf(Color(0xFFFFD700), Color(0xFF00D2FF)))),
+                border = BorderStroke(3.dp, Brush.linearGradient(listOf(Color(0xFF38BDF8), Color(0xFF00E5FF)))),
                 shadowElevation = 18.dp,
                 modifier = Modifier
                     .size(150.dp)
@@ -2080,7 +2080,7 @@ private fun RadioVisualizerView(
                         Icon(
                             imageVector = Icons.Default.Radio,
                             contentDescription = null,
-                            tint = Color(0xFFFFD700),
+                            tint = Color(0xFF38BDF8),
                             modifier = Modifier.size(54.dp)
                         )
                     }
@@ -2163,7 +2163,7 @@ private fun RadioVisualizerView(
                             .background(
                                 Brush.verticalGradient(
                                     listOf(
-                                        Color(0xFFFFD700),
+                                        Color(0xFF38BDF8),
                                         Color(0xFF00D2FF)
                                     )
                                 )

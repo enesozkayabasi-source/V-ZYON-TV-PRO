@@ -14,7 +14,11 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -640,11 +644,37 @@ fun HomeScreen(
                         }
                     }
 
-                    // Content Grid
+                    // Content Grid (Mükemmel Akıcı Yaylanma ve Kayma Geçişi)
                     AnimatedContent(
                         targetState = selectedTab,
                         transitionSpec = {
-                            fadeIn(animationSpec = tween(220)) togetherWith fadeOut(animationSpec = tween(180))
+                            val tabsOrder = listOf(
+                                MainNavigationTab.CANLI_TV,
+                                MainNavigationTab.HABER,
+                                MainNavigationTab.COCUK,
+                                MainNavigationTab.SPOR,
+                                MainNavigationTab.RADYO,
+                                MainNavigationTab.FAVORILER
+                            )
+                            val fromIndex = tabsOrder.indexOf(initialState).coerceAtLeast(0)
+                            val toIndex = tabsOrder.indexOf(targetState).coerceAtLeast(0)
+                            val isForward = toIndex >= fromIndex
+
+                            (slideInHorizontally(
+                                animationSpec = spring(dampingRatio = 0.82f, stiffness = Spring.StiffnessMediumLow),
+                                initialOffsetX = { fullWidth -> if (isForward) (fullWidth * 0.22f).toInt() else (-fullWidth * 0.22f).toInt() }
+                            ) + fadeIn(animationSpec = tween(220)) + scaleIn(
+                                initialScale = 0.96f,
+                                animationSpec = spring(dampingRatio = 0.82f, stiffness = Spring.StiffnessMediumLow)
+                            )).togetherWith(
+                                slideOutHorizontally(
+                                    animationSpec = spring(dampingRatio = 0.82f, stiffness = Spring.StiffnessMediumLow),
+                                    targetOffsetX = { fullWidth -> if (isForward) (-fullWidth * 0.22f).toInt() else (fullWidth * 0.22f).toInt() }
+                                ) + fadeOut(animationSpec = tween(160)) + scaleOut(
+                                    targetScale = 0.96f,
+                                    animationSpec = tween(160)
+                                )
+                            )
                         },
                         label = "tab_content_transition",
                         modifier = Modifier.fillMaxSize()
@@ -936,7 +966,7 @@ private fun TvNavigationSidebar(
                 Surface(
                     shape = RoundedCornerShape(12.dp),
                     color = Color(0xFF0F1523),
-                    border = BorderStroke(1.5.dp, Brush.linearGradient(listOf(Color(0xFFFFD700), Color(0xFF00D2FF)))),
+                    border = BorderStroke(1.5.dp, Brush.linearGradient(listOf(Color(0xFF38BDF8), Color(0xFF00E5FF)))),
                     shadowElevation = 8.dp,
                     modifier = Modifier
                         .size(42.dp)
@@ -1047,7 +1077,7 @@ private fun TopBarHeader(
                     Surface(
                         shape = RoundedCornerShape(10.dp),
                         color = Color(0xFF0F1523),
-                        border = BorderStroke(1.5.dp, Brush.linearGradient(listOf(Color(0xFFFFD700), Color(0xFF00D2FF)))),
+                        border = BorderStroke(1.5.dp, Brush.linearGradient(listOf(Color(0xFF38BDF8), Color(0xFF00E5FF)))),
                         shadowElevation = 4.dp,
                         modifier = Modifier
                             .size(36.dp)
@@ -1070,29 +1100,16 @@ private fun TopBarHeader(
                     ) {
                         Text(
                             text = "VİZYON TV",
-                            fontSize = if (isLandscape) 18.sp else 15.sp,
+                            fontSize = if (isLandscape) 18.sp else 16.sp,
                             fontWeight = FontWeight.Black,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                             style = androidx.compose.ui.text.TextStyle(
                                 brush = Brush.linearGradient(
-                                    listOf(Color(0xFFFFE57F), Color(0xFFFFD700), Color(0xFFFFA000))
+                                    listOf(Color(0xFFBAE6FD), Color(0xFF38BDF8), Color(0xFF0284C7))
                                 )
                             )
                         )
-                        Surface(
-                            shape = RoundedCornerShape(4.dp),
-                            color = Color(0xFF241C0A),
-                            border = BorderStroke(0.8.dp, Color(0xFFFFD700).copy(alpha = 0.7f))
-                        ) {
-                            Text(
-                                text = "PRO",
-                                color = Color(0xFFFFD700),
-                                fontSize = 8.sp,
-                                fontWeight = FontWeight.ExtraBold,
-                                modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
-                            )
-                        }
                     }
                     Text(
                         text = AppStrings.get(selectedTab.key, language),
@@ -1416,13 +1433,13 @@ private fun HeroHighlightBanner(
             .scale(bannerScale)
             .clickable(
                 interactionSource = interactionSource,
-                indication = ripple(bounded = true, color = Color(0xFFFFD700)),
+                indication = ripple(bounded = true, color = Color(0xFF38BDF8)),
                 onClick = onPlay
             )
             .focusable()
             .border(
                 1.dp,
-                Brush.horizontalGradient(listOf(Color(0xFFFFD700).copy(alpha = 0.5f), Color(0xFF00D2FF).copy(alpha = 0.2f), Color.Transparent)),
+                Brush.horizontalGradient(listOf(Color(0xFF38BDF8).copy(alpha = 0.6f), Color(0xFF00D2FF).copy(alpha = 0.25f), Color.Transparent)),
                 RoundedCornerShape(16.dp)
             ),
         shape = RoundedCornerShape(16.dp),
