@@ -949,9 +949,9 @@ fun SettingsDialog(
                                     .clip(RoundedCornerShape(8.dp))
                             ) {
                                 androidx.compose.foundation.Image(
-                                    painter = androidx.compose.ui.res.painterResource(id = com.example.R.drawable.img_corner_logo_premium_1791395314114),
+                                    painter = androidx.compose.ui.res.painterResource(id = com.example.R.drawable.vizyontv_blue_icon),
                                     contentDescription = "VİZYON TV Logo",
-                                    contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                                    contentScale = androidx.compose.ui.layout.ContentScale.Fit,
                                     modifier = Modifier.fillMaxSize()
                                 )
                             }

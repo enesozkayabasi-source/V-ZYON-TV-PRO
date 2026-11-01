@@ -30,7 +30,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Surface
@@ -44,24 +43,33 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.R
-import com.example.ui.theme.NeonAmber
-import com.example.ui.theme.NeonCyan
-import com.example.ui.theme.NeonRed
 import kotlinx.coroutines.delay
 
+/**
+ * VİZYON TV Açılış (Splash) Ekranı
+ *
+ * Yenilikler:
+ * - Yeni Mavi Metalik Kanatlı "V" Logosu (1:1 Kare ve 16:9 TV Banner Uyumu)
+ * - Nefes Alan Elektrik Mavisi Arka Işık (Breathing Aurora Glow)
+ * - Dinamik Yaylanan Logo Girişi (Spring Overshoot Entrance)
+ * - Metalik Kanatlar Üzerinden Geçen Işık Yansıması (Specular Shimmer Sweep)
+ * - Dönen Enerji Halkası ve Akıcı İlerleme Çubuğu
+ */
 @Composable
 fun SplashScreen(
     onFinished: () -> Unit,
@@ -69,43 +77,49 @@ fun SplashScreen(
 ) {
     var progress by remember { mutableFloatStateOf(0f) }
     var statusText by remember { mutableStateOf("VİZYON TV Başlatılıyor...") }
-    val entranceScale = remember { Animatable(0.7f) }
+    val entranceScale = remember { Animatable(0.6f) }
     val entranceAlpha = remember { Animatable(0f) }
 
-    // Breathing glow animation
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.screenWidthDp > configuration.screenHeightDp
+
+    // Sonsuz animasyon döngüsü (Nefes alan parlaklık ve ışık dalgası)
     val infiniteTransition = rememberInfiniteTransition(label = "splash_glow_anim")
+
     val glowPulse by infiniteTransition.animateFloat(
-        initialValue = 0.45f,
+        initialValue = 0.40f,
         targetValue = 1.0f,
         animationSpec = infiniteRepeatable(
-            animation = tween(1400, easing = FastOutSlowInEasing),
+            animation = tween(1200, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
         ),
         label = "glow_pulse"
     )
 
-    // Subtle ambient rotation for background accent
     val subtleRotate by infiniteTransition.animateFloat(
         initialValue = 0f,
         targetValue = 360f,
         animationSpec = infiniteRepeatable(
-            animation = tween(28000, easing = LinearEasing),
+            animation = tween(22000, easing = LinearEasing),
             repeatMode = RepeatMode.Restart
         ),
         label = "subtle_rotate"
     )
 
-    // Snappy, fast opening sequence (~0.8s total)
+    // Açılış sekansı
     LaunchedEffect(Unit) {
-        entranceAlpha.animateTo(1f, animationSpec = tween(200, easing = FastOutSlowInEasing))
-        entranceScale.animateTo(1f, animationSpec = spring(dampingRatio = 0.85f, stiffness = 600f))
+        entranceAlpha.animateTo(1f, animationSpec = tween(240, easing = FastOutSlowInEasing))
+        entranceScale.animateTo(
+            targetValue = 1f,
+            animationSpec = spring(dampingRatio = 0.68f, stiffness = 450f)
+        )
 
         progress = 0.35f
-        statusText = "Türksat & Canlı TV Bağlanıyor..."
+        statusText = "Türksat & Canlı Yayınlar Bağlanıyor..."
         delay(250)
 
         progress = 0.85f
-        statusText = "Kanallar Hazırlanıyor..."
+        statusText = "Yüksek Kalite Akış Hazırlanıyor..."
         delay(300)
 
         progress = 1.0f
@@ -118,124 +132,199 @@ fun SplashScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(Color(0xFF070A12))
+            .background(Color(0xFF030712))
             .testTag("splash_screen")
     ) {
-        // Atmospheric cinematic background image (Gold Luxury Art)
-        Image(
-            painter = painterResource(id = R.drawable.vizyontv_gold_splash_1791394550229),
-            contentDescription = "VİZYON TV Splash Arka Planı",
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize()
-        )
-
-        // Vignette & Darkness Gradients
+        // Derin Obsidyen & Safir Atmosfer Gradyanı
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(
-                    Brush.verticalGradient(
+                    Brush.radialGradient(
                         colors = listOf(
-                            Color.Black.copy(alpha = 0.50f),
-                            Color(0xFF070A12).copy(alpha = 0.70f),
-                            Color(0xFF070A12).copy(alpha = 0.96f)
-                        )
+                            Color(0xFF0B2545).copy(alpha = 0.65f * glowPulse),
+                            Color(0xFF071226).copy(alpha = 0.85f),
+                            Color(0xFF020617)
+                        ),
+                        radius = 1200f
                     )
                 )
         )
 
-        // Main Center Content
+        // Merkez İçerik Alanı
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(24.dp),
+                .padding(horizontal = 24.dp, vertical = 20.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Spacer(modifier = Modifier.weight(1.1f))
+            Spacer(modifier = Modifier.weight(1f))
 
-            // VİZYON TV Altın Kanatlı Logo
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier
-                    .scale(entranceScale.value)
-                    .size(160.dp)
-                    .clip(RoundedCornerShape(32.dp))
-                    .background(Color(0xFF10141E))
-                    .border(
-                        width = 2.5.dp,
-                        color = Color(0xFF38BDF8).copy(alpha = glowPulse),
-                        shape = RoundedCornerShape(32.dp)
+            if (isLandscape) {
+                // 16:9 TV Ekranı Modu: Logolu ve Başlıklı Geniş Banner
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth(0.75f)
+                        .aspectRatio(16f / 9f)
+                        .scale(entranceScale.value)
+                        .alpha(entranceAlpha.value)
+                        .shadow(
+                            elevation = 28.dp,
+                            shape = RoundedCornerShape(24.dp),
+                            spotColor = Color(0xFF38BDF8).copy(alpha = 0.5f)
+                        )
+                        .clip(RoundedCornerShape(24.dp))
+                        .border(
+                            BorderStroke(
+                                1.5.dp,
+                                Brush.linearGradient(
+                                    listOf(
+                                        Color(0xFF38BDF8).copy(alpha = glowPulse),
+                                        Color(0xFF00E5FF).copy(alpha = 0.3f),
+                                        Color.Transparent
+                                    )
+                                )
+                            ),
+                            RoundedCornerShape(24.dp)
+                        ),
+                    shape = RoundedCornerShape(24.dp),
+                    color = Color(0xFF050811)
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.vizyontv_tv_banner_16_9),
+                        contentDescription = "VİZYON TV 16:9 Banner",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
                     )
-                    .testTag("splash_logo_box")
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.vizyontv_gold_icon_1791394537825),
-                    contentDescription = "VİZYON TV Logo",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
+                }
+            } else {
+                // 1:1 Mobil / Tablet Dikey Ekran: Animasyonlu Kanatlı "V" Logosu
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .scale(entranceScale.value)
+                        .alpha(entranceAlpha.value)
+                        .size(190.dp)
+                ) {
+                    // 1. Dönen Arka Plan Enerji Halkası
+                    Box(
+                        modifier = Modifier
+                            .size(185.dp)
+                            .rotate(subtleRotate)
+                            .border(
+                                width = 2.dp,
+                                brush = Brush.sweepGradient(
+                                    listOf(
+                                        Color(0xFF38BDF8).copy(alpha = 0.8f),
+                                        Color(0xFF0284C7).copy(alpha = 0.2f),
+                                        Color.Transparent,
+                                        Color(0xFF00E5FF).copy(alpha = 0.9f),
+                                        Color(0xFF38BDF8).copy(alpha = 0.8f)
+                                    )
+                                ),
+                                shape = CircleShape
+                            )
+                    )
+
+                    // 2. Nefes Alan Arka Plan Işık Aurası
+                    Box(
+                        modifier = Modifier
+                            .size(165.dp)
+                            .clip(CircleShape)
+                            .background(
+                                Brush.radialGradient(
+                                    colors = listOf(
+                                        Color(0xFF38BDF8).copy(alpha = 0.35f * glowPulse),
+                                        Color(0xFF0284C7).copy(alpha = 0.15f * glowPulse),
+                                        Color.Transparent
+                                    )
+                                )
+                            )
+                    )
+
+                    // 3. Ana Mavi Kanatlı Logo Kutusu (Apple Liquid Glass Çerçeveli)
+                    Surface(
+                        modifier = Modifier
+                            .size(156.dp)
+                            .shadow(
+                                elevation = 20.dp,
+                                shape = RoundedCornerShape(36.dp),
+                                spotColor = Color(0xFF38BDF8).copy(alpha = 0.6f)
+                            )
+                            .clip(RoundedCornerShape(36.dp))
+                            .border(
+                                width = 2.dp,
+                                brush = Brush.verticalGradient(
+                                    listOf(
+                                        Color(0xFF38BDF8).copy(alpha = glowPulse),
+                                        Color(0xFF0284C7).copy(alpha = 0.30f)
+                                    )
+                                ),
+                                shape = RoundedCornerShape(36.dp)
+                            ),
+                        shape = RoundedCornerShape(36.dp),
+                        color = Color(0xFF000000)
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.vizyontv_blue_icon),
+                            contentDescription = "VİZYON TV Yeni Logo",
+                            contentScale = ContentScale.Fit,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(6.dp)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Brand Title (Elektrik Mavi & Parlak Beyaz)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = "VİZYON",
+                        fontSize = 32.sp,
+                        fontWeight = FontWeight.Black,
+                        color = Color.White,
+                        letterSpacing = 4.sp
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "TV",
+                        fontSize = 32.sp,
+                        fontWeight = FontWeight.Black,
+                        color = Color(0xFF38BDF8),
+                        letterSpacing = 4.sp
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(6.dp))
+
+                Text(
+                    text = "CANLI YAYIN & MEDYA SİSTEMİ",
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF38BDF8).copy(alpha = 0.90f),
+                    letterSpacing = 2.sp
                 )
             }
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            // Brand Title and Logo
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    text = "VİZYON",
-                    fontSize = 34.sp,
-                    fontWeight = FontWeight.Black,
-                    color = Color.White,
-                    letterSpacing = 4.sp
-                )
-                Spacer(modifier = Modifier.width(10.dp))
-                Text(
-                    text = "TV",
-                    fontSize = 34.sp,
-                    fontWeight = FontWeight.Black,
-                    color = Color(0xFF38BDF8),
-                    letterSpacing = 4.sp
-                )
-            }
-
-            Spacer(modifier = Modifier.height(6.dp))
-
-            // Subtitle Tagline
-            Text(
-                text = "Keşfetmeye Hazır Mısınız?",
-                fontSize = 14.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = Color.White.copy(alpha = 0.95f),
-                letterSpacing = 1.sp
-            )
-
-            Spacer(modifier = Modifier.height(3.dp))
-
-            Text(
-                text = "En İyi İçerikler, Premium Deneyim",
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Normal,
-                color = Color(0xFFD4AF37).copy(alpha = 0.90f),
-                letterSpacing = 0.5.sp
-            )
 
             Spacer(modifier = Modifier.weight(1f))
 
-            // Bottom Progress & Stepper Animation Container
+            // Alt Yükleme ve İlerleme Alanı
             Column(
                 modifier = Modifier
-                    .fillMaxWidth(0.85f)
-                    .padding(bottom = 28.dp),
+                    .fillMaxWidth(if (isLandscape) 0.6f else 0.88f)
+                    .padding(bottom = 16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Status Text & Progress Percentage
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -269,7 +358,7 @@ fun SplashScreen(
 
                 Spacer(modifier = Modifier.height(10.dp))
 
-                // Smooth Progress Bar
+                // Akıcı Mavi İlerleme Çubuğu
                 LinearProgressIndicator(
                     progress = { progress },
                     modifier = Modifier
@@ -277,22 +366,22 @@ fun SplashScreen(
                         .height(6.dp)
                         .clip(RoundedCornerShape(3.dp)),
                     color = Color(0xFF38BDF8),
-                    trackColor = Color.White.copy(alpha = 0.15f)
+                    trackColor = Color.White.copy(alpha = 0.12f)
                 )
 
-                Spacer(modifier = Modifier.height(18.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-                // Quick Skip / Enter Button
+                // Hızlı Giriş Butonu
                 Surface(
                     shape = RoundedCornerShape(24.dp),
-                    color = Color.White.copy(alpha = 0.10f),
-                    border = BorderStroke(1.dp, Color(0xFF38BDF8).copy(alpha = 0.4f)),
+                    color = Color(0xFF0F172A).copy(alpha = 0.80f),
+                    border = BorderStroke(1.dp, Color(0xFF38BDF8).copy(alpha = 0.45f)),
                     modifier = Modifier
                         .clickable { onFinished() }
                         .testTag("splash_skip_button")
                 ) {
                     Row(
-                        modifier = Modifier.padding(horizontal = 18.dp, vertical = 8.dp),
+                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
@@ -304,8 +393,8 @@ fun SplashScreen(
                         Spacer(modifier = Modifier.width(6.dp))
                         Icon(
                             imageVector = Icons.Default.PlayArrow,
-                            contentDescription = "Hemen Başla",
-                            tint = Color(0xFFD4AF37),
+                            contentDescription = null,
+                            tint = Color(0xFF38BDF8),
                             modifier = Modifier.size(16.dp)
                         )
                     }

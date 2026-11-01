@@ -973,8 +973,8 @@ private fun TvNavigationSidebar(
                         .clip(RoundedCornerShape(12.dp))
                 ) {
                     androidx.compose.foundation.Image(
-                        painter = androidx.compose.ui.res.painterResource(id = com.example.R.drawable.img_corner_logo_premium_1791395314114),
-                        contentDescription = "VİZYON TV Premium Logo",
+                        painter = androidx.compose.ui.res.painterResource(id = com.example.R.drawable.vizyontv_blue_icon),
+                        contentDescription = "VİZYON TV Logo",
                         contentScale = ContentScale.Crop,
                         modifier = Modifier.fillMaxSize()
                     )
