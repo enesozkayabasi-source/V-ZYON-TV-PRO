@@ -1073,26 +1073,6 @@ private fun TopBarHeader(
                     .weight(1f, fill = true)
                     .padding(end = 6.dp)
             ) {
-                if (!isLandscape) {
-                    Surface(
-                        shape = RoundedCornerShape(10.dp),
-                        color = Color(0xFF0F1523),
-                        border = BorderStroke(1.5.dp, Brush.linearGradient(listOf(Color(0xFF38BDF8), Color(0xFF00E5FF)))),
-                        shadowElevation = 4.dp,
-                        modifier = Modifier
-                            .size(36.dp)
-                            .clip(RoundedCornerShape(10.dp))
-                    ) {
-                        androidx.compose.foundation.Image(
-                            painter = androidx.compose.ui.res.painterResource(id = com.example.R.drawable.img_corner_logo_premium_1791395314114),
-                            contentDescription = "VİZYON TV Premium Logo",
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(8.dp))
-                }
-
                 Column(modifier = Modifier.weight(1f, fill = true)) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
