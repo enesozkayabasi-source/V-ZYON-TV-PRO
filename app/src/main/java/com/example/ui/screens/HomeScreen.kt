@@ -1056,6 +1056,7 @@ private fun TopBarHeader(
     onToggleDataSaver: () -> Unit = {},
     onRefresh: () -> Unit
 ) {
+    val currentTabColor = com.example.ui.components.getDockTabColor(selectedTab)
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -1086,12 +1087,11 @@ private fun TopBarHeader(
                             overflow = TextOverflow.Ellipsis,
                             style = androidx.compose.ui.text.TextStyle(
                                 brush = Brush.linearGradient(
-                                    listOf(Color(0xFFBAE6FD), Color(0xFF38BDF8), Color(0xFF0284C7))
+                                    listOf(Color.White, currentTabColor, Color(0xFF0284C7))
                                 )
                             )
                         )
                     }
-                    val currentTabColor = com.example.ui.components.getDockTabColor(selectedTab)
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(5.dp)
@@ -1326,7 +1326,7 @@ private fun TopBarHeader(
                     Icon(
                         imageVector = Icons.Default.Search,
                         contentDescription = "Arama",
-                        tint = MaterialTheme.colorScheme.primary,
+                        tint = currentTabColor,
                         modifier = Modifier.size(20.dp)
                     )
                 },
@@ -1338,14 +1338,14 @@ private fun TopBarHeader(
                         if (searchQuery.isNotBlank()) {
                             Surface(
                                 shape = RoundedCornerShape(8.dp),
-                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+                                color = currentTabColor.copy(alpha = 0.2f),
                                 modifier = Modifier.padding(end = 4.dp)
                             ) {
                                 Text(
                                     text = "$resultCount içerik",
                                     fontSize = 10.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.primary,
+                                    color = currentTabColor,
                                     modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                                 )
                             }
@@ -1365,7 +1365,7 @@ private fun TopBarHeader(
                 },
                 shape = RoundedCornerShape(14.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    focusedBorderColor = currentTabColor,
                     unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.25f),
                     focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f),
                     unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
@@ -1411,10 +1411,21 @@ private fun HeroHighlightBanner(
 
     val isSport = !isHaber && !isCocuk && (item.kategori.equals("Spor", ignoreCase = true) || item.baslik.contains("spor", ignoreCase = true))
 
+    val isRadio = item.collectionType == MediaCollection.RADYO || item.kategori.contains("radyo", ignoreCase = true)
+
+    val heroCategoryColor = when {
+        isHaber -> Color(0xFFFB7185) // Canlı Mercan Kırmızı
+        isCocuk -> Color(0xFFFBBF24) // Sıcak Güneş Sarısı / Amber
+        isSport -> Color(0xFF4ADE80) // Stadyum Çim Yeşili
+        isRadio -> Color(0xFFC084FC) // Kozmik Neon Mor
+        else -> Color(0xFF38BDF8)    // Elektrik Cyan Mavi
+    }
+
     val heroCategoryText = when {
         isHaber -> "Haber & Gündem"
         isCocuk -> "Çocuk & Çizgi Dizi"
         isSport -> "Spor & Canlı Maç"
+        isRadio -> "Canlı Radyo & Müzik"
         else -> item.kategori.replace("Film", "Yayın", ignoreCase = true)
     }
 
@@ -1425,13 +1436,13 @@ private fun HeroHighlightBanner(
             .scale(bannerScale)
             .clickable(
                 interactionSource = interactionSource,
-                indication = ripple(bounded = true, color = Color(0xFF38BDF8)),
+                indication = ripple(bounded = true, color = heroCategoryColor),
                 onClick = onPlay
             )
             .focusable()
             .border(
                 1.dp,
-                Brush.horizontalGradient(listOf(Color(0xFF38BDF8).copy(alpha = 0.6f), Color(0xFF00D2FF).copy(alpha = 0.25f), Color.Transparent)),
+                Brush.horizontalGradient(listOf(heroCategoryColor.copy(alpha = 0.75f), heroCategoryColor.copy(alpha = 0.25f), Color.Transparent)),
                 RoundedCornerShape(16.dp)
             ),
         shape = RoundedCornerShape(16.dp),
@@ -1478,18 +1489,14 @@ private fun HeroHighlightBanner(
             ) {
                 Surface(
                     shape = RoundedCornerShape(4.dp),
-                    color = when {
-                        isHaber -> NeonAmber
-                        isCocuk -> NeonCyan
-                        isSport -> NeonAmber
-                        else -> NeonRed
-                    }
+                    color = heroCategoryColor
                 ) {
                     Text(
                         text = when {
                             isHaber -> "CANLI HABER"
                             isCocuk -> "ÇOCUK YAYINI"
                             isSport -> "CANLI SPOR"
+                            isRadio -> "CANLI RADYO"
                             else -> "ÖNE ÇIKAN YAYIN"
                         },
                         color = Color.Black,
@@ -1511,8 +1518,9 @@ private fun HeroHighlightBanner(
 
                 Text(
                     text = "$heroCategoryText • Canlı HD Akış",
-                    color = Color.White.copy(alpha = 0.8f),
+                    color = heroCategoryColor,
                     fontSize = 11.sp,
+                    fontWeight = FontWeight.SemiBold,
                     maxLines = 1
                 )
 
@@ -1520,7 +1528,7 @@ private fun HeroHighlightBanner(
 
                 Surface(
                     shape = RoundedCornerShape(8.dp),
-                    color = MaterialTheme.colorScheme.primary,
+                    color = heroCategoryColor,
                     shadowElevation = 4.dp,
                     modifier = Modifier.clickable(onClick = onPlay)
                 ) {

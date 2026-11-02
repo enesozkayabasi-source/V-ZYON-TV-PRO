@@ -88,8 +88,8 @@ fun SettingsDialog(
     onImportM3u: (input: String, isUrl: Boolean) -> Unit,
     isDataSaverEnabled: Boolean = false,
     onToggleDataSaver: ((Boolean) -> Unit)? = null,
-    currentVersion: String = "v2.9.5",
-    latestVersion: String = "v2.9.5",
+    currentVersion: String = "v3.0",
+    latestVersion: String = "v3.0",
     hasUpdate: Boolean = false,
     isUpdating: Boolean = false,
     updateProgress: Float = 0f,
@@ -175,7 +175,8 @@ fun SettingsDialog(
                 Spacer(modifier = Modifier.height(18.dp))
 
                 // SECTION 1: ARAYÜZ MODU (TV & TELEFON GİBİ FARKLI ARAYÜZLER)
-                SectionHeader(title = "Arayüz Görünümü (TV / Telefon)", icon = Icons.Default.Devices)
+                val layoutAccentColor = Color(0xFF38BDF8) // Sky Blue
+                SectionHeader(title = "Arayüz Görünümü (TV / Telefon)", icon = Icons.Default.Devices, color = layoutAccentColor)
                 Spacer(modifier = Modifier.height(8.dp))
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     AppLayoutMode.entries.forEach { mode ->
@@ -187,13 +188,13 @@ fun SettingsDialog(
                         }
                         Surface(
                             shape = RoundedCornerShape(12.dp),
-                            color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
+                            color = if (isSelected) layoutAccentColor.copy(alpha = 0.16f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable { onSelectLayoutMode(mode) }
                                 .border(
                                     width = if (isSelected) 1.5.dp else 0.dp,
-                                    color = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
+                                    color = if (isSelected) layoutAccentColor else Color.Transparent,
                                     shape = RoundedCornerShape(12.dp)
                                 )
                         ) {
@@ -209,7 +210,7 @@ fun SettingsDialog(
                                     Icon(
                                         imageVector = icon,
                                         contentDescription = null,
-                                        tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                        tint = if (isSelected) layoutAccentColor else MaterialTheme.colorScheme.onSurfaceVariant,
                                         modifier = Modifier.size(22.dp)
                                     )
                                     Spacer(modifier = Modifier.width(12.dp))
@@ -218,7 +219,7 @@ fun SettingsDialog(
                                             text = mode.title,
                                             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.SemiBold,
                                             fontSize = 13.sp,
-                                            color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface
+                                            color = if (isSelected) layoutAccentColor else MaterialTheme.colorScheme.onSurface
                                         )
                                         Text(
                                             text = mode.description,
@@ -231,7 +232,7 @@ fun SettingsDialog(
                                     Icon(
                                         imageVector = Icons.Default.Check,
                                         contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.primary,
+                                        tint = layoutAccentColor,
                                         modifier = Modifier.size(18.dp)
                                     )
                                 }
@@ -243,7 +244,8 @@ fun SettingsDialog(
                 Spacer(modifier = Modifier.height(18.dp))
 
                 // SECTION 2: DEĞİŞTİRİLEBİLİR TEMALAR
-                SectionHeader(title = "Uygulama Teması", icon = Icons.Default.Palette)
+                val themeAccentColor = Color(0xFFA855F7) // Radiant Violet
+                SectionHeader(title = "Uygulama Teması & Renk Paleti", icon = Icons.Default.Palette, color = themeAccentColor)
                 Spacer(modifier = Modifier.height(8.dp))
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     AppThemeMode.entries.chunked(2).forEach { rowThemes ->
@@ -256,7 +258,7 @@ fun SettingsDialog(
                                 val accentColor = Color(theme.primaryColorHex)
                                 Surface(
                                     shape = RoundedCornerShape(12.dp),
-                                    color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
+                                    color = if (isSelected) accentColor.copy(alpha = 0.16f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
                                     modifier = Modifier
                                         .weight(1f)
                                         .clickable { onSelectThemeMode(theme) }
@@ -282,7 +284,7 @@ fun SettingsDialog(
                                                 text = theme.title,
                                                 fontSize = 12.sp,
                                                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                                color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface
+                                                color = if (isSelected) accentColor else MaterialTheme.colorScheme.onSurface
                                             )
                                         }
                                         if (isSelected) {
@@ -303,7 +305,8 @@ fun SettingsDialog(
                 Spacer(modifier = Modifier.height(18.dp))
 
                 // SECTION 3: DİL SEÇİMİ
-                SectionHeader(title = "Uygulama Dili", icon = Icons.Default.Language)
+                val languageAccentColor = Color(0xFFF59E0B) // Amber Gold
+                SectionHeader(title = "Uygulama Dili", icon = Icons.Default.Language, color = languageAccentColor)
                 Spacer(modifier = Modifier.height(8.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -313,13 +316,13 @@ fun SettingsDialog(
                         val isSelected = currentLanguage == lang
                         Surface(
                             shape = RoundedCornerShape(10.dp),
-                            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
+                            color = if (isSelected) languageAccentColor.copy(alpha = 0.2f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
                             modifier = Modifier
                                 .weight(1f)
                                 .clickable { onSelectLanguage(lang) }
                                 .border(
                                     width = if (isSelected) 1.5.dp else 0.dp,
-                                    color = if (isSelected) NeonCyan else Color.Transparent,
+                                    color = if (isSelected) languageAccentColor else Color.Transparent,
                                     shape = RoundedCornerShape(10.dp)
                                 )
                         ) {
@@ -334,7 +337,7 @@ fun SettingsDialog(
                                     text = lang.title,
                                     fontSize = 12.sp,
                                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                    color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
+                                    color = if (isSelected) languageAccentColor else MaterialTheme.colorScheme.onSurface
                                 )
                             }
                         }
@@ -344,7 +347,8 @@ fun SettingsDialog(
                 Spacer(modifier = Modifier.height(18.dp))
 
                 // SECTION 3.5: VERİ TASARRUFU SİSTEMİ (DATA SAVER)
-                SectionHeader(title = "Veri Tasarrufu Modu (Daha Az İnternet)", icon = Icons.Default.Download)
+                val dataSaverAccentColor = Color(0xFF10B981) // Emerald Green
+                SectionHeader(title = "Veri Tasarrufu Modu (Daha Az İnternet)", icon = Icons.Default.Download, color = dataSaverAccentColor)
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Card(
@@ -353,9 +357,9 @@ fun SettingsDialog(
                         .clickable { onToggleDataSaver?.invoke(!isDataSaverEnabled) },
                     shape = RoundedCornerShape(14.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = if (isDataSaverEnabled) NeonCyan.copy(alpha = 0.12f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
+                        containerColor = if (isDataSaverEnabled) dataSaverAccentColor.copy(alpha = 0.12f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
                     ),
-                    border = if (isDataSaverEnabled) androidx.compose.foundation.BorderStroke(1.5.dp, NeonCyan) else null
+                    border = if (isDataSaverEnabled) androidx.compose.foundation.BorderStroke(1.5.dp, dataSaverAccentColor) else null
                 ) {
                     Row(
                         modifier = Modifier
@@ -370,18 +374,18 @@ fun SettingsDialog(
                                     text = "İnternet Veri Tasarrufu",
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 13.sp,
-                                    color = if (isDataSaverEnabled) NeonCyan else MaterialTheme.colorScheme.onSurface
+                                    color = if (isDataSaverEnabled) dataSaverAccentColor else MaterialTheme.colorScheme.onSurface
                                 )
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Surface(
                                     shape = RoundedCornerShape(4.dp),
-                                    color = if (isDataSaverEnabled) NeonCyan.copy(alpha = 0.25f) else MaterialTheme.colorScheme.surfaceVariant
+                                    color = if (isDataSaverEnabled) dataSaverAccentColor.copy(alpha = 0.25f) else MaterialTheme.colorScheme.surfaceVariant
                                 ) {
                                     Text(
                                         text = if (isDataSaverEnabled) "%85 TASARRUF" else "KAPALI",
                                         fontSize = 9.sp,
                                         fontWeight = FontWeight.ExtraBold,
-                                        color = if (isDataSaverEnabled) NeonCyan else MaterialTheme.colorScheme.onSurfaceVariant,
+                                        color = if (isDataSaverEnabled) dataSaverAccentColor else MaterialTheme.colorScheme.onSurfaceVariant,
                                         modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp)
                                     )
                                 }
@@ -399,8 +403,8 @@ fun SettingsDialog(
                             checked = isDataSaverEnabled,
                             onCheckedChange = { onToggleDataSaver?.invoke(it) },
                             colors = SwitchDefaults.colors(
-                                checkedThumbColor = Color.Black,
-                                checkedTrackColor = NeonCyan,
+                                checkedThumbColor = Color.White,
+                                checkedTrackColor = dataSaverAccentColor,
                                 uncheckedThumbColor = MaterialTheme.colorScheme.outline,
                                 uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant
                             )
@@ -411,7 +415,8 @@ fun SettingsDialog(
                 Spacer(modifier = Modifier.height(20.dp))
 
                 // SECTION 4: EKLENTİ & TOPLU M3U ÇALMA LİSTELERİ
-                SectionHeader(title = "Eklentiler & IPTV Listesi", icon = Icons.Default.Extension)
+                val iptvAccentColor = Color(0xFFFB923C) // Warm Coral / Orange
+                SectionHeader(title = "Eklentiler & IPTV Listesi", icon = Icons.Default.Extension, color = iptvAccentColor)
                 Spacer(modifier = Modifier.height(8.dp))
 
                 // Preset Lists
@@ -452,7 +457,7 @@ fun SettingsDialog(
                                 }
                                 Surface(
                                     shape = RoundedCornerShape(8.dp),
-                                    color = NeonCyan.copy(alpha = 0.15f)
+                                    color = iptvAccentColor.copy(alpha = 0.15f)
                                 ) {
                                     Row(
                                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
@@ -461,13 +466,13 @@ fun SettingsDialog(
                                         Icon(
                                             imageVector = Icons.Default.Download,
                                             contentDescription = null,
-                                            tint = NeonCyan,
+                                            tint = iptvAccentColor,
                                             modifier = Modifier.size(14.dp)
                                         )
                                         Spacer(modifier = Modifier.width(4.dp))
                                         Text(
                                             text = preset.channelCountHint,
-                                            color = NeonCyan,
+                                            color = iptvAccentColor,
                                             fontSize = 10.sp,
                                             fontWeight = FontWeight.Bold
                                         )
@@ -490,7 +495,7 @@ fun SettingsDialog(
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.PlaylistAdd,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
+                        tint = iptvAccentColor,
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
@@ -519,7 +524,7 @@ fun SettingsDialog(
                         ) {
                             Surface(
                                 shape = RoundedCornerShape(8.dp),
-                                color = if (isUrlMode) MaterialTheme.colorScheme.primary else Color.Transparent,
+                                color = if (isUrlMode) iptvAccentColor else Color.Transparent,
                                 modifier = Modifier
                                     .weight(1f)
                                     .clickable { isUrlMode = true }
@@ -529,13 +534,13 @@ fun SettingsDialog(
                                     textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = if (isUrlMode) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                    color = if (isUrlMode) Color.Black else MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.padding(vertical = 6.dp)
                                 )
                             }
                             Surface(
                                 shape = RoundedCornerShape(8.dp),
-                                color = if (!isUrlMode) MaterialTheme.colorScheme.primary else Color.Transparent,
+                                color = if (!isUrlMode) iptvAccentColor else Color.Transparent,
                                 modifier = Modifier
                                     .weight(1f)
                                     .clickable { isUrlMode = false }
@@ -545,7 +550,7 @@ fun SettingsDialog(
                                     textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = if (!isUrlMode) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                    color = if (!isUrlMode) Color.Black else MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.padding(vertical = 6.dp)
                                 )
                             }
@@ -567,7 +572,7 @@ fun SettingsDialog(
                             maxLines = 5,
                             shape = RoundedCornerShape(8.dp),
                             colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = NeonCyan,
+                                focusedBorderColor = iptvAccentColor,
                                 unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
                             )
                         )
@@ -580,7 +585,7 @@ fun SettingsDialog(
                                 m3uInputText = ""
                                 showM3uInputSection = false
                             },
-                            colors = ButtonDefaults.buttonColors(containerColor = NeonCyan),
+                            colors = ButtonDefaults.buttonColors(containerColor = iptvAccentColor),
                             shape = RoundedCornerShape(8.dp),
                             modifier = Modifier.fillMaxWidth()
                         ) {
@@ -596,7 +601,8 @@ fun SettingsDialog(
                 Spacer(modifier = Modifier.height(14.dp))
 
                 // SECTION 5: GÜNCELLEME BAĞLANTISI & SÜRÜM YÖNETİMİ
-                SectionHeader(title = "Güncelleme Bağlantısı & Sürüm Denetimi", icon = Icons.Default.SystemUpdate)
+                val updateAccentColor = Color(0xFF22C55E) // Vibrant Green
+                SectionHeader(title = "Güncelleme Bağlantısı & Sürüm Denetimi (v3.0)", icon = Icons.Default.SystemUpdate, color = updateAccentColor)
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Card(
@@ -680,8 +686,8 @@ fun SettingsDialog(
                         // Buton 1: Canlı Güncellemeleri Denetle
                         Button(
                             onClick = onCheckForUpdates,
-                            colors = ButtonDefaults.buttonColors(containerColor = NeonCyan.copy(alpha = 0.22f)),
-                            border = androidx.compose.foundation.BorderStroke(1.2.dp, NeonCyan),
+                            colors = ButtonDefaults.buttonColors(containerColor = updateAccentColor.copy(alpha = 0.22f)),
+                            border = androidx.compose.foundation.BorderStroke(1.2.dp, updateAccentColor),
                             shape = RoundedCornerShape(8.dp),
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -690,13 +696,13 @@ fun SettingsDialog(
                             Icon(
                                 imageVector = Icons.Default.SystemUpdate,
                                 contentDescription = null,
-                                tint = NeonCyan,
+                                tint = updateAccentColor,
                                 modifier = Modifier.size(16.dp)
                             )
                             Spacer(modifier = Modifier.width(6.dp))
                             Text(
                                 text = "Güncellemeleri Canlı Denetle",
-                                color = NeonCyan,
+                                color = updateAccentColor,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 12.sp
                             )
@@ -820,13 +826,13 @@ fun SettingsDialog(
                                     .padding(10.dp)
                             ) {
                                 Surface(
-                                    color = NeonCyan.copy(alpha = 0.08f),
+                                    color = updateAccentColor.copy(alpha = 0.08f),
                                     shape = RoundedCornerShape(6.dp),
-                                    border = androidx.compose.foundation.BorderStroke(1.dp, NeonCyan.copy(alpha = 0.3f)),
+                                    border = androidx.compose.foundation.BorderStroke(1.dp, updateAccentColor.copy(alpha = 0.3f)),
                                     modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
                                 ) {
                                     Text(
-                                        text = "✅ GitHub Release: İndirme bağlantısı GitHub v2.9.5 sürümündeki VIZYON.TV.v2.9.5.apk dosyasına bağlıdır. Tıklandığında doğrudan indirme başlar.",
+                                        text = "✅ GitHub Release: İndirme bağlantısı GitHub v3.0 sürümündeki VIZYON.TV.v3.0.apk dosyasına bağlıdır. Tıklandığında doğrudan indirme başlar.",
                                         fontSize = 10.sp,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                         modifier = Modifier.padding(8.dp)
@@ -990,20 +996,33 @@ fun SettingsDialog(
 }
 
 @Composable
-private fun SectionHeader(title: String, icon: androidx.compose.ui.graphics.vector.ImageVector) {
+private fun SectionHeader(
+    title: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    color: Color = NeonCyan
+) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = NeonCyan,
-            modifier = Modifier.size(16.dp)
-        )
-        Spacer(modifier = Modifier.width(6.dp))
+        Surface(
+            shape = CircleShape,
+            color = color.copy(alpha = 0.16f),
+            modifier = Modifier.size(28.dp)
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = color,
+                    modifier = Modifier.size(16.dp)
+                )
+            }
+        }
+        Spacer(modifier = Modifier.width(10.dp))
         Text(
             text = title,
-            style = MaterialTheme.typography.titleSmall,
+            style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary
+            color = color,
+            fontSize = 14.sp
         )
     }
 }

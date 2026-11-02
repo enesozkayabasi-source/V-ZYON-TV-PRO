@@ -153,6 +153,14 @@ fun MediaCard(
         }
     }
 
+    val categoryColor = when {
+        isHaber -> Color(0xFFFB7185) // Canlı Mercan Kırmızı
+        isCocuk -> Color(0xFFFBBF24) // Sıcak Güneş Sarısı / Amber
+        isSport -> Color(0xFF4ADE80) // Stadyum Çim Yeşili
+        isRadio -> Color(0xFFC084FC) // Kozmik Neon Mor
+        else -> Color(0xFF38BDF8)    // Elektrik Cyan Mavi (Canlı TV)
+    }
+
     val primaryColor = MaterialTheme.colorScheme.primary
     val cardBg = if (isFocused) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant
 
@@ -172,12 +180,12 @@ fun MediaCard(
             }
             .clickable(
                 interactionSource = interactionSource,
-                indication = ripple(bounded = true, color = primaryColor),
+                indication = ripple(bounded = true, color = categoryColor),
                 onClick = onClick
             )
             .border(
                 width = if (isFocused) 2.5.dp else 1.dp,
-                color = if (isFocused) primaryColor else primaryColor.copy(alpha = 0.18f),
+                color = if (isFocused) categoryColor else categoryColor.copy(alpha = 0.24f),
                 shape = RoundedCornerShape(14.dp)
             ),
         shape = RoundedCornerShape(14.dp),
@@ -266,7 +274,7 @@ fun MediaCard(
                     if (isHaber) {
                         Surface(
                             shape = RoundedCornerShape(6.dp),
-                            color = NeonAmber.copy(alpha = 0.95f)
+                            color = Color(0xFFFB7185).copy(alpha = 0.95f)
                         ) {
                             Row(
                                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp),
@@ -290,7 +298,7 @@ fun MediaCard(
                     } else if (isCocuk) {
                         Surface(
                             shape = RoundedCornerShape(6.dp),
-                            color = NeonCyan.copy(alpha = 0.95f)
+                            color = Color(0xFFFBBF24).copy(alpha = 0.95f)
                         ) {
                             Row(
                                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp),
@@ -314,7 +322,7 @@ fun MediaCard(
                     } else if (isSport) {
                         Surface(
                             shape = RoundedCornerShape(6.dp),
-                            color = NeonAmber.copy(alpha = 0.95f)
+                            color = Color(0xFF4ADE80).copy(alpha = 0.95f)
                         ) {
                             Row(
                                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp),
@@ -338,7 +346,7 @@ fun MediaCard(
                     } else if (isRadio) {
                         Surface(
                             shape = RoundedCornerShape(6.dp),
-                            color = NeonAmber.copy(alpha = 0.95f)
+                            color = Color(0xFFC084FC).copy(alpha = 0.95f)
                         ) {
                             Row(
                                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp),
@@ -362,7 +370,7 @@ fun MediaCard(
                     } else {
                         Surface(
                             shape = RoundedCornerShape(6.dp),
-                            color = NeonRed.copy(alpha = 0.95f)
+                            color = Color(0xFF38BDF8).copy(alpha = 0.95f)
                         ) {
                             Row(
                                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp),
@@ -424,7 +432,7 @@ fun MediaCard(
                         modifier = Modifier
                             .align(Alignment.Center)
                             .size(44.dp)
-                            .background(primaryColor, CircleShape),
+                            .background(categoryColor, CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
@@ -469,24 +477,27 @@ fun MediaCard(
                         modifier = Modifier.weight(1f, fill = false)
                     )
 
-                    Spacer(modifier = Modifier.width(6.dp))
-
-                    Text(
-                        text = when {
-                            isHaber -> "Haber"
-                            isCocuk -> "Çocuk"
-                            isSport -> "Spor"
-                            else -> "Canlı"
-                        },
-                        color = when {
-                            isHaber -> NeonAmber
-                            isCocuk -> NeonCyan
-                            isSport -> NeonAmber
-                            else -> primaryColor
-                        },
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Medium
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(6.dp)
+                                .clip(CircleShape)
+                                .background(categoryColor)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = when {
+                                isHaber -> "Haber"
+                                isCocuk -> "Çocuk"
+                                isSport -> "Spor"
+                                isRadio -> "Radyo"
+                                else -> "Canlı"
+                            },
+                            color = categoryColor,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
                 }
             }
         }
