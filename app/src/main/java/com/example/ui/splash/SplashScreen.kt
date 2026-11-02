@@ -199,21 +199,21 @@ fun SplashScreen(
                     )
                 }
             } else {
-                // 1:1 Mobil / Tablet Dikey Ekran: Animasyonlu Kanatlı "V" Logosu
+                // 1:1 Mobil / Tablet Dikey Ekran: Animasyonlu Kanatlı "V" Logosu (Tam Görünecek Şekilde İdeal Boyutta)
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier
                         .scale(entranceScale.value)
                         .alpha(entranceAlpha.value)
-                        .size(190.dp)
+                        .size(160.dp)
                 ) {
                     // 1. Dönen Arka Plan Enerji Halkası
                     Box(
                         modifier = Modifier
-                            .size(185.dp)
+                            .size(156.dp)
                             .rotate(subtleRotate)
                             .border(
-                                width = 2.dp,
+                                width = 1.8.dp,
                                 brush = Brush.sweepGradient(
                                     listOf(
                                         Color(0xFF38BDF8).copy(alpha = 0.8f),
@@ -230,7 +230,7 @@ fun SplashScreen(
                     // 2. Nefes Alan Arka Plan Işık Aurası
                     Box(
                         modifier = Modifier
-                            .size(165.dp)
+                            .size(136.dp)
                             .clip(CircleShape)
                             .background(
                                 Brush.radialGradient(
@@ -246,24 +246,24 @@ fun SplashScreen(
                     // 3. Ana Mavi Kanatlı Logo Kutusu (Apple Liquid Glass Çerçeveli)
                     Surface(
                         modifier = Modifier
-                            .size(156.dp)
+                            .size(132.dp)
                             .shadow(
-                                elevation = 20.dp,
-                                shape = RoundedCornerShape(36.dp),
-                                spotColor = Color(0xFF38BDF8).copy(alpha = 0.6f)
+                                elevation = 18.dp,
+                                shape = RoundedCornerShape(30.dp),
+                                spotColor = Color(0xFF38BDF8).copy(alpha = 0.55f)
                             )
-                            .clip(RoundedCornerShape(36.dp))
+                            .clip(RoundedCornerShape(30.dp))
                             .border(
-                                width = 2.dp,
+                                width = 1.8.dp,
                                 brush = Brush.verticalGradient(
                                     listOf(
                                         Color(0xFF38BDF8).copy(alpha = glowPulse),
                                         Color(0xFF0284C7).copy(alpha = 0.30f)
                                     )
                                 ),
-                                shape = RoundedCornerShape(36.dp)
+                                shape = RoundedCornerShape(30.dp)
                             ),
-                        shape = RoundedCornerShape(36.dp),
+                        shape = RoundedCornerShape(30.dp),
                         color = Color(0xFF000000)
                     ) {
                         Image(
@@ -272,7 +272,7 @@ fun SplashScreen(
                             contentScale = ContentScale.Fit,
                             modifier = Modifier
                                 .fillMaxSize()
-                                .padding(6.dp)
+                                .padding(12.dp)
                         )
                     }
                 }

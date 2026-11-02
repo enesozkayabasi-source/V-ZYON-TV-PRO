@@ -1091,14 +1091,26 @@ private fun TopBarHeader(
                             )
                         )
                     }
-                    Text(
-                        text = AppStrings.get(selectedTab.key, language),
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
+                    val currentTabColor = com.example.ui.components.getDockTabColor(selectedTab)
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(5.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(6.dp)
+                                .clip(CircleShape)
+                                .background(currentTabColor)
+                        )
+                        Text(
+                            text = AppStrings.get(selectedTab.key, language),
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = currentTabColor,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
                 }
             }
 

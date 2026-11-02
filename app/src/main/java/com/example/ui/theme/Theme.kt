@@ -22,6 +22,7 @@ enum class AppThemeMode(
     CRIMSON("Sinema Kırmızı", "Netflix & Sinema tarzı koyu kömür & Canlı Kırmızı", 0xFFFF3366),
     EMERALD("Zümrüt Yeşil", "Koyu zümrüt & Canlı Yeşil vurgular", 0xFF00E676),
     TITANIUM("Koyu Titanyum", "Füme metalik gri & Safir Mavi ışıltısı", 0xFF0EA5E9),
+    SPECTRUM("Canlı Spektrum", "Her buton ve kategori için ayrı canlı renk kimliği", 0xFFFB7185),
     LIGHT("Açık Modern", "Gündüz kullanımına özel ferah açık tema", 0xFF0284C7)
 }
 
@@ -145,6 +146,25 @@ val TitaniumColorScheme = darkColorScheme(
     outline = Color(0xFF0EA5E9)
 )
 
+// 6. Canlı Çok Renkli Spektrum Paleti (Her buton ve kategori için özel renk)
+val SpectrumColorScheme = darkColorScheme(
+    primary = Color(0xFF38BDF8), // Canlı TV: Cyan Mavi
+    onPrimary = Color(0xFF070D18),
+    primaryContainer = Color(0xFF0C2440),
+    onPrimaryContainer = Color(0xFFBAE6FD),
+    secondary = Color(0xFFFB7185), // Haber: Mercan Kırmızı
+    onSecondary = Color(0xFFFFFFFF),
+    tertiary = Color(0xFF4ADE80), // Spor: Çim Yeşili
+    onTertiary = Color(0xFF000000),
+    background = Color(0xFF050811), // Derin gece
+    onBackground = Color(0xFFF9FAFB),
+    surface = Color(0xFF0B1120),
+    onSurface = Color(0xFFF9FAFB),
+    surfaceVariant = Color(0xFF141E33),
+    onSurfaceVariant = Color(0xFFA1ADC7),
+    outline = Color(0xFFC084FC) // Radyo: Neon Mor
+)
+
 // 6. Light Modern ColorScheme
 val LightColorScheme = lightColorScheme(
     primary = LightPrimary,
@@ -177,6 +197,7 @@ fun MyApplicationTheme(
         AppThemeMode.CRIMSON -> CrimsonColorScheme
         AppThemeMode.EMERALD -> EmeraldColorScheme
         AppThemeMode.TITANIUM -> TitaniumColorScheme
+        AppThemeMode.SPECTRUM -> SpectrumColorScheme
         AppThemeMode.LIGHT -> LightColorScheme
     }
 

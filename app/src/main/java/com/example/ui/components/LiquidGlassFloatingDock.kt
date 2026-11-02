@@ -60,15 +60,14 @@ import com.example.ui.i18n.AppStrings
 import com.example.ui.viewmodel.MainNavigationTab
 
 /**
- * Apple Liquid Glass (Sıvı Buzlu Cam) Yüzen Alt Gezinme Çubuğu (Floating Dock)
+ * Apple Liquid Glass (Ultra Şık Saydam Yüzen Dock)
  *
- * Mükemmel Geçiş Animasyonları:
- * - Kesintisiz Kayan Sıvı Cam Hap Kapsülü (Sliding Liquid Glass Capsule with Apple Spring Physics)
- * - Simge zıplama ve yaylanma animasyonu (Bouncy pop icon scale)
- * - Yarı saydam koyu tonlu sıvı cam dokusu (Liquid Frosted Glass)
- * - 1.2.dp üstten ışık alan cam çerçeve parıltısı (Specular Rim)
+ * Yenilikler:
+ * - Ağır ve koyu arka plan tamamen kaldırıldı (Kristal berraklığında ultra saydam yüzen panel)
+ * - Her Butona Özel Canlı Renk Kimliği (Canlı TV: Cyan, Haber: Mercan Kırmızı, Çocuk: Güneş Sarısı, Spor: Stadyum Yeşili, Radyo: Neon Mor)
+ * - Kayan Sıvı Cam Kapsülü rengini aktif butona göre pürüzsüzce dönüştürür (Color-morphing Liquid Capsule)
+ * - Zarif üstten ışık yansıtan yarı saydam cam çerçevesi (Frosted Specular Rim)
  * - Dokunsal Taptic Engine titreşim geri bildirimi
- * - Android jest çubuğu güvenli alan uyumluluğu (.navigationBarsPadding())
  */
 @Composable
 fun LiquidGlassFloatingDock(
@@ -90,36 +89,37 @@ fun LiquidGlassFloatingDock(
         )
     }
 
-    // Sıvı Cam Arka Plan Dokusu
-    val glassBackgroundBrush = if (isDarkTheme) {
-        Brush.verticalGradient(
-            colors = listOf(
-                Color(0xD90F172A), // Yarı saydam derin lacivert cam
-                Color(0xF2070D18)  // Altta derin obsidyen taban
-            )
-        )
-    } else {
-        Brush.verticalGradient(
-            colors = listOf(
-                Color(0xE6FFFFFF),
-                Color(0xF0E2E8F0)
-            )
-        )
-    }
+    // Aktif sekmenin özel renk kimliği
+    val activeTabColor = getDockTabColor(selectedTab)
+    val activeTabDarkColor = getDockTabDarkColor(selectedTab)
 
-    // Cam kenar yansıması (Specular Rim Highlight)
-    val glassRimBorder = BorderStroke(
-        width = 1.2.dp,
-        brush = Brush.verticalGradient(
+    val activePrimaryColor by animateColorAsState(
+        targetValue = activeTabColor,
+        animationSpec = tween(durationMillis = 220),
+        label = "activeDockColor"
+    )
+
+    val activeSecondaryColor by animateColorAsState(
+        targetValue = activeTabDarkColor,
+        animationSpec = tween(durationMillis = 220),
+        label = "activeDockDarkColor"
+    )
+
+    // Ultra şık, hafif ve saydam cam kenar çizgisi (Koyu panel arka planı kaldırıldı!)
+    val ultraChicGlassRimBorder = BorderStroke(
+        width = 1.dp,
+        brush = Brush.horizontalGradient(
             colors = if (isDarkTheme) {
                 listOf(
-                    Color.White.copy(alpha = 0.28f), // Üstten vuran ışık yansıması
-                    Color.White.copy(alpha = 0.05f)  // Altta kaybolan parıltı
+                    Color.White.copy(alpha = 0.18f),
+                    Color.White.copy(alpha = 0.05f),
+                    Color.White.copy(alpha = 0.18f)
                 )
             } else {
                 listOf(
-                    Color.White.copy(alpha = 0.90f),
-                    Color(0xFFCBD5E1).copy(alpha = 0.40f)
+                    Color.White.copy(alpha = 0.65f),
+                    Color(0xFFCBD5E1).copy(alpha = 0.25f),
+                    Color.White.copy(alpha = 0.65f)
                 )
             }
         )
@@ -132,26 +132,20 @@ fun LiquidGlassFloatingDock(
             .padding(horizontal = 16.dp, vertical = 8.dp),
         contentAlignment = Alignment.Center
     ) {
+        // Tamamen saydam, zemin rengi olmayan şık cam kapsül
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(66.dp)
-                .shadow(
-                    elevation = 20.dp,
-                    shape = RoundedCornerShape(33.dp),
-                    spotColor = if (isDarkTheme) Color(0x99000000) else Color(0x33000000),
-                    ambientColor = if (isDarkTheme) Color(0x55000000) else Color(0x1A000000)
-                )
-                .clip(RoundedCornerShape(33.dp))
-                .border(border = glassRimBorder, shape = RoundedCornerShape(33.dp)),
-            shape = RoundedCornerShape(33.dp),
-            color = Color.Transparent
+                .height(64.dp)
+                .clip(RoundedCornerShape(32.dp))
+                .border(border = ultraChicGlassRimBorder, shape = RoundedCornerShape(32.dp)),
+            shape = RoundedCornerShape(32.dp),
+            color = if (isDarkTheme) Color(0x1A0F172A) else Color(0x33FFFFFF) // Ultra hafif yarı saydam ipeksi cam tabakası
         ) {
             BoxWithConstraints(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(glassBackgroundBrush)
-                    .padding(horizontal = 6.dp, vertical = 6.dp),
+                    .padding(horizontal = 4.dp, vertical = 4.dp),
                 contentAlignment = Alignment.CenterStart
             ) {
                 val dockWidth = maxWidth
@@ -170,35 +164,40 @@ fun LiquidGlassFloatingDock(
                     label = "dockPillOffset"
                 )
 
-                // 1. Kayan Sıvı Cam Kapsülü (Sliding Liquid Glow Capsule)
+                // 1. Kayan Sıvı Cam Kapsülü (Rengi seçili butona göre değişen parlak aydınlatmalı hap)
                 Box(
                     modifier = Modifier
                         .offset(x = indicatorOffset)
                         .width(tabWidth)
                         .fillMaxHeight()
-                        .padding(horizontal = 3.dp)
-                        .clip(RoundedCornerShape(24.dp))
+                        .padding(horizontal = 3.dp, vertical = 2.dp)
+                        .shadow(
+                            elevation = 8.dp,
+                            shape = RoundedCornerShape(22.dp),
+                            spotColor = activePrimaryColor.copy(alpha = 0.45f)
+                        )
+                        .clip(RoundedCornerShape(22.dp))
                         .border(
                             width = 1.2.dp,
                             brush = Brush.verticalGradient(
                                 colors = listOf(
-                                    Color(0xFF38BDF8).copy(alpha = if (isDarkTheme) 0.85f else 0.70f),
-                                    Color(0xFF0284C7).copy(alpha = if (isDarkTheme) 0.30f else 0.20f)
+                                    activePrimaryColor.copy(alpha = if (isDarkTheme) 0.85f else 0.75f),
+                                    activeSecondaryColor.copy(alpha = if (isDarkTheme) 0.35f else 0.20f)
                                 )
                             ),
-                            shape = RoundedCornerShape(24.dp)
+                            shape = RoundedCornerShape(22.dp)
                         )
                         .background(
                             Brush.verticalGradient(
                                 colors = listOf(
-                                    Color(0xFF38BDF8).copy(alpha = if (isDarkTheme) 0.32f else 0.22f),
-                                    Color(0xFF0284C7).copy(alpha = if (isDarkTheme) 0.16f else 0.10f)
+                                    activePrimaryColor.copy(alpha = if (isDarkTheme) 0.30f else 0.22f),
+                                    activeSecondaryColor.copy(alpha = if (isDarkTheme) 0.14f else 0.08f)
                                 )
                             )
                         )
                 )
 
-                // 2. Sekme Butonları ve İçerikleri (Kayan kapsülün üstünde)
+                // 2. Sekme Butonları (Her biri kendi özel renk kimliğiyle parlar)
                 Row(
                     modifier = Modifier.fillMaxSize(),
                     horizontalArrangement = Arrangement.SpaceEvenly,
@@ -206,21 +205,22 @@ fun LiquidGlassFloatingDock(
                 ) {
                     visibleTabs.forEach { tab ->
                         val isSelected = selectedTab == tab
+                        val tabColor = getDockTabColor(tab)
 
                         // Aktif sekme için zıplama/büyüme yaylanması (Pop animation)
                         val iconScale by animateFloatAsState(
                             targetValue = if (isSelected) 1.20f else 1.0f,
                             animationSpec = spring(
-                                dampingRatio = 0.55f, // Canlı zıplama
+                                dampingRatio = 0.55f,
                                 stiffness = Spring.StiffnessMedium
                             ),
                             label = "iconScale_${tab.name}"
                         )
 
-                        // Renk geçişleri
+                        // Renk geçişleri: Seçili ise butonun kendi canlı rengi, seçili değilse şık nötr slate tonu
                         val iconColor by animateColorAsState(
                             targetValue = when {
-                                isSelected -> Color(0xFF38BDF8) // Canlı Elektrik Mavisi
+                                isSelected -> tabColor
                                 isDarkTheme -> Color(0xFF94A3B8)
                                 else -> Color(0xFF64748B)
                             },
@@ -230,7 +230,7 @@ fun LiquidGlassFloatingDock(
 
                         val textColor by animateColorAsState(
                             targetValue = when {
-                                isSelected -> if (isDarkTheme) Color.White else Color(0xFF0284C7)
+                                isSelected -> if (isDarkTheme) Color.White else tabColor
                                 isDarkTheme -> Color(0xFF94A3B8)
                                 else -> Color(0xFF64748B)
                             },
@@ -242,10 +242,10 @@ fun LiquidGlassFloatingDock(
                             modifier = Modifier
                                 .weight(1f)
                                 .fillMaxHeight()
-                                .clip(RoundedCornerShape(24.dp))
+                                .clip(RoundedCornerShape(22.dp))
                                 .clickable(
                                     interactionSource = remember { MutableInteractionSource() },
-                                    indication = ripple(bounded = true, color = Color(0xFF38BDF8)),
+                                    indication = ripple(bounded = true, color = tabColor),
                                     onClick = {
                                         if (!isSelected) {
                                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -282,6 +282,31 @@ fun LiquidGlassFloatingDock(
                 }
             }
         }
+    }
+}
+
+/**
+ * Her buton için kendine özel canlı renk kimliği
+ */
+fun getDockTabColor(tab: MainNavigationTab): Color {
+    return when (tab) {
+        MainNavigationTab.CANLI_TV -> Color(0xFF38BDF8) // Canlı Elektrik Mavisi (Cyan)
+        MainNavigationTab.HABER -> Color(0xFFFB7185)   // Canlı Mercan Kırmızısı (Coral Crimson)
+        MainNavigationTab.COCUK -> Color(0xFFFBBF24)   // Sıcak Güneş Sarısı / Marigold Amber
+        MainNavigationTab.SPOR -> Color(0xFF4ADE80)    // Dinamik Çim / Stadyum Yeşili (Emerald)
+        MainNavigationTab.RADYO -> Color(0xFFC084FC)   // Kozmik Neon Mor / Menekşe (Violet)
+        MainNavigationTab.FAVORILER -> Color(0xFFF43F5E) // Kalp Kırmızısı
+    }
+}
+
+fun getDockTabDarkColor(tab: MainNavigationTab): Color {
+    return when (tab) {
+        MainNavigationTab.CANLI_TV -> Color(0xFF0284C7)
+        MainNavigationTab.HABER -> Color(0xFFE11D48)
+        MainNavigationTab.COCUK -> Color(0xFFD97706)
+        MainNavigationTab.SPOR -> Color(0xFF16A34A)
+        MainNavigationTab.RADYO -> Color(0xFF9333EA)
+        MainNavigationTab.FAVORILER -> Color(0xFFBE123C)
     }
 }
 
