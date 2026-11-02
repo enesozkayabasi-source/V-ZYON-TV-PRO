@@ -139,14 +139,15 @@ fun SettingsDialog(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Surface(
                             shape = CircleShape,
-                            color = NeonCyan.copy(alpha = 0.15f),
+                            color = Color(0xFFA855F7).copy(alpha = 0.16f),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFA855F7).copy(alpha = 0.4f)),
                             modifier = Modifier.size(38.dp)
                         ) {
                             Box(contentAlignment = Alignment.Center) {
                                 Icon(
                                     imageVector = Icons.Default.Settings,
                                     contentDescription = null,
-                                    tint = NeonCyan,
+                                    tint = Color(0xFFA855F7),
                                     modifier = Modifier.size(20.dp)
                                 )
                             }
@@ -765,10 +766,11 @@ fun SettingsDialog(
                             }
 
                             // GitHub Sayfamıza Yönlendirme Butonu
+                            val ghButtonColor = Color(0xFF818CF8) // Şık İndigo / Mor
                             Button(
                                 onClick = { onOpenUpdateLink(githubPageUrl) },
-                                colors = ButtonDefaults.buttonColors(containerColor = NeonCyan.copy(alpha = 0.2f)),
-                                border = androidx.compose.foundation.BorderStroke(1.2.dp, NeonCyan),
+                                colors = ButtonDefaults.buttonColors(containerColor = ghButtonColor.copy(alpha = 0.2f)),
+                                border = androidx.compose.foundation.BorderStroke(1.2.dp, ghButtonColor),
                                 shape = RoundedCornerShape(8.dp),
                                 modifier = Modifier
                                     .weight(1f)
@@ -777,13 +779,13 @@ fun SettingsDialog(
                                 Icon(
                                     imageVector = Icons.Default.OpenInBrowser,
                                     contentDescription = null,
-                                    tint = NeonCyan,
+                                    tint = ghButtonColor,
                                     modifier = Modifier.size(16.dp)
                                 )
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Text(
                                     text = "GitHub Sayfası",
-                                    color = NeonCyan,
+                                    color = ghButtonColor,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 11.sp
                                 )

@@ -108,23 +108,23 @@ fun SplashScreen(
 
     // Açılış sekansı
     LaunchedEffect(Unit) {
-        entranceAlpha.animateTo(1f, animationSpec = tween(240, easing = FastOutSlowInEasing))
+        entranceAlpha.animateTo(1f, animationSpec = tween(350, easing = FastOutSlowInEasing))
         entranceScale.animateTo(
             targetValue = 1f,
-            animationSpec = spring(dampingRatio = 0.68f, stiffness = 450f)
+            animationSpec = spring(dampingRatio = 0.65f, stiffness = 380f)
         )
 
         progress = 0.35f
         statusText = "Türksat & Canlı Yayınlar Bağlanıyor..."
-        delay(250)
+        delay(400)
 
-        progress = 0.85f
+        progress = 0.80f
         statusText = "Yüksek Kalite Akış Hazırlanıyor..."
-        delay(300)
+        delay(450)
 
         progress = 1.0f
         statusText = "Hazır! Keyifli Seyirler..."
-        delay(200)
+        delay(350)
 
         onFinished()
     }

@@ -242,7 +242,7 @@ fun MediaCard(
                                 else -> Icons.Default.LiveTv
                             },
                             contentDescription = null,
-                            tint = primaryColor.copy(alpha = 0.6f),
+                            tint = categoryColor.copy(alpha = 0.85f),
                             modifier = Modifier.size(46.dp)
                         )
                     }
@@ -454,8 +454,8 @@ fun MediaCard(
                 Text(
                     text = item.baslik,
                     style = MaterialTheme.typography.titleSmall,
-                    color = if (isFocused) primaryColor else MaterialTheme.colorScheme.onSurface,
-                    fontWeight = FontWeight.SemiBold,
+                    color = if (isFocused) categoryColor else MaterialTheme.colorScheme.onSurface,
+                    fontWeight = FontWeight.Bold,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )

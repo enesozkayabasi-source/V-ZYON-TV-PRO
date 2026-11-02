@@ -468,11 +468,22 @@ fun HomeScreen(
                     )
                 }
 
-                // Main Content Column
+                // Main Content Column (Dinamik Kategori Işıltısı ile Atmosferik Arka Plan)
+                val activeTabGlowColor = com.example.ui.components.getDockTabColor(selectedTab)
                 Column(
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxHeight()
+                        .background(
+                            Brush.verticalGradient(
+                                colors = listOf(
+                                    activeTabGlowColor.copy(alpha = 0.12f),
+                                    Color.Transparent
+                                ),
+                                startY = 0f,
+                                endY = 500f
+                            )
+                        )
                 ) {
                     // Top App Header & Real-Time Search Bar
                     TopBarHeader(
@@ -614,6 +625,7 @@ fun HomeScreen(
 
                     // Categories horizontal filter chips
                     if (availableCategories.size > 1) {
+                        val activeCategoryColor = com.example.ui.components.getDockTabColor(selectedTab)
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -630,15 +642,16 @@ fun HomeScreen(
                                         Text(
                                             text = category,
                                             fontSize = 11.sp,
-                                            fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.Normal
+                                            fontWeight = if (isSelected) FontWeight.Black else FontWeight.Normal
                                         )
                                     },
                                     colors = FilterChipDefaults.filterChipColors(
-                                        selectedContainerColor = MaterialTheme.colorScheme.primary,
-                                        selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
+                                        selectedContainerColor = activeCategoryColor,
+                                        selectedLabelColor = Color.Black,
                                         containerColor = MaterialTheme.colorScheme.surfaceVariant,
                                         labelColor = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
+                                    ),
+                                    border = if (isSelected) BorderStroke(1.2.dp, activeCategoryColor) else null
                                 )
                             }
                         }
@@ -984,6 +997,7 @@ private fun TvNavigationSidebar(
     ) {
         tvTabs.forEach { tab ->
             val isSelected = selectedTab == tab
+            val tabColor = com.example.ui.components.getDockTabColor(tab)
             NavigationRailItem(
                 selected = isSelected,
                 onClick = { onSelectTab(tab) },
@@ -991,6 +1005,7 @@ private fun TvNavigationSidebar(
                     Icon(
                         imageVector = getTabIcon(tab),
                         contentDescription = tab.name,
+                        tint = if (isSelected) tabColor else tabColor.copy(alpha = 0.70f),
                         modifier = Modifier.size(20.dp)
                     )
                 },
@@ -998,16 +1013,17 @@ private fun TvNavigationSidebar(
                     Text(
                         text = AppStrings.get(tab.key, currentLanguage),
                         fontSize = 9.sp,
-                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                        fontWeight = if (isSelected) FontWeight.Black else FontWeight.Normal,
+                        color = if (isSelected) tabColor else tabColor.copy(alpha = 0.80f),
                         maxLines = 1
                     )
                 },
                 colors = NavigationRailItemDefaults.colors(
-                    indicatorColor = MaterialTheme.colorScheme.primaryContainer,
-                    selectedIconColor = MaterialTheme.colorScheme.primary,
-                    selectedTextColor = MaterialTheme.colorScheme.primary,
-                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    indicatorColor = tabColor.copy(alpha = 0.22f),
+                    selectedIconColor = tabColor,
+                    selectedTextColor = tabColor,
+                    unselectedIconColor = tabColor.copy(alpha = 0.70f),
+                    unselectedTextColor = tabColor.copy(alpha = 0.80f)
                 )
             )
         }
@@ -1019,7 +1035,7 @@ private fun TvNavigationSidebar(
             Icon(
                 imageVector = Icons.Default.Settings,
                 contentDescription = "Genel Ayarlar",
-                tint = NeonCyan,
+                tint = Color(0xFFA855F7),
                 modifier = Modifier.size(22.dp)
             )
         }
@@ -1177,14 +1193,14 @@ private fun TopBarHeader(
                         if (isRefreshing) {
                             CircularProgressIndicator(
                                 strokeWidth = 2.dp,
-                                color = MaterialTheme.colorScheme.primary,
+                                color = currentTabColor,
                                 modifier = Modifier.size(18.dp)
                             )
                         } else {
                             Icon(
                                 imageVector = Icons.Default.Refresh,
                                 contentDescription = "Yenile",
-                                tint = MaterialTheme.colorScheme.primary,
+                                tint = currentTabColor,
                                 modifier = Modifier.size(20.dp)
                             )
                         }
@@ -1218,12 +1234,13 @@ private fun TopBarHeader(
                 }
 
                 // Veri Tasarrufu Hızlı Butonu (%85 Daha Az İnternet)
+                val dataSaverColor = Color(0xFF10B981) // Canlı Zümrüt Yeşili
                 Surface(
                     shape = RoundedCornerShape(10.dp),
-                    color = if (isDataSaverEnabled) NeonCyan.copy(alpha = 0.22f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
+                    color = if (isDataSaverEnabled) dataSaverColor.copy(alpha = 0.22f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
                     border = BorderStroke(
                         1.2.dp,
-                        if (isDataSaverEnabled) NeonCyan else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
+                        if (isDataSaverEnabled) dataSaverColor else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
                     ),
                     modifier = Modifier
                         .size(40.dp)
@@ -1238,7 +1255,7 @@ private fun TopBarHeader(
                         Icon(
                             imageVector = Icons.Default.Download,
                             contentDescription = if (isDataSaverEnabled) "Veri Tasarrufu Açık" else "Veri Tasarrufu Kapalı",
-                            tint = if (isDataSaverEnabled) NeonCyan else MaterialTheme.colorScheme.onSurfaceVariant,
+                            tint = if (isDataSaverEnabled) dataSaverColor else MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(20.dp)
                         )
                     }
@@ -1281,8 +1298,8 @@ private fun TopBarHeader(
                 // Genel Ayarlar Butonu (Samsung S25 FE ve tüm ekranlarda belirgin, 44dp dokunma hedefli, asla nokta olmaz)
                 Surface(
                     shape = RoundedCornerShape(10.dp),
-                    color = NeonCyan.copy(alpha = 0.18f),
-                    border = BorderStroke(1.4.dp, NeonCyan),
+                    color = currentTabColor.copy(alpha = 0.18f),
+                    border = BorderStroke(1.4.dp, currentTabColor),
                     shadowElevation = 3.dp,
                     modifier = Modifier
                         .size(42.dp)
@@ -1297,7 +1314,7 @@ private fun TopBarHeader(
                         Icon(
                             imageVector = Icons.Default.Settings,
                             contentDescription = "Genel Ayarlar",
-                            tint = NeonCyan,
+                            tint = currentTabColor,
                             modifier = Modifier.size(23.dp)
                         )
                     }

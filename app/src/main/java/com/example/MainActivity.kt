@@ -41,7 +41,14 @@ class MainActivity : ComponentActivity() {
                 ) {
                     AnimatedContent(
                         targetState = showSplash,
-                        transitionSpec = { fadeIn() togetherWith fadeOut() },
+                        transitionSpec = {
+                            (androidx.compose.animation.fadeIn(animationSpec = androidx.compose.animation.core.tween(500, easing = androidx.compose.animation.core.FastOutSlowInEasing)) +
+                             androidx.compose.animation.scaleIn(initialScale = 0.95f, animationSpec = androidx.compose.animation.core.tween(500, easing = androidx.compose.animation.core.FastOutSlowInEasing)))
+                            .togetherWith(
+                                androidx.compose.animation.fadeOut(animationSpec = androidx.compose.animation.core.tween(400, easing = androidx.compose.animation.core.FastOutLinearInEasing)) +
+                                androidx.compose.animation.scaleOut(targetScale = 1.05f, animationSpec = androidx.compose.animation.core.tween(400, easing = androidx.compose.animation.core.FastOutLinearInEasing))
+                            )
+                        },
                         label = "splash_transition"
                     ) { isSplashVisible ->
                         if (isSplashVisible) {

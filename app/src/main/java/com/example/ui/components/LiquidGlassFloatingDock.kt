@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChildCare
@@ -132,7 +133,7 @@ fun LiquidGlassFloatingDock(
             .padding(horizontal = 16.dp, vertical = 8.dp),
         contentAlignment = Alignment.Center
     ) {
-        // Tamamen saydam, zemin rengi olmayan şık cam kapsül
+        // Tamamen saydam, zemin rengi olmayan şık kristal cam kapsül
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
@@ -140,7 +141,7 @@ fun LiquidGlassFloatingDock(
                 .clip(RoundedCornerShape(32.dp))
                 .border(border = ultraChicGlassRimBorder, shape = RoundedCornerShape(32.dp)),
             shape = RoundedCornerShape(32.dp),
-            color = if (isDarkTheme) Color(0x1A0F172A) else Color(0x33FFFFFF) // Ultra hafif yarı saydam ipeksi cam tabakası
+            color = Color.Transparent // Arka plan tamamen şeffaf
         ) {
             BoxWithConstraints(
                 modifier = Modifier
@@ -172,17 +173,17 @@ fun LiquidGlassFloatingDock(
                         .fillMaxHeight()
                         .padding(horizontal = 3.dp, vertical = 2.dp)
                         .shadow(
-                            elevation = 8.dp,
+                            elevation = 10.dp,
                             shape = RoundedCornerShape(22.dp),
-                            spotColor = activePrimaryColor.copy(alpha = 0.45f)
+                            spotColor = activePrimaryColor.copy(alpha = 0.65f)
                         )
                         .clip(RoundedCornerShape(22.dp))
                         .border(
-                            width = 1.2.dp,
+                            width = 1.4.dp,
                             brush = Brush.verticalGradient(
                                 colors = listOf(
-                                    activePrimaryColor.copy(alpha = if (isDarkTheme) 0.85f else 0.75f),
-                                    activeSecondaryColor.copy(alpha = if (isDarkTheme) 0.35f else 0.20f)
+                                    activePrimaryColor.copy(alpha = 0.95f),
+                                    activeSecondaryColor.copy(alpha = 0.35f)
                                 )
                             ),
                             shape = RoundedCornerShape(22.dp)
@@ -190,14 +191,14 @@ fun LiquidGlassFloatingDock(
                         .background(
                             Brush.verticalGradient(
                                 colors = listOf(
-                                    activePrimaryColor.copy(alpha = if (isDarkTheme) 0.30f else 0.22f),
-                                    activeSecondaryColor.copy(alpha = if (isDarkTheme) 0.14f else 0.08f)
+                                    activePrimaryColor.copy(alpha = 0.28f),
+                                    activeSecondaryColor.copy(alpha = 0.12f)
                                 )
                             )
                         )
                 )
 
-                // 2. Sekme Butonları (Her biri kendi özel renk kimliğiyle parlar)
+                // 2. Sekme Butonları (Her buton kendi özel rengiyle canlı parlar)
                 Row(
                     modifier = Modifier.fillMaxSize(),
                     horizontalArrangement = Arrangement.SpaceEvenly,
@@ -209,7 +210,7 @@ fun LiquidGlassFloatingDock(
 
                         // Aktif sekme için zıplama/büyüme yaylanması (Pop animation)
                         val iconScale by animateFloatAsState(
-                            targetValue = if (isSelected) 1.20f else 1.0f,
+                            targetValue = if (isSelected) 1.22f else 1.0f,
                             animationSpec = spring(
                                 dampingRatio = 0.55f,
                                 stiffness = Spring.StiffnessMedium
@@ -217,24 +218,16 @@ fun LiquidGlassFloatingDock(
                             label = "iconScale_${tab.name}"
                         )
 
-                        // Renk geçişleri: Seçili ise butonun kendi canlı rengi, seçili değilse şık nötr slate tonu
+                        // Her butonun KENDİNE ÖZEL CANLI RENGİ (Seçilmemişken de rengini korur, seçilince en parlak hale gelir)
                         val iconColor by animateColorAsState(
-                            targetValue = when {
-                                isSelected -> tabColor
-                                isDarkTheme -> Color(0xFF94A3B8)
-                                else -> Color(0xFF64748B)
-                            },
-                            animationSpec = tween(durationMillis = 180),
+                            targetValue = if (isSelected) tabColor else tabColor.copy(alpha = 0.80f),
+                            animationSpec = tween(durationMillis = 200),
                             label = "iconColor_${tab.name}"
                         )
 
                         val textColor by animateColorAsState(
-                            targetValue = when {
-                                isSelected -> if (isDarkTheme) Color.White else tabColor
-                                isDarkTheme -> Color(0xFF94A3B8)
-                                else -> Color(0xFF64748B)
-                            },
-                            animationSpec = tween(durationMillis = 180),
+                            targetValue = if (isSelected) Color.White else tabColor.copy(alpha = 0.90f),
+                            animationSpec = tween(durationMillis = 200),
                             label = "textColor_${tab.name}"
                         )
 
@@ -268,14 +261,23 @@ fun LiquidGlassFloatingDock(
                                         .size(20.dp)
                                         .scale(iconScale)
                                 )
-                                Spacer(modifier = Modifier.height(3.dp))
+                                Spacer(modifier = Modifier.height(2.dp))
                                 Text(
                                     text = AppStrings.get(tab.key, currentLanguage),
                                     fontSize = 10.sp,
-                                    fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.Medium,
+                                    fontWeight = if (isSelected) FontWeight.Black else FontWeight.Bold,
                                     color = textColor,
                                     maxLines = 1
                                 )
+                                if (isSelected) {
+                                    Spacer(modifier = Modifier.height(2.dp))
+                                    Box(
+                                        modifier = Modifier
+                                            .size(4.dp)
+                                            .clip(CircleShape)
+                                            .background(tabColor)
+                                    )
+                                }
                             }
                         }
                     }
