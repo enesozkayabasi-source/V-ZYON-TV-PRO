@@ -360,9 +360,7 @@ fun HomeScreen(
                     TvNavigationSidebar(
                         selectedTab = selectedTab,
                         onSelectTab = { onTabItemClick(it) },
-                        currentLanguage = currentLanguage,
-                        onOpenSettings = { showSettingsDialog = true },
-                        onOpenAddDialog = { showAddDialog = true }
+                        currentLanguage = currentLanguage
                     )
                 }
 
@@ -969,9 +967,7 @@ private fun getTabIcon(tab: MainNavigationTab): androidx.compose.ui.graphics.vec
 private fun TvNavigationSidebar(
     selectedTab: MainNavigationTab,
     onSelectTab: (MainNavigationTab) -> Unit,
-    currentLanguage: AppLanguage,
-    onOpenSettings: () -> Unit,
-    onOpenAddDialog: () -> Unit
+    currentLanguage: AppLanguage
 ) {
     val tvTabs = listOf(
         MainNavigationTab.CANLI_TV,
@@ -982,39 +978,38 @@ private fun TvNavigationSidebar(
         MainNavigationTab.FAVORILER
     )
 
+    // Sol panel arka planı ekranın en üst piksellerine kadar kesintisiz uzanır (Siyah boşluk tamamen bütünlendi)
     Surface(
-        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f),
+        color = MaterialTheme.colorScheme.surface,
         contentColor = MaterialTheme.colorScheme.onSurface,
         modifier = Modifier
-            .width(68.dp)
+            .width(72.dp)
             .fillMaxHeight()
-            .statusBarsPadding()
-            .navigationBarsPadding()
     ) {
         Column(
             modifier = Modifier
                 .fillMaxHeight()
+                .statusBarsPadding()
+                .navigationBarsPadding()
                 .verticalScroll(rememberScrollState())
-                .padding(vertical = 4.dp, horizontal = 3.dp),
+                .padding(vertical = 10.dp, horizontal = 4.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(3.dp)
+            verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            // 1. Logo yatay ekranda tamamen kaldırıldı!
-            // Kullanıcı talebi: "yatay ekrandayken logoyu kaldır ve yataydeyken paneldeki butonların hepsini görmeyi sağla"
-            
-            // 2. Tüm Sekme Butonları (Canlı TV, Haber, Çocuk, Spor, Radyo, Favoriler)
+            // Sadece 6 ana medya sekmesi: Canlı TV, Haber, Çocuk, Spor, Radyo, Favoriler
+            // Ayarlar ve Kanal Ekle butonları panelden kaldırıldı (Üst barda yer alıyor)
             tvTabs.forEach { tab ->
                 val isSelected = selectedTab == tab
                 val tabColor = com.example.ui.components.getDockTabColor(tab)
                 
                 Surface(
                     onClick = { onSelectTab(tab) },
-                    shape = RoundedCornerShape(10.dp),
+                    shape = RoundedCornerShape(12.dp),
                     color = if (isSelected) tabColor.copy(alpha = 0.22f) else Color.Transparent,
                     border = if (isSelected) BorderStroke(1.2.dp, tabColor) else null,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(42.dp)
+                        .height(48.dp)
                         .testTag("tv_tab_${tab.key}")
                 ) {
                     Column(
@@ -1026,91 +1021,18 @@ private fun TvNavigationSidebar(
                             imageVector = getTabIcon(tab),
                             contentDescription = AppStrings.get(tab.key, currentLanguage),
                             tint = if (isSelected) tabColor else tabColor.copy(alpha = 0.70f),
-                            modifier = Modifier.size(18.dp)
+                            modifier = Modifier.size(20.dp)
                         )
-                        Spacer(modifier = Modifier.height(1.dp))
+                        Spacer(modifier = Modifier.height(2.dp))
                         Text(
                             text = AppStrings.get(tab.key, currentLanguage),
-                            fontSize = 8.sp,
+                            fontSize = 8.5.sp,
                             fontWeight = if (isSelected) FontWeight.Black else FontWeight.Normal,
                             color = if (isSelected) tabColor else tabColor.copy(alpha = 0.85f),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
                     }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(2.dp))
-            Box(
-                modifier = Modifier
-                    .width(32.dp)
-                    .height(1.dp)
-                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f))
-            )
-            Spacer(modifier = Modifier.height(2.dp))
-
-            // Genel Ayarlar Butonu (Panelde her zaman net görünür)
-            Surface(
-                onClick = onOpenSettings,
-                shape = RoundedCornerShape(10.dp),
-                color = Color(0xFFA855F7).copy(alpha = 0.15f),
-                border = BorderStroke(1.dp, Color(0xFFA855F7).copy(alpha = 0.35f)),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(38.dp)
-                    .testTag("tv_settings_button")
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center,
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Settings,
-                        contentDescription = "Genel Ayarlar",
-                        tint = Color(0xFFA855F7),
-                        modifier = Modifier.size(17.dp)
-                    )
-                    Text(
-                        text = "Ayarlar",
-                        fontSize = 8.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFFA855F7),
-                        maxLines = 1
-                    )
-                }
-            }
-
-            // Kanal Ekle Butonu (Panelde her zaman net görünür)
-            Surface(
-                onClick = onOpenAddDialog,
-                shape = RoundedCornerShape(10.dp),
-                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f)),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(38.dp)
-                    .testTag("tv_add_button")
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center,
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Kanal Ekle",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(17.dp)
-                    )
-                    Text(
-                        text = "Ekle",
-                        fontSize = 8.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1
-                    )
                 }
             }
         }
