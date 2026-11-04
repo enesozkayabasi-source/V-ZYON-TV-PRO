@@ -28,6 +28,7 @@ import androidx.compose.foundation.focusable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -35,13 +36,16 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -345,118 +349,12 @@ fun HomeScreen(
         Scaffold(
             snackbarHost = { SnackbarHost(snackbarHostState) },
             containerColor = MaterialTheme.colorScheme.background,
-            // Mobile portrait bottom navigation bar & Background Radio Mini Player
-            bottomBar = {
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    // Arka Planda Çalan Radyo Kontrol Menüsü (Mini Player)
-                    AnimatedVisibility(
-                        visible = activeRadioStation != null,
-                        enter = fadeIn() + expandVertically(),
-                        exit = fadeOut() + shrinkVertically()
-                    ) {
-                        activeRadioStation?.let { radioItem ->
-                            RadioMiniPlayerBar(
-                                station = radioItem,
-                                isPlaying = isRadioPlaying,
-                                isBuffering = isRadioBuffering,
-                                onTogglePlayPause = { viewModel.toggleRadio() },
-                                onStop = { viewModel.stopRadio() },
-                                onOpenFullPlayer = {
-                                    viewModel.playMedia(radioItem)
-                                }
-                            )
-                        }
-                    }
-
-                    // Arka Planda Güncelleme İndirme Durum Çubuğu
-                    AnimatedVisibility(
-                        visible = isDownloadingInBackground,
-                        enter = fadeIn() + expandVertically(),
-                        exit = fadeOut() + shrinkVertically()
-                    ) {
-                        Surface(
-                            onClick = { viewModel.restoreInAppUpdateDialog() },
-                            color = MaterialTheme.colorScheme.surfaceVariant,
-                            border = BorderStroke(1.dp, NeonAmber.copy(alpha = 0.5f)),
-                            shape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .testTag("bar_background_update_status")
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 14.dp, vertical = 8.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Box(
-                                    contentAlignment = Alignment.Center,
-                                    modifier = Modifier.size(32.dp)
-                                ) {
-                                    CircularProgressIndicator(
-                                        progress = { inAppUpdateProgress },
-                                        color = NeonAmber,
-                                        strokeWidth = 3.dp,
-                                        modifier = Modifier.size(30.dp)
-                                    )
-                                    Text(
-                                        text = "${(inAppUpdateProgress * 100).toInt()}%",
-                                        fontSize = 9.sp,
-                                        fontWeight = FontWeight.ExtraBold,
-                                        color = NeonAmber
-                                    )
-                                }
-                                Spacer(modifier = Modifier.width(10.dp))
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(
-                                        text = "VİZYON TV $targetReleaseVersion Arka Planda İndiriliyor",
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 11.sp,
-                                        color = MaterialTheme.colorScheme.onSurface
-                                    )
-                                    val downloadedMb = "%.1f".format(inAppDownloadedBytes / (1024f * 1024f))
-                                    val totalMb = if (inAppTotalBytes > 0) "%.1f MB".format(inAppTotalBytes / (1024f * 1024f)) else "Bilinmiyor"
-                                    Text(
-                                        text = "$downloadedMb MB / $totalMb • Genişletmek için dokunun",
-                                        fontSize = 10.sp,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Button(
-                                    onClick = { viewModel.restoreInAppUpdateDialog() },
-                                    colors = ButtonDefaults.buttonColors(containerColor = NeonAmber),
-                                    shape = RoundedCornerShape(8.dp),
-                                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
-                                    modifier = Modifier.height(28.dp)
-                                ) {
-                                    Text(
-                                        text = "Aç",
-                                        color = Color.Black,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 11.sp
-                                    )
-                                }
-                            }
-                        }
-                    }
-
-                    if (!isTvLayout) {
-                        LiquidGlassFloatingDock(
-                            selectedTab = selectedTab,
-                            onTabSelected = { onTabItemClick(it) },
-                            currentLanguage = currentLanguage,
-                            isDarkTheme = themeMode != com.example.ui.theme.AppThemeMode.LIGHT
-                        )
-                    }
-                }
-            }
-        ) { innerPadding ->
-            Row(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-            ) {
+            contentWindowInsets = WindowInsets(0, 0, 0, 0)
+        ) { _ ->
+            Box(modifier = Modifier.fillMaxSize()) {
+                Row(
+                    modifier = Modifier.fillMaxSize()
+                ) {
                 // TV Navigation Rail (Left Sidebar in TV Mode)
                 if (isTvLayout) {
                     TvNavigationSidebar(
@@ -730,7 +628,12 @@ fun HomeScreen(
                                 } else {
                                     if (screenWidth > 500.dp) GridCells.Fixed(3) else GridCells.Fixed(2)
                                 },
-                                contentPadding = PaddingValues(horizontal = if (isTvLayout) 18.dp else 10.dp, vertical = 8.dp),
+                                contentPadding = PaddingValues(
+                                    start = if (isTvLayout) 18.dp else 10.dp,
+                                    end = if (isTvLayout) 18.dp else 10.dp,
+                                    top = 8.dp,
+                                    bottom = if (!isTvLayout) 96.dp else 16.dp
+                                ),
                                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                                 verticalArrangement = Arrangement.spacedBy(10.dp),
                                 modifier = Modifier
@@ -817,8 +720,119 @@ fun HomeScreen(
                     }
                 }
             }
+
+            // 2. Yüzen Sıvı Cam Panel & Arka Plan Radyo Mini Player (Kanalların üzerinde yüzen kristal ada)
+            Column(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+            ) {
+                // Arka Planda Çalan Radyo Kontrol Menüsü (Mini Player)
+                AnimatedVisibility(
+                    visible = activeRadioStation != null,
+                    enter = fadeIn() + expandVertically(),
+                    exit = fadeOut() + shrinkVertically()
+                ) {
+                    activeRadioStation?.let { radioItem ->
+                        RadioMiniPlayerBar(
+                            station = radioItem,
+                            isPlaying = isRadioPlaying,
+                            isBuffering = isRadioBuffering,
+                            onTogglePlayPause = { viewModel.toggleRadio() },
+                            onStop = { viewModel.stopRadio() },
+                            onOpenFullPlayer = {
+                                viewModel.playMedia(radioItem)
+                            }
+                        )
+                    }
+                }
+
+                // Arka Planda Güncelleme İndirme Durum Çubuğu
+                AnimatedVisibility(
+                    visible = isDownloadingInBackground,
+                    enter = fadeIn() + expandVertically(),
+                    exit = fadeOut() + shrinkVertically()
+                ) {
+                    Surface(
+                        onClick = { viewModel.restoreInAppUpdateDialog() },
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        border = BorderStroke(1.dp, NeonAmber.copy(alpha = 0.5f)),
+                        shape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag("bar_background_update_status")
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 14.dp, vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier.size(32.dp)
+                            ) {
+                                CircularProgressIndicator(
+                                    progress = { inAppUpdateProgress },
+                                    color = NeonAmber,
+                                    strokeWidth = 3.dp,
+                                    modifier = Modifier.size(30.dp)
+                                )
+                                Text(
+                                    text = "${(inAppUpdateProgress * 100).toInt()}%",
+                                    fontSize = 9.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = NeonAmber
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = "VİZYON TV $targetReleaseVersion Arka Planda İndiriliyor",
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 11.sp,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                val downloadedMb = "%.1f".format(inAppDownloadedBytes / (1024f * 1024f))
+                                val totalMb = if (inAppTotalBytes > 0) "%.1f MB".format(inAppTotalBytes / (1024f * 1024f)) else "Bilinmiyor"
+                                Text(
+                                    text = "$downloadedMb MB / $totalMb • Genişletmek için dokunun",
+                                    fontSize = 10.sp,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Button(
+                                onClick = { viewModel.restoreInAppUpdateDialog() },
+                                colors = ButtonDefaults.buttonColors(containerColor = NeonAmber),
+                                shape = RoundedCornerShape(8.dp),
+                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                                modifier = Modifier.height(28.dp)
+                            ) {
+                                Text(
+                                    text = "Aç",
+                                    color = Color.Black,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 11.sp
+                                )
+                            }
+                        }
+                    }
+                }
+
+                // Dikey modda yüzen kristal cam ada (Arka planı şeffaf, kanallar altından akar)
+                if (!isTvLayout) {
+                    LiquidGlassFloatingDock(
+                        selectedTab = selectedTab,
+                        onTabSelected = { onTabItemClick(it) },
+                        currentLanguage = currentLanguage,
+                        isDarkTheme = themeMode != com.example.ui.theme.AppThemeMode.LIGHT
+                    )
+                }
+            }
         }
     }
+}
 
     // General Settings Dialog
     if (showSettingsDialog) {
@@ -964,93 +978,142 @@ private fun TvNavigationSidebar(
         MainNavigationTab.HABER,
         MainNavigationTab.COCUK,
         MainNavigationTab.SPOR,
-        MainNavigationTab.RADYO
+        MainNavigationTab.RADYO,
+        MainNavigationTab.FAVORILER
     )
 
-    NavigationRail(
-        containerColor = MaterialTheme.colorScheme.surface,
+    Surface(
+        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f),
         contentColor = MaterialTheme.colorScheme.onSurface,
-        modifier = Modifier.width(68.dp),
-        header = {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.padding(top = 12.dp, bottom = 8.dp)
-            ) {
+        modifier = Modifier
+            .width(68.dp)
+            .fillMaxHeight()
+            .statusBarsPadding()
+            .navigationBarsPadding()
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxHeight()
+                .verticalScroll(rememberScrollState())
+                .padding(vertical = 4.dp, horizontal = 3.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(3.dp)
+        ) {
+            // 1. Logo yatay ekranda tamamen kaldırıldı!
+            // Kullanıcı talebi: "yatay ekrandayken logoyu kaldır ve yataydeyken paneldeki butonların hepsini görmeyi sağla"
+            
+            // 2. Tüm Sekme Butonları (Canlı TV, Haber, Çocuk, Spor, Radyo, Favoriler)
+            tvTabs.forEach { tab ->
+                val isSelected = selectedTab == tab
+                val tabColor = com.example.ui.components.getDockTabColor(tab)
+                
                 Surface(
-                    shape = RoundedCornerShape(12.dp),
-                    color = Color(0xFF0F1523),
-                    border = BorderStroke(1.5.dp, Brush.linearGradient(listOf(Color(0xFF38BDF8), Color(0xFF00E5FF)))),
-                    shadowElevation = 8.dp,
+                    onClick = { onSelectTab(tab) },
+                    shape = RoundedCornerShape(10.dp),
+                    color = if (isSelected) tabColor.copy(alpha = 0.22f) else Color.Transparent,
+                    border = if (isSelected) BorderStroke(1.2.dp, tabColor) else null,
                     modifier = Modifier
-                        .size(42.dp)
-                        .clip(RoundedCornerShape(12.dp))
+                        .fillMaxWidth()
+                        .height(42.dp)
+                        .testTag("tv_tab_${tab.key}")
                 ) {
-                    androidx.compose.foundation.Image(
-                        painter = androidx.compose.ui.res.painterResource(id = com.example.R.drawable.vizyontv_blue_icon),
-                        contentDescription = "VİZYON TV Logo",
-                        contentScale = ContentScale.Crop,
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center,
                         modifier = Modifier.fillMaxSize()
+                    ) {
+                        Icon(
+                            imageVector = getTabIcon(tab),
+                            contentDescription = AppStrings.get(tab.key, currentLanguage),
+                            tint = if (isSelected) tabColor else tabColor.copy(alpha = 0.70f),
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.height(1.dp))
+                        Text(
+                            text = AppStrings.get(tab.key, currentLanguage),
+                            fontSize = 8.sp,
+                            fontWeight = if (isSelected) FontWeight.Black else FontWeight.Normal,
+                            color = if (isSelected) tabColor else tabColor.copy(alpha = 0.85f),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(2.dp))
+            Box(
+                modifier = Modifier
+                    .width(32.dp)
+                    .height(1.dp)
+                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f))
+            )
+            Spacer(modifier = Modifier.height(2.dp))
+
+            // Genel Ayarlar Butonu (Panelde her zaman net görünür)
+            Surface(
+                onClick = onOpenSettings,
+                shape = RoundedCornerShape(10.dp),
+                color = Color(0xFFA855F7).copy(alpha = 0.15f),
+                border = BorderStroke(1.dp, Color(0xFFA855F7).copy(alpha = 0.35f)),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(38.dp)
+                    .testTag("tv_settings_button")
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Settings,
+                        contentDescription = "Genel Ayarlar",
+                        tint = Color(0xFFA855F7),
+                        modifier = Modifier.size(17.dp)
+                    )
+                    Text(
+                        text = "Ayarlar",
+                        fontSize = 8.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFFA855F7),
+                        maxLines = 1
+                    )
+                }
+            }
+
+            // Kanal Ekle Butonu (Panelde her zaman net görünür)
+            Surface(
+                onClick = onOpenAddDialog,
+                shape = RoundedCornerShape(10.dp),
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f)),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(38.dp)
+                    .testTag("tv_add_button")
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Kanal Ekle",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(17.dp)
+                    )
+                    Text(
+                        text = "Ekle",
+                        fontSize = 8.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1
                     )
                 }
             }
         }
-    ) {
-        tvTabs.forEach { tab ->
-            val isSelected = selectedTab == tab
-            val tabColor = com.example.ui.components.getDockTabColor(tab)
-            NavigationRailItem(
-                selected = isSelected,
-                onClick = { onSelectTab(tab) },
-                icon = {
-                    Icon(
-                        imageVector = getTabIcon(tab),
-                        contentDescription = tab.name,
-                        tint = if (isSelected) tabColor else tabColor.copy(alpha = 0.70f),
-                        modifier = Modifier.size(20.dp)
-                    )
-                },
-                label = {
-                    Text(
-                        text = AppStrings.get(tab.key, currentLanguage),
-                        fontSize = 9.sp,
-                        fontWeight = if (isSelected) FontWeight.Black else FontWeight.Normal,
-                        color = if (isSelected) tabColor else tabColor.copy(alpha = 0.80f),
-                        maxLines = 1
-                    )
-                },
-                colors = NavigationRailItemDefaults.colors(
-                    indicatorColor = tabColor.copy(alpha = 0.22f),
-                    selectedIconColor = tabColor,
-                    selectedTextColor = tabColor,
-                    unselectedIconColor = tabColor.copy(alpha = 0.70f),
-                    unselectedTextColor = tabColor.copy(alpha = 0.80f)
-                )
-            )
-        }
-
-        Spacer(modifier = Modifier.weight(1f))
-
-        // Settings Button
-        IconButton(onClick = onOpenSettings) {
-            Icon(
-                imageVector = Icons.Default.Settings,
-                contentDescription = "Genel Ayarlar",
-                tint = Color(0xFFA855F7),
-                modifier = Modifier.size(22.dp)
-            )
-        }
-
-        // Add Channel Button
-        IconButton(onClick = onOpenAddDialog) {
-            Icon(
-                imageVector = Icons.Default.Add,
-                contentDescription = "Kanal Ekle",
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(22.dp)
-            )
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
     }
 }
 
@@ -1076,6 +1139,7 @@ private fun TopBarHeader(
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .statusBarsPadding()
             .padding(horizontal = if (isLandscape) 18.dp else 12.dp, vertical = 6.dp)
     ) {
         Row(

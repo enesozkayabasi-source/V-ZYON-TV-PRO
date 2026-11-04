@@ -133,15 +133,29 @@ fun LiquidGlassFloatingDock(
             .padding(horizontal = 16.dp, vertical = 8.dp),
         contentAlignment = Alignment.Center
     ) {
-        // Tamamen saydam, zemin rengi olmayan şık kristal cam kapsül
-        Surface(
+        // Şık Siyah Dynamic Island (Yüzen Siyah Kristal Cam Ada)
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(64.dp)
                 .clip(RoundedCornerShape(32.dp))
+                .background(
+                    Brush.verticalGradient(
+                        colors = if (isDarkTheme) {
+                            listOf(
+                                Color(0xFF0D111A), // Zengin parlak siyah cam tonu
+                                Color(0xFF000000)
+                            )
+                        } else {
+                            listOf(
+                                Color(0xFF1E293B),
+                                Color(0xFF0F172A)
+                            )
+                        }
+                    )
+                )
                 .border(border = ultraChicGlassRimBorder, shape = RoundedCornerShape(32.dp)),
-            shape = RoundedCornerShape(32.dp),
-            color = Color.Transparent // Arka plan tamamen şeffaf
+            contentAlignment = Alignment.CenterStart
         ) {
             BoxWithConstraints(
                 modifier = Modifier
@@ -165,36 +179,31 @@ fun LiquidGlassFloatingDock(
                     label = "dockPillOffset"
                 )
 
-                // 1. Kayan Sıvı Cam Kapsülü (Rengi seçili butona göre değişen parlak aydınlatmalı hap)
+                // 1. Kayan Sıvı Cam Kapsülü (Kara dikdörtgen kutu silueti kaldırıldı, saf berrak ışık parlaması)
                 Box(
                     modifier = Modifier
                         .offset(x = indicatorOffset)
                         .width(tabWidth)
                         .fillMaxHeight()
                         .padding(horizontal = 3.dp, vertical = 2.dp)
-                        .shadow(
-                            elevation = 10.dp,
-                            shape = RoundedCornerShape(22.dp),
-                            spotColor = activePrimaryColor.copy(alpha = 0.65f)
-                        )
                         .clip(RoundedCornerShape(22.dp))
-                        .border(
-                            width = 1.4.dp,
-                            brush = Brush.verticalGradient(
-                                colors = listOf(
-                                    activePrimaryColor.copy(alpha = 0.95f),
-                                    activeSecondaryColor.copy(alpha = 0.35f)
-                                )
-                            ),
-                            shape = RoundedCornerShape(22.dp)
-                        )
                         .background(
                             Brush.verticalGradient(
                                 colors = listOf(
-                                    activePrimaryColor.copy(alpha = 0.28f),
-                                    activeSecondaryColor.copy(alpha = 0.12f)
+                                    activePrimaryColor.copy(alpha = 0.32f),
+                                    activeSecondaryColor.copy(alpha = 0.15f)
                                 )
                             )
+                        )
+                        .border(
+                            width = 1.3.dp,
+                            brush = Brush.verticalGradient(
+                                colors = listOf(
+                                    activePrimaryColor.copy(alpha = 0.90f),
+                                    activeSecondaryColor.copy(alpha = 0.30f)
+                                )
+                            ),
+                            shape = RoundedCornerShape(22.dp)
                         )
                 )
 

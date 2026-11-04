@@ -22,11 +22,11 @@ class UserPreferencesManager(context: Context) {
         private const val KEY_FAVORITES = "pref_favorites"
         private const val KEY_LAST_TAB = "pref_last_tab"
         private const val KEY_APP_VERSION = "pref_app_version"
-        const val LATEST_RELEASE_VERSION = "v3.0"
+        const val LATEST_RELEASE_VERSION = "v3.1"
         const val KEY_CUSTOM_GITHUB_URL = "pref_custom_github_url"
         const val KEY_CUSTOM_APK_URL = "pref_custom_apk_url"
         const val DEFAULT_GITHUB_PAGE_URL = "https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO"
-        const val DEFAULT_APK_DOWNLOAD_URL = "https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO/releases/download/v3.0/VIZYON.TV.v3.0.apk"
+        const val DEFAULT_APK_DOWNLOAD_URL = "https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO/releases/download/v3.1/VIZYON.TV.v3.1.apk"
         const val OFFICIAL_UPDATE_URL = DEFAULT_APK_DOWNLOAD_URL
     }
 

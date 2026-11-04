@@ -191,7 +191,7 @@ class StreamViewModel(
     private val _targetReleaseVersion = MutableStateFlow(latestReleaseVersion)
     val targetReleaseVersion: StateFlow<String> = _targetReleaseVersion.asStateFlow()
 
-    private val _releaseChangelog = MutableStateFlow("VİZYON TV v3.0: Kategoriye özel dinamik renkler, şeffaf Liquid Glass panel, renkli ayarlar ve optimize açılış logosu.")
+    private val _releaseChangelog = MutableStateFlow("VİZYON TV v3.1: Siyah Dynamic Island yüzen dock, yatay modda temiz ve logosuz sol panel, kamera adası tam ekran desteği ve akış optimizasyonları.")
     val releaseChangelog: StateFlow<String> = _releaseChangelog.asStateFlow()
 
     private var downloadedApkFile: File? = null
