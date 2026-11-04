@@ -1157,7 +1157,7 @@ private fun TopBarHeader(
                 Column(modifier = Modifier.weight(1f, fill = true)) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
                         Text(
                             text = "VİZYON TV",
@@ -1171,6 +1171,19 @@ private fun TopBarHeader(
                                 )
                             )
                         )
+                        Surface(
+                            shape = RoundedCornerShape(6.dp),
+                            color = currentTabColor.copy(alpha = 0.20f),
+                            border = BorderStroke(0.8.dp, currentTabColor.copy(alpha = 0.6f))
+                        ) {
+                            Text(
+                                text = "PRO v3.1",
+                                fontSize = 9.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = currentTabColor,
+                                modifier = Modifier.padding(horizontal = 5.dp, vertical = 1.5.dp)
+                            )
+                        }
                     }
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
