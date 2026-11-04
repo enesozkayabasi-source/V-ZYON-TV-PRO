@@ -38,10 +38,11 @@ Gelişmiş kumanda (D-Pad) optimizasyonu sayesinde hem **Android TV** ve **TV Bo
   - Modern telefonlardaki kamera adası / çentik (punch-hole) etrafında oluşan siyah şeritler ve kısıklıklar giderildi.
   - Android 9+ ve Android 11+ için `LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS` desteği eklendi.
   - Dinamik atmosferik degrade zemin ekranın en üst fiziksel pikseline kadar uzanırken, başlık ve butonlar kamera deliğinin altına güvenle hizalanır.
-- 🖥️ **Yatay Ekran (TV/Telefon) Panel Optimizasyonu:**
-  - Yatay modda sol panelin en üstünde yer alan ve dikey alan daraltan logo kaldırıldı.
-  - Sol navigasyon panelindeki tüm butonlar (Canlı TV, Haber, Çocuk, Spor, Radyo, Favoriler, Genel Ayarlar, Kanal Ekle) kompakt ve modern bir hiyerarşiyle yeniden dizildi.
-  - Panele `verticalScroll` ve güvenli kenar boşlukları eklenerek en kısa yatay ekranlı telefonlarda bile tüm butonların eksiksiz görünmesi ve tıklanabilmesi sağlandı.
+- 🖥️ **Yatay Ekran (TV/Telefon) Kusursuz Sol Panel:**
+  - Sol navigasyon panelinin en üstünde kalan siyah boşluk tamamen giderildi; panel zemin rengi ekranın en üst piksellerine kadar kesintisiz bütünlendi.
+  - Yatay modda dikey alanı daraltan logo kaldırıldı.
+  - Paneldeki gereksiz Ayarlar ve Kanal Ekle butonları kaldırılarak (üst bardan doğrudan erişilebilir) Canlı TV, Haber, Çocuk, Spor, Radyo ve Favoriler sekmeleri daha geniş ve ergonomik butonlarla yerleştirildi.
+  - Panele `verticalScroll` ve dengeli aralıklar eklenerek tüm ekranlarda kusursuz akış sağlandı.
 - 🎨 **Kategoriye Özel Dinamik Canlı Renk Kimliği:**
   - Haber: Canlı Mercan Kırmızı (`#FB7185`)
   - Çocuk: Neşeli Güneş Sarısı (`#FBBF24`)
