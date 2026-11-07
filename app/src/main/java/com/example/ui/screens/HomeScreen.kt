@@ -25,6 +25,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.horizontalScroll
@@ -304,7 +305,7 @@ fun HomeScreen(
 
         if (isDoubleOrReClick) {
             scope.launch {
-                gridState.animateScrollToItem(0)
+                gridState.scrollToItem(0)
             }
         } else {
             viewModel.selectTab(tab)
@@ -553,42 +554,8 @@ fun HomeScreen(
                         }
                     }
 
-                    // Content Grid (Mükemmel Akıcı Yaylanma ve Kayma Geçişi)
-                    AnimatedContent(
-                        targetState = selectedTab,
-                        transitionSpec = {
-                            val tabsOrder = listOf(
-                                MainNavigationTab.CANLI_TV,
-                                MainNavigationTab.HABER,
-                                MainNavigationTab.COCUK,
-                                MainNavigationTab.SPOR,
-                                MainNavigationTab.RADYO,
-                                MainNavigationTab.FAVORILER
-                            )
-                            val fromIndex = tabsOrder.indexOf(initialState).coerceAtLeast(0)
-                            val toIndex = tabsOrder.indexOf(targetState).coerceAtLeast(0)
-                            val isForward = toIndex >= fromIndex
-
-                            (slideInHorizontally(
-                                animationSpec = spring(dampingRatio = 0.82f, stiffness = Spring.StiffnessMediumLow),
-                                initialOffsetX = { fullWidth -> if (isForward) (fullWidth * 0.22f).toInt() else (-fullWidth * 0.22f).toInt() }
-                            ) + fadeIn(animationSpec = tween(220)) + scaleIn(
-                                initialScale = 0.96f,
-                                animationSpec = spring(dampingRatio = 0.82f, stiffness = Spring.StiffnessMediumLow)
-                            )).togetherWith(
-                                slideOutHorizontally(
-                                    animationSpec = spring(dampingRatio = 0.82f, stiffness = Spring.StiffnessMediumLow),
-                                    targetOffsetX = { fullWidth -> if (isForward) (-fullWidth * 0.22f).toInt() else (fullWidth * 0.22f).toInt() }
-                                ) + fadeOut(animationSpec = tween(160)) + scaleOut(
-                                    targetScale = 0.96f,
-                                    animationSpec = tween(160)
-                                )
-                            )
-                        },
-                        label = "tab_content_transition",
-                        modifier = Modifier.fillMaxSize()
-                    ) { targetTab ->
-                        if (filteredItems.isEmpty()) {
+                    // Content Grid (Doğrudan Ultra Akıcı & Gecikmesiz Liste - Düşük Donanımlı Cihaz ve TV'lerde Sıfır Gecikme)
+                    if (filteredItems.isEmpty()) {
                             Box(
                                 modifier = Modifier
                                     .fillMaxSize()
@@ -715,7 +682,6 @@ fun HomeScreen(
                                 }
                             }
                         }
-                    }
                 }
             }
 
@@ -1001,15 +967,25 @@ private fun TvNavigationSidebar(
             tvTabs.forEach { tab ->
                 val isSelected = selectedTab == tab
                 val tabColor = com.example.ui.components.getDockTabColor(tab)
-                
+                var isFocused by remember { mutableStateOf(false) }
+
                 Surface(
                     onClick = { onSelectTab(tab) },
                     shape = RoundedCornerShape(12.dp),
-                    color = if (isSelected) tabColor.copy(alpha = 0.22f) else Color.Transparent,
-                    border = if (isSelected) BorderStroke(1.2.dp, tabColor) else null,
+                    color = when {
+                        isFocused -> tabColor.copy(alpha = 0.35f)
+                        isSelected -> tabColor.copy(alpha = 0.22f)
+                        else -> Color.Transparent
+                    },
+                    border = when {
+                        isFocused -> BorderStroke(2.dp, tabColor)
+                        isSelected -> BorderStroke(1.2.dp, tabColor)
+                        else -> null
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(48.dp)
+                        .onFocusChanged { isFocused = it.isFocused }
                         .testTag("tv_tab_${tab.key}")
                 ) {
                     Column(
@@ -1266,7 +1242,6 @@ private fun TopBarHeader(
                         shape = RoundedCornerShape(10.dp),
                         color = NeonAmber.copy(alpha = 0.22f),
                         border = BorderStroke(1.5.dp, NeonAmber),
-                        shadowElevation = 3.dp,
                         modifier = Modifier
                             .height(42.dp)
                             .clip(RoundedCornerShape(10.dp))
@@ -1299,7 +1274,6 @@ private fun TopBarHeader(
                     shape = RoundedCornerShape(10.dp),
                     color = currentTabColor.copy(alpha = 0.18f),
                     border = BorderStroke(1.4.dp, currentTabColor),
-                    shadowElevation = 3.dp,
                     modifier = Modifier
                         .size(42.dp)
                         .clip(RoundedCornerShape(10.dp))
@@ -1402,54 +1376,62 @@ private fun HeroHighlightBanner(
     isLandscape: Boolean,
     onPlay: () -> Unit
 ) {
-    val interactionSource = remember { MutableInteractionSource() }
-    val isPressed by interactionSource.collectIsPressedAsState()
+    val context = LocalContext.current
+    val meta = remember(item.id, item.baslik, item.kategori, item.collectionType) {
+        val h = item.collectionType == MediaCollection.HABER ||
+            item.kategori.contains("haber", ignoreCase = true) ||
+            item.baslik.contains("haber", ignoreCase = true) ||
+            item.baslik.contains("ntv", ignoreCase = true)
 
-    val bannerScale by animateFloatAsState(
-        targetValue = if (isPressed) 0.97f else 1.0f,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessLow
-        ),
-        label = "hero_banner_scale"
-    )
+        val c = item.collectionType == MediaCollection.COCUK ||
+            item.kategori.contains("çocuk", ignoreCase = true) ||
+            item.kategori.contains("cocuk", ignoreCase = true) ||
+            item.baslik.contains("çocuk", ignoreCase = true) ||
+            item.baslik.contains("minika", ignoreCase = true)
 
-    val isHaber = item.collectionType == MediaCollection.HABER ||
-        item.kategori.contains("haber", ignoreCase = true) ||
-        item.baslik.contains("haber", ignoreCase = true) ||
-        item.baslik.contains("ntv", ignoreCase = true)
+        val s = !h && !c && (item.kategori.equals("Spor", ignoreCase = true) || item.baslik.contains("spor", ignoreCase = true))
+        val r = item.collectionType == MediaCollection.RADYO || item.kategori.contains("radyo", ignoreCase = true)
 
-    val isCocuk = item.collectionType == MediaCollection.COCUK ||
-        item.kategori.contains("çocuk", ignoreCase = true) ||
-        item.kategori.contains("cocuk", ignoreCase = true) ||
-        item.baslik.contains("çocuk", ignoreCase = true) ||
-        item.baslik.contains("minika", ignoreCase = true)
+        val catCol = when {
+            h -> Color(0xFFFB7185) // Canlı Mercan Kırmızı
+            c -> Color(0xFFFBBF24) // Sıcak Güneş Sarısı / Amber
+            s -> Color(0xFF4ADE80) // Stadyum Çim Yeşili
+            r -> Color(0xFFC084FC) // Kozmik Neon Mor
+            else -> Color(0xFF38BDF8)    // Elektrik Cyan Mavi
+        }
 
-    val isSport = !isHaber && !isCocuk && (item.kategori.equals("Spor", ignoreCase = true) || item.baslik.contains("spor", ignoreCase = true))
-
-    val isRadio = item.collectionType == MediaCollection.RADYO || item.kategori.contains("radyo", ignoreCase = true)
-
-    val heroCategoryColor = when {
-        isHaber -> Color(0xFFFB7185) // Canlı Mercan Kırmızı
-        isCocuk -> Color(0xFFFBBF24) // Sıcak Güneş Sarısı / Amber
-        isSport -> Color(0xFF4ADE80) // Stadyum Çim Yeşili
-        isRadio -> Color(0xFFC084FC) // Kozmik Neon Mor
-        else -> Color(0xFF38BDF8)    // Elektrik Cyan Mavi
+        val catTxt = when {
+            h -> "Haber & Gündem"
+            c -> "Çocuk & Çizgi Dizi"
+            s -> "Spor & Canlı Maç"
+            r -> "Canlı Radyo & Müzik"
+            else -> item.kategori.replace("Film", "Yayın", ignoreCase = true)
+        }
+        Triple(h to c, s to r, catCol to catTxt)
     }
 
-    val heroCategoryText = when {
-        isHaber -> "Haber & Gündem"
-        isCocuk -> "Çocuk & Çizgi Dizi"
-        isSport -> "Spor & Canlı Maç"
-        isRadio -> "Canlı Radyo & Müzik"
-        else -> item.kategori.replace("Film", "Yayın", ignoreCase = true)
+    val (isHaber, isCocuk) = meta.first
+    val (isSport, isRadio) = meta.second
+    val (heroCategoryColor, heroCategoryText) = meta.third
+    val interactionSource = remember { MutableInteractionSource() }
+
+    val heroImageRequest = remember(item.resim_url) {
+        if (item.resim_url.isBlank()) null
+        else {
+            ImageRequest.Builder(context)
+                .data(item.resim_url)
+                .crossfade(false)
+                .size(800, 450)
+                .memoryCacheKey(item.resim_url)
+                .diskCacheKey(item.resim_url)
+                .build()
+        }
     }
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .aspectRatio(if (isLandscape) 3.0f else 2.3f)
-            .scale(bannerScale)
             .clickable(
                 interactionSource = interactionSource,
                 indication = ripple(bounded = true, color = heroCategoryColor),
@@ -1463,18 +1445,12 @@ private fun HeroHighlightBanner(
             ),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
-            if (item.resim_url.isNotBlank()) {
+            if (heroImageRequest != null) {
                 AsyncImage(
-                    model = ImageRequest.Builder(LocalContext.current)
-                        .data(item.resim_url)
-                        .crossfade(false)
-                        .size(800, 450)
-                        .memoryCacheKey(item.resim_url)
-                        .diskCacheKey(item.resim_url)
-                        .build(),
+                    model = heroImageRequest,
                     contentDescription = item.baslik,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize()

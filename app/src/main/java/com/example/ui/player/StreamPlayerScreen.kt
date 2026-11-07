@@ -49,6 +49,10 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -174,9 +178,28 @@ fun StreamPlayerScreen(
     var showControls by remember { mutableStateOf(true) }
     var showChannelDrawer by remember { mutableStateOf(false) }
     var drawerSearchQuery by remember { mutableStateOf("") }
+    val coroutineScope = rememberCoroutineScope()
+    val drawerListState = rememberLazyListState()
+    var focusedDrawerIndex by remember { mutableIntStateOf(0) }
     var currentPosition by remember { mutableLongStateOf(0L) }
     var duration by remember { mutableLongStateOf(0L) }
     var resizeModeIndex by remember { mutableIntStateOf(0) }
+
+    // Kanal paneli açıldığında seçili kanalı otomatik ortala ve odaklan
+    LaunchedEffect(showChannelDrawer) {
+        if (showChannelDrawer) {
+            val displayed = if (drawerSearchQuery.isBlank()) channelList
+            else channelList.filter {
+                it.baslik.contains(drawerSearchQuery, ignoreCase = true) ||
+                it.kategori.contains(drawerSearchQuery, ignoreCase = true)
+            }
+            val currentIdx = displayed.indexOfFirst { it.id == item.id }
+            focusedDrawerIndex = if (currentIdx >= 0) currentIdx else 0
+            if (focusedDrawerIndex >= 0 && displayed.isNotEmpty()) {
+                drawerListState.scrollToItem((focusedDrawerIndex - 2).coerceAtLeast(0))
+            }
+        }
+    }
 
     // Çoklu Sunucu Yönetimi: Kanala ait tüm sunucular (birincil + yedekler)
     val serverList = remember(item) {
@@ -508,10 +531,9 @@ fun StreamPlayerScreen(
 
                     when (event.key) {
                         Key.DirectionCenter, Key.Enter, Key.NumPadEnter -> {
-                            // OK tuşuna basıldığında: listedeki aktif kanalı seç ve çekmeceyi kapat
-                            val currentIdx = displayedChannels.indexOfFirst { it.id == item.id }
-                            if (currentIdx >= 0) {
-                                onSelectChannel(displayedChannels[currentIdx])
+                            // OK tuşuna basıldığında: YALNIZCA seçilen kanalı oynat ve çekmeceyi kapat
+                            if (displayedChannels.isNotEmpty() && focusedDrawerIndex in displayedChannels.indices) {
+                                onSelectChannel(displayedChannels[focusedDrawerIndex])
                             } else if (displayedChannels.isNotEmpty()) {
                                 onSelectChannel(displayedChannels[0])
                             }
@@ -519,29 +541,34 @@ fun StreamPlayerScreen(
                             true
                         }
                         Key.DirectionUp -> {
-                            // Listede yukarı çık
-                            val currentIdx = displayedChannels.indexOfFirst { it.id == item.id }
+                            // Listede yukarı çık: ASLA KANAL DEĞİŞTİRMEZ, sadece listedeki odağı yukarı taşır
                             if (displayedChannels.isNotEmpty()) {
-                                val prevIdx = if (currentIdx > 0) currentIdx - 1 else displayedChannels.lastIndex
-                                onSelectChannel(displayedChannels[prevIdx])
+                                val prevIdx = if (focusedDrawerIndex > 0) focusedDrawerIndex - 1 else displayedChannels.lastIndex
+                                focusedDrawerIndex = prevIdx
+                                coroutineScope.launch {
+                                    drawerListState.animateScrollToItem((prevIdx - 2).coerceAtLeast(0))
+                                }
                             }
                             true
                         }
                         Key.DirectionDown -> {
-                            // Listede aşağı in
-                            val currentIdx = displayedChannels.indexOfFirst { it.id == item.id }
+                            // Listede aşağı in: ASLA KANAL DEĞİŞTİRMEZ, sadece listedeki odağı aşağı taşır
                             if (displayedChannels.isNotEmpty()) {
-                                val nextIdx = if (currentIdx >= 0 && currentIdx < displayedChannels.lastIndex) currentIdx + 1 else 0
-                                onSelectChannel(displayedChannels[nextIdx])
+                                val nextIdx = if (focusedDrawerIndex < displayedChannels.lastIndex) focusedDrawerIndex + 1 else 0
+                                focusedDrawerIndex = nextIdx
+                                coroutineScope.launch {
+                                    drawerListState.animateScrollToItem((nextIdx - 2).coerceAtLeast(0))
+                                }
                             }
                             true
                         }
                         Key.Back, Key.Escape -> {
+                            // Geri tuşuna basıldığında kanal değiştirmeden listeyi kapat
                             showChannelDrawer = false
                             true
                         }
                         Key.DirectionLeft, Key.DirectionRight -> {
-                            // Sol veya sağ basıldığında listeyi kapatıp oynatıcıya dön
+                            // Sol veya sağ basıldığında kanal değiştirmeden listeyi kapatıp oynatıcıya dön
                             showChannelDrawer = false
                             true
                         }
@@ -1127,11 +1154,13 @@ fun StreamPlayerScreen(
                         }
 
                         LazyColumn(
+                            state = drawerListState,
                             modifier = Modifier.fillMaxSize(),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            items(displayedChannels, key = { it.id }) { ch ->
+                            itemsIndexed(displayedChannels, key = { _, ch -> ch.id }) { index, ch ->
                                 val isCurrent = ch.id == item.id
+                                val isFocused = index == focusedDrawerIndex
                                 val chLogo = remember(ch.resim_url, ch.baslik) {
                                     if (ch.resim_url.isNotBlank() && !ch.resim_url.contains("unsplash")) ch.resim_url
                                     else com.example.service.InternetChannelService().getOfficialWebLogo(ch.baslik)
@@ -1139,14 +1168,23 @@ fun StreamPlayerScreen(
 
                                 Surface(
                                     shape = RoundedCornerShape(12.dp),
-                                    color = if (isCurrent) NeonCyan.copy(alpha = 0.15f) else Color.White.copy(alpha = 0.04f),
+                                    color = when {
+                                        isFocused -> NeonCyan.copy(alpha = 0.28f)
+                                        isCurrent -> NeonCyan.copy(alpha = 0.15f)
+                                        else -> Color.White.copy(alpha = 0.04f)
+                                    },
                                     border = BorderStroke(
-                                        width = if (isCurrent) 1.5.dp else 1.dp,
-                                        color = if (isCurrent) NeonCyan else Color.White.copy(alpha = 0.08f)
+                                        width = if (isFocused || isCurrent) 2.dp else 1.dp,
+                                        color = when {
+                                            isFocused -> NeonCyan
+                                            isCurrent -> NeonCyan.copy(alpha = 0.70f)
+                                            else -> Color.White.copy(alpha = 0.08f)
+                                        }
                                     ),
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .clickable {
+                                            focusedDrawerIndex = index
                                             onSelectChannel(ch)
                                             showChannelDrawer = false
                                         }
@@ -1186,8 +1224,8 @@ fun StreamPlayerScreen(
                                         Column(modifier = Modifier.weight(1f)) {
                                             Text(
                                                 text = ch.baslik,
-                                                color = if (isCurrent) NeonCyan else TextPrimary,
-                                                fontWeight = if (isCurrent) FontWeight.Bold else FontWeight.Medium,
+                                                color = if (isFocused) Color.White else if (isCurrent) NeonCyan else TextPrimary,
+                                                fontWeight = if (isFocused || isCurrent) FontWeight.Bold else FontWeight.Medium,
                                                 fontSize = 13.sp,
                                                 maxLines = 1,
                                                 overflow = TextOverflow.Ellipsis
@@ -1234,15 +1272,15 @@ fun StreamPlayerScreen(
                                             }
                                         }
 
-                                        if (isCurrent) {
+                                        if (isCurrent || isFocused) {
                                             Surface(
                                                 shape = CircleShape,
-                                                color = NeonCyan,
+                                                color = if (isFocused) LuxuryGoldPrimary else NeonCyan,
                                                 modifier = Modifier.size(24.dp)
                                             ) {
                                                 Box(contentAlignment = Alignment.Center) {
                                                     Icon(
-                                                        imageVector = Icons.Default.PlayArrow,
+                                                        imageVector = if (isCurrent) Icons.Default.PlayArrow else Icons.Default.Check,
                                                         contentDescription = null,
                                                         tint = Color.Black,
                                                         modifier = Modifier.size(14.dp)

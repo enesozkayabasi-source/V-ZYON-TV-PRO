@@ -91,20 +91,8 @@ fun LiquidGlassFloatingDock(
     }
 
     // Aktif sekmenin özel renk kimliği
-    val activeTabColor = getDockTabColor(selectedTab)
-    val activeTabDarkColor = getDockTabDarkColor(selectedTab)
-
-    val activePrimaryColor by animateColorAsState(
-        targetValue = activeTabColor,
-        animationSpec = tween(durationMillis = 220),
-        label = "activeDockColor"
-    )
-
-    val activeSecondaryColor by animateColorAsState(
-        targetValue = activeTabDarkColor,
-        animationSpec = tween(durationMillis = 220),
-        label = "activeDockDarkColor"
-    )
+    val activePrimaryColor = getDockTabColor(selectedTab)
+    val activeSecondaryColor = getDockTabDarkColor(selectedTab)
 
     // Ultra şık, hafif ve saydam cam kenar çizgisi (Koyu panel arka planı kaldırıldı!)
     val ultraChicGlassRimBorder = BorderStroke(
@@ -168,14 +156,11 @@ fun LiquidGlassFloatingDock(
                 val tabWidth = dockWidth / tabCount
                 val selectedIndex = visibleTabs.indexOf(selectedTab).coerceAtLeast(0)
 
-                // Apple Yaylanma Fiziği (Bouncy Spring Physics) ile Kayan Gösterge
+                // Hızlı, pürüzsüz ve sıfır gecikmeli gösterge kayması (140ms hafif tween)
                 val targetOffsetX = tabWidth * selectedIndex
                 val indicatorOffset by animateDpAsState(
                     targetValue = targetOffsetX,
-                    animationSpec = spring(
-                        dampingRatio = 0.72f, // Akıcı Apple sıvı yaylanması
-                        stiffness = Spring.StiffnessMediumLow
-                    ),
+                    animationSpec = tween(durationMillis = 140, easing = androidx.compose.animation.core.FastOutSlowInEasing),
                     label = "dockPillOffset"
                 )
 
@@ -207,7 +192,7 @@ fun LiquidGlassFloatingDock(
                         )
                 )
 
-                // 2. Sekme Butonları (Her buton kendi özel rengiyle canlı parlar)
+                // 2. Sekme Butonları (Her buton anında tepki verir, gecikmesiz çalışır)
                 Row(
                     modifier = Modifier.fillMaxSize(),
                     horizontalArrangement = Arrangement.SpaceEvenly,
@@ -217,28 +202,9 @@ fun LiquidGlassFloatingDock(
                         val isSelected = selectedTab == tab
                         val tabColor = getDockTabColor(tab)
 
-                        // Aktif sekme için zıplama/büyüme yaylanması (Pop animation)
-                        val iconScale by animateFloatAsState(
-                            targetValue = if (isSelected) 1.22f else 1.0f,
-                            animationSpec = spring(
-                                dampingRatio = 0.55f,
-                                stiffness = Spring.StiffnessMedium
-                            ),
-                            label = "iconScale_${tab.name}"
-                        )
-
-                        // Her butonun KENDİNE ÖZEL CANLI RENGİ (Seçilmemişken de rengini korur, seçilince en parlak hale gelir)
-                        val iconColor by animateColorAsState(
-                            targetValue = if (isSelected) tabColor else tabColor.copy(alpha = 0.80f),
-                            animationSpec = tween(durationMillis = 200),
-                            label = "iconColor_${tab.name}"
-                        )
-
-                        val textColor by animateColorAsState(
-                            targetValue = if (isSelected) Color.White else tabColor.copy(alpha = 0.90f),
-                            animationSpec = tween(durationMillis = 200),
-                            label = "textColor_${tab.name}"
-                        )
+                        val iconColor = if (isSelected) tabColor else tabColor.copy(alpha = 0.70f)
+                        val textColor = if (isSelected) Color.White else tabColor.copy(alpha = 0.85f)
+                        val iconScale = if (isSelected) 1.12f else 1.0f
 
                         Box(
                             modifier = Modifier
@@ -250,7 +216,6 @@ fun LiquidGlassFloatingDock(
                                     indication = ripple(bounded = true, color = tabColor),
                                     onClick = {
                                         if (!isSelected) {
-                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                             onTabSelected(tab)
                                         }
                                     }

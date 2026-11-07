@@ -72,6 +72,15 @@ import com.example.ui.theme.NeonAmber
 import com.example.ui.theme.NeonCyan
 import com.example.ui.theme.NeonRed
 
+private data class CardMeta(
+    val isHaber: Boolean,
+    val isCocuk: Boolean,
+    val isRadio: Boolean,
+    val isSport: Boolean,
+    val displayCategory: String,
+    val categoryColor: Color
+)
+
 @Composable
 fun MediaCard(
     item: MediaItem,
@@ -81,68 +90,51 @@ fun MediaCard(
 ) {
     var isFocused by remember { mutableStateOf(false) }
     val interactionSource = remember { MutableInteractionSource() }
-    val isPressed by interactionSource.collectIsPressedAsState()
 
-    val targetScale = when {
-        isPressed -> 0.95f
-        isFocused -> 1.06f
-        else -> 1.0f
-    }
+    val meta = remember(item.id, item.baslik, item.kategori, item.collectionType) {
+        val h = item.collectionType == MediaCollection.HABER ||
+            item.kategori.contains("haber", ignoreCase = true) ||
+            item.baslik.contains("haber", ignoreCase = true) ||
+            item.baslik.contains("ntv", ignoreCase = true) ||
+            item.baslik.contains("bloomberg", ignoreCase = true) ||
+            item.baslik.contains("cnbc", ignoreCase = true)
 
-    val animatedScale by animateFloatAsState(
-        targetValue = targetScale,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessLow
-        ),
-        label = "media_card_scale"
-    )
+        val c = item.collectionType == MediaCollection.COCUK ||
+            item.kategori.contains("çocuk", ignoreCase = true) ||
+            item.kategori.contains("cocuk", ignoreCase = true) ||
+            item.baslik.contains("çocuk", ignoreCase = true) ||
+            item.baslik.contains("disney", ignoreCase = true) ||
+            item.baslik.contains("junior", ignoreCase = true) ||
+            item.baslik.contains("jnr", ignoreCase = true) ||
+            item.baslik.contains("minika", ignoreCase = true) ||
+            item.baslik.contains("cartoon", ignoreCase = true) ||
+            item.baslik.contains("baby", ignoreCase = true) ||
+            item.baslik.contains("zarok", ignoreCase = true) ||
+            item.baslik.contains("nickelodeon", ignoreCase = true) ||
+            item.baslik.contains("pepee", ignoreCase = true)
 
-    val cardAspectRatio = 16f / 9f
-    val isHaber = item.collectionType == MediaCollection.HABER ||
-        item.kategori.contains("haber", ignoreCase = true) ||
-        item.baslik.contains("haber", ignoreCase = true) ||
-        item.baslik.contains("ntv", ignoreCase = true) ||
-        item.baslik.contains("bloomberg", ignoreCase = true) ||
-        item.baslik.contains("cnbc", ignoreCase = true)
+        val r = item.collectionType == MediaCollection.RADYO ||
+            item.kategori.contains("radyo", ignoreCase = true) ||
+            item.baslik.contains("radyo", ignoreCase = true) ||
+            item.baslik.contains("fm", ignoreCase = true)
 
-    val isCocuk = item.collectionType == MediaCollection.COCUK ||
-        item.kategori.contains("çocuk", ignoreCase = true) ||
-        item.kategori.contains("cocuk", ignoreCase = true) ||
-        item.baslik.contains("çocuk", ignoreCase = true) ||
-        item.baslik.contains("disney", ignoreCase = true) ||
-        item.baslik.contains("junior", ignoreCase = true) ||
-        item.baslik.contains("jnr", ignoreCase = true) ||
-        item.baslik.contains("minika", ignoreCase = true) ||
-        item.baslik.contains("cartoon", ignoreCase = true) ||
-        item.baslik.contains("baby", ignoreCase = true) ||
-        item.baslik.contains("zarok", ignoreCase = true) ||
-        item.baslik.contains("nickelodeon", ignoreCase = true) ||
-        item.baslik.contains("pepee", ignoreCase = true)
+        val s = !h && !c && !r && (
+            item.collectionType == MediaCollection.SPOR ||
+            item.kategori.equals("Spor", ignoreCase = true) ||
+            item.baslik.contains("spor", ignoreCase = true) ||
+            item.baslik.contains("tjk", ignoreCase = true)
+        )
 
-    val isRadio = item.collectionType == MediaCollection.RADYO ||
-        item.kategori.contains("radyo", ignoreCase = true) ||
-        item.baslik.contains("radyo", ignoreCase = true) ||
-        item.baslik.contains("fm", ignoreCase = true)
-
-    val isSport = !isHaber && !isCocuk && !isRadio && (
-        item.collectionType == MediaCollection.SPOR ||
-        item.kategori.equals("Spor", ignoreCase = true) ||
-        item.baslik.contains("spor", ignoreCase = true) ||
-        item.baslik.contains("tjk", ignoreCase = true)
-    )
-
-    val displayCategory = remember(item.kategori, item.collectionType) {
-        when {
-            isRadio -> if (item.kategori.isBlank() || item.kategori.equals("Genel", ignoreCase = true)) "Canlı Radyo" else "Radyo • ${item.kategori}"
-            isHaber -> {
+        val dispCat = when {
+            r -> if (item.kategori.isBlank() || item.kategori.equals("Genel", ignoreCase = true)) "Canlı Radyo" else "Radyo • ${item.kategori}"
+            h -> {
                 val clean = item.kategori
                     .replace("Çizgi Film", "Gündem", ignoreCase = true)
                     .replace("Film", "Haber", ignoreCase = true)
                     .replace("Sinema", "Haber", ignoreCase = true)
                 if (clean.isBlank() || clean.equals("Genel", ignoreCase = true)) "Canlı Haber" else clean
             }
-            isCocuk -> {
+            c -> {
                 val clean = item.kategori
                     .replace("Çizgi Film", "Çizgi Dizi", ignoreCase = true)
                     .replace("Film", "Çizgi Dizi", ignoreCase = true)
@@ -151,33 +143,33 @@ fun MediaCard(
             }
             else -> item.kategori
         }
+
+        val catCol = when {
+            h -> Color(0xFFFB7185) // Canlı Mercan Kırmızı
+            c -> Color(0xFFFBBF24) // Sıcak Güneş Sarısı / Amber
+            s -> Color(0xFF4ADE80) // Stadyum Çim Yeşili
+            r -> Color(0xFFC084FC) // Kozmik Neon Mor
+            else -> Color(0xFF38BDF8)    // Elektrik Cyan Mavi (Canlı TV)
+        }
+
+        CardMeta(h, c, r, s, dispCat, catCol)
     }
 
-    val categoryColor = when {
-        isHaber -> Color(0xFFFB7185) // Canlı Mercan Kırmızı
-        isCocuk -> Color(0xFFFBBF24) // Sıcak Güneş Sarısı / Amber
-        isSport -> Color(0xFF4ADE80) // Stadyum Çim Yeşili
-        isRadio -> Color(0xFFC084FC) // Kozmik Neon Mor
-        else -> Color(0xFF38BDF8)    // Elektrik Cyan Mavi (Canlı TV)
-    }
+    val isHaber = meta.isHaber
+    val isCocuk = meta.isCocuk
+    val isRadio = meta.isRadio
+    val isSport = meta.isSport
+    val displayCategory = meta.displayCategory
+    val categoryColor = meta.categoryColor
 
-    val primaryColor = MaterialTheme.colorScheme.primary
+    val cardAspectRatio = 16f / 9f
     val cardBg = if (isFocused) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant
 
     Card(
-        modifier = modifier
-            .scale(animatedScale)
+        modifier = (if (isFocused) modifier.scale(1.04f) else modifier)
             .testTag("media_card_${item.id}")
             .onFocusChanged { isFocused = it.isFocused }
             .focusable()
-            .onKeyEvent { keyEvent ->
-                if (keyEvent.key == Key.DirectionCenter || keyEvent.key == Key.Enter) {
-                    onClick()
-                    true
-                } else {
-                    false
-                }
-            }
             .clickable(
                 interactionSource = interactionSource,
                 indication = ripple(bounded = true, color = categoryColor),
@@ -191,15 +183,31 @@ fun MediaCard(
         shape = RoundedCornerShape(14.dp),
         colors = CardDefaults.cardColors(containerColor = cardBg),
         elevation = CardDefaults.cardElevation(
-            defaultElevation = if (isFocused) 10.dp else 3.dp
+            defaultElevation = 0.dp,
+            focusedElevation = 2.dp
         )
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
+            val context = LocalContext.current
             val resolvedLogoUrl = remember(item.resim_url, item.baslik) {
                 if (item.resim_url.isNotBlank() && !item.resim_url.contains("unsplash")) {
                     item.resim_url
                 } else {
                     com.example.service.InternetChannelService.getOfficialWebLogo(item.baslik)
+                }
+            }
+
+            val imageRequest = remember(resolvedLogoUrl) {
+                if (resolvedLogoUrl.isBlank()) null
+                else {
+                    ImageRequest.Builder(context)
+                        .data(resolvedLogoUrl)
+                        .crossfade(false)
+                        .setHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
+                        .setHeader("Referer", "https://www.google.com/")
+                        .memoryCacheKey(resolvedLogoUrl)
+                        .diskCacheKey(resolvedLogoUrl)
+                        .build()
                 }
             }
 
@@ -213,16 +221,9 @@ fun MediaCard(
                     .background(Color(0xFF090D17)),
                 contentAlignment = Alignment.Center
             ) {
-                if (resolvedLogoUrl.isNotBlank() && !isImageLoadError) {
+                if (imageRequest != null && !isImageLoadError) {
                     AsyncImage(
-                        model = ImageRequest.Builder(LocalContext.current)
-                            .data(resolvedLogoUrl)
-                            .crossfade(true)
-                            .setHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
-                            .setHeader("Referer", "https://www.google.com/")
-                            .memoryCacheKey(resolvedLogoUrl)
-                            .diskCacheKey(resolvedLogoUrl)
-                            .build(),
+                        model = imageRequest,
                         contentDescription = item.baslik,
                         contentScale = ContentScale.Fit,
                         onError = { isImageLoadError = true },
