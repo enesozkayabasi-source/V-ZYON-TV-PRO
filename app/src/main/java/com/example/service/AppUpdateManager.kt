@@ -29,7 +29,7 @@ class AppUpdateManager(private val context: Context) {
         private const val GITHUB_API_LATEST_RELEASE =
             "https://api.github.com/repos/enesozkayabasi-source/V-ZYON-TV-PRO/releases/latest"
         private const val DEFAULT_FALLBACK_APK_URL =
-            "https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO/releases/download/v3.1/VIZYON.TV.v3.1.apk"
+            "https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO/releases/download/v3.2/VIZYON.TV.v3.2.apk"
     }
 
     /**
@@ -49,8 +49,8 @@ class AppUpdateManager(private val context: Context) {
             if (conn.responseCode in 200..299) {
                 val responseText = conn.inputStream.bufferedReader().use { it.readText() }
                 val json = JSONObject(responseText)
-                val tagName = json.optString("tag_name", "v3.1")
-                val body = json.optString("body", "VİZYON TV v3.1: Siyah Dynamic Island yüzen dock, yatay modda temiz ve logosuz panel, tam ekran kamera adası (Display Cutout) entegrasyonu ve performans optimizasyonları.")
+                val tagName = json.optString("tag_name", "v3.2")
+                val body = json.optString("body", "VİZYON TV v3.2: Tam ekran yatay modda bildirim paneli gizleme (Immersive Mode), Android TV kumandasında kanal listesinde gezinirken kanal değiştirmeyi engelleyen seçim modu ve ultra akıcı arayüz optimizasyonları.")
 
                 var apkUrl = DEFAULT_FALLBACK_APK_URL
                 var apkSize = 0L
@@ -80,21 +80,21 @@ class AppUpdateManager(private val context: Context) {
             } else {
                 // API cevap vermezse varsayılan fallback
                 UpdateInfo(
-                    isUpdateAvailable = currentVersion != "v3.1",
-                    latestVersion = "v3.1",
+                    isUpdateAvailable = currentVersion != "v3.2",
+                    latestVersion = "v3.2",
                     currentVersion = currentVersion,
                     apkDownloadUrl = DEFAULT_FALLBACK_APK_URL,
-                    changelog = "VİZYON TV v3.1: Siyah Dynamic Island yüzen dock, yatay modda temiz ve logosuz panel, kamera adası tam ekran desteği.",
+                    changelog = "VİZYON TV v3.2: Tam ekran yatay modda bildirim çubuğu gizleme, TV kumandası kanal listesi serbest gezinme modu ve performans optimizasyonları.",
                     assetSize = 0L
                 )
             }
         } catch (_: Exception) {
             UpdateInfo(
-                isUpdateAvailable = currentVersion != "v3.1",
-                latestVersion = "v3.1",
+                isUpdateAvailable = currentVersion != "v3.2",
+                latestVersion = "v3.2",
                 currentVersion = currentVersion,
                 apkDownloadUrl = DEFAULT_FALLBACK_APK_URL,
-                changelog = "VİZYON TV v3.1: Siyah Dynamic Island yüzen dock, yatay modda temiz ve logosuz panel, kamera adası tam ekran desteği.",
+                changelog = "VİZYON TV v3.2: Tam ekran yatay modda bildirim çubuğu gizleme, TV kumandası kanal listesi serbest gezinme modu ve performans optimizasyonları.",
                 assetSize = 0L
             )
         }

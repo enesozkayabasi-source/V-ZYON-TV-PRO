@@ -9,6 +9,10 @@ import android.widget.FrameLayout
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.view.WindowManager
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.activity.compose.BackHandler
 import androidx.annotation.OptIn
 import androidx.compose.animation.AnimatedVisibility
@@ -312,11 +316,48 @@ fun StreamPlayerScreen(
     val effectiveIsPlaying = if (isRadio) isRadioServicePlaying else isPlaying
     val effectiveIsBuffering = if (isRadio) isRadioServiceBuffering else isBuffering
 
+    // Gerçek Tam Ekran (Immersive Mode):
+    // Kanal izlenirken ve özellikle telefonda yatay ekrandayken telefonun üst bildirim paneli (status bar) tamamen gizlenir.
+    val window = (context as? Activity)?.window
+    DisposableEffect(window, isLandscape, showControls) {
+        if (window != null) {
+            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            val insetsController = WindowCompat.getInsetsController(window, window.decorView)
+            insetsController.systemBarsBehavior =
+                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+
+            if (isLandscape) {
+                // Yatay ekranda telefonun bildirim paneli ve gezinme tuşları tamamen gizlenir (Net Tam Ekran)
+                insetsController.hide(WindowInsetsCompat.Type.statusBars())
+                insetsController.hide(WindowInsetsCompat.Type.navigationBars())
+            } else {
+                // Dikey ekranda kanaldayken üst bildirim paneli gizlenir
+                insetsController.hide(WindowInsetsCompat.Type.statusBars())
+                if (!showControls) {
+                    insetsController.hide(WindowInsetsCompat.Type.navigationBars())
+                }
+            }
+        }
+        onDispose {
+            if (window != null) {
+                window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                val insetsController = WindowCompat.getInsetsController(window, window.decorView)
+                insetsController.show(WindowInsetsCompat.Type.statusBars())
+                insetsController.show(WindowInsetsCompat.Type.navigationBars())
+            }
+        }
+    }
+
     // Kanaldan çıkıldığında yayını durduran fonksiyon
     val exitPlayer: () -> Unit = {
         try {
-            // Restore orientation to sensor when exiting player
             val act = context as? Activity
+            act?.window?.let { win ->
+                win.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                val insetsController = WindowCompat.getInsetsController(win, win.decorView)
+                insetsController.show(WindowInsetsCompat.Type.statusBars())
+                insetsController.show(WindowInsetsCompat.Type.navigationBars())
+            }
             act?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
             if (!isRadio) {
                 exoPlayer.stop()
@@ -342,7 +383,13 @@ fun StreamPlayerScreen(
         onDispose {
             lifecycleOwner.lifecycle.removeObserver(observer)
             try {
-                (context as? Activity)?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+                val act = context as? Activity
+                act?.window?.let { win ->
+                    val insetsController = WindowCompat.getInsetsController(win, win.decorView)
+                    insetsController.show(WindowInsetsCompat.Type.statusBars())
+                    insetsController.show(WindowInsetsCompat.Type.navigationBars())
+                }
+                act?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
             } catch (_: Throwable) {}
         }
     }

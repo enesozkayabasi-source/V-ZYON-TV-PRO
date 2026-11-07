@@ -3,15 +3,15 @@
 # 📺 VİZYON TV PRO
 ### Android TV, TV Box, Tablet ve Telefonlar için Yeni Nesil Medya Platformu
 
-[![Sürüm](https://img.shields.io/badge/S%C3%BCr%C3%BCm-v3.1-00F5FF?style=for-the-badge&logo=android)](https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO/releases/tag/v3.1)
-[![Android TV](https://img.shields.io/badge/Android%20TV-Uyumlu-3DDC84?style=for-the-badge&logo=android)](https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO/releases/tag/v3.1)
+[![Sürüm](https://img.shields.io/badge/S%C3%BCr%C3%BCm-v3.2-00F5FF?style=for-the-badge&logo=android)](https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO/releases/tag/v3.2)
+[![Android TV](https://img.shields.io/badge/Android%20TV-Uyumlu-3DDC84?style=for-the-badge&logo=android)](https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO/releases/tag/v3.2)
 [![ExoPlayer](https://img.shields.io/badge/Oynat%C4%B1c%C4%B1-ExoPlayer%202.19-FF6F00?style=for-the-badge)](https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO)
 [![Durum](https://img.shields.io/badge/Yay%C4%B1n-Aktif%20%26%20Kesintisiz-brightgreen?style=for-the-badge)](https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO)
-[![Boyut](https://img.shields.io/badge/APK%20Boyutu-37%20MB-blueviolet?style=for-the-badge)](https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO/releases/download/v3.1/VIZYON.TV.v3.1.apk)
+[![Boyut](https://img.shields.io/badge/APK%20Boyutu-37%20MB-blueviolet?style=for-the-badge)](https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO/releases/download/v3.2/VIZYON.TV.v3.2.apk)
 
 <br/>
 
-**[ 📲 VİZYON TV PRO v3.1 APK İNDİR (Doğrudan Bağlantı) ](https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO/releases/download/v3.1/VIZYON.TV.v3.1.apk)**
+**[ 📲 VİZYON TV PRO v3.2 APK İNDİR (Doğrudan Bağlantı) ](https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO/releases/download/v3.2/VIZYON.TV.v3.2.apk)**
 
 **[ ⚡ Alternatif Hızlı İndir (vizyontv.apk) ](https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO/raw/main/vizyontv.apk)** • **[ 📦 Tüm Sürümler & Değişiklik Günlüğü ](https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO/releases)** • **[ 🌐 Web Portalı ](https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO/blob/main/web/index.html)**
 
@@ -27,8 +27,19 @@ Gelişmiş kumanda (D-Pad) optimizasyonu sayesinde hem **Android TV** ve **TV Bo
 
 ---
 
-## 🚀 Sürüm v3.1 ile Gelen Yenilikler
+## 🚀 Sürüm v3.2 ile Gelen Yenilikler
 
+- 📱 **Gerçek Tam Ekran (Immersive Mode) & Bildirim Paneli Gizleme:**
+  - Telefonda yatay ekranda video ve kanal izlerken üstte beliren sistem bildirim paneli (status bar) ve alt gezinme tuşları tamamen gizlendi.
+  - Görüntüyü hiçbir sistem çubuğunun kesmediği, sinematik ve net tam ekran video deneyimi sağlandı (`BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE`).
+- 🎮 **Android TV Kumandası Kanal Listesi Serbest Gezinme Modu:**
+  - Kanal izlerken kumandada `OK` tuşuna basıldığında açılan kanal listesinde yukarı/aşağı tuşları artık anında kanal değiştirmez.
+  - Liste üzerinde serbestçe gezinip odaklanabilir, yalnızca istediğiniz kanalın üstündeyken `OK / Enter` bastığınızda o kanala geçiş yapabilirsiniz. Mevcut yayın arkada kesintisiz oynamaya devam eder.
+- ⚡ **Eski ve Düşük Donanımlı Cihazlar İçin Sıfır Gecikmeli Akıcı Form:**
+  - Düşük RAM ve zayıf GPU'ya sahip telefon ve TV Box cihazlarında buton tıklama gecikmeleri giderildi.
+  - Çift grid animasyon yükü kaldırılarak sekmeler arası geçiş anlık (0ms gecikmeli) hale getirildi.
+  - Kanal kartlarındaki ağır GPU donanım gölgeleri optimize edilerek kaydırma akıcılığı 60 FPS seviyesine çıkarıldı.
+  - Android TV kumandalarında `OK` tuşunun 2-3 defa üst üste tıklama yapıp yayını dondurması engellendi.
 - 🖤 **Siyah Dynamic Island Yüzen Dock (Obsidian Black Glass):**
   - Alt gezinme adasının arka planı derin parlak siyah cam kaplama (`#0D111A` ➔ `#000000`) ile yenilendi.
   - Kristal kenar ışığı korundu; Canlı TV (Cyan), Haber (Mercan), Çocuk (Güneş Sarısı), Spor (Stadyum Yeşili) ve Radyo (Neon Mor) butonları siyah ada üzerinde maksimum kontrast ve canlılıkla parlar.

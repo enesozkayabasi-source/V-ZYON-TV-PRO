@@ -1075,7 +1075,7 @@ private fun TopBarHeader(
                             border = BorderStroke(0.8.dp, currentTabColor.copy(alpha = 0.6f))
                         ) {
                             Text(
-                                text = "PRO v3.1",
+                                text = "PRO v3.2",
                                 fontSize = 9.sp,
                                 fontWeight = FontWeight.ExtraBold,
                                 color = currentTabColor,
