@@ -2,6 +2,7 @@ package com.example.ui.player
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.Context
 import android.content.pm.ActivityInfo
 import android.net.Uri
 import android.view.ViewGroup
@@ -72,6 +73,7 @@ import androidx.compose.material.icons.filled.HighQuality
 import androidx.compose.material.icons.filled.LiveTv
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LockOpen
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Radio
@@ -157,6 +159,31 @@ import com.example.ui.theme.NeonRed
 import com.example.ui.theme.TextPrimary
 import com.example.ui.theme.TextSecondary
 import kotlinx.coroutines.delay
+
+// Bildirim panelini (Notification Shade / Quick Settings) güvenli ve takılmadan açma yardımcısı
+private fun expandNotificationPanel(context: Context) {
+    try {
+        @SuppressLint("WrongConstant")
+        val statusBarService = context.getSystemService("statusbar")
+        val statusBarManager = Class.forName("android.app.StatusBarManager")
+        val method = statusBarManager.getMethod("expandNotificationsPanel")
+        method.invoke(statusBarService)
+    } catch (_: Throwable) {
+        try {
+            @SuppressLint("WrongConstant")
+            val statusBarService = context.getSystemService("statusbar")
+            val statusBarManager = Class.forName("android.app.StatusBarManager")
+            val method = statusBarManager.getMethod("expand")
+            method.invoke(statusBarService)
+        } catch (_: Throwable) {
+            // Alternatif / Güvenli Geri Dönüş: Durum çubuğunu görünür yap ki kullanıcı tek kaydırmayla çekebilsin
+            (context as? Activity)?.window?.let { win ->
+                val insetsController = WindowCompat.getInsetsController(win, win.decorView)
+                insetsController.show(WindowInsetsCompat.Type.statusBars())
+            }
+        }
+    }
+}
 
 @SuppressLint("UnsafeOptInUsageError")
 @OptIn(UnstableApi::class)
@@ -316,26 +343,32 @@ fun StreamPlayerScreen(
     val effectiveIsPlaying = if (isRadio) isRadioServicePlaying else isPlaying
     val effectiveIsBuffering = if (isRadio) isRadioServiceBuffering else isBuffering
 
-    // Gerçek Tam Ekran (Immersive Mode):
-    // Kanal izlenirken ve özellikle telefonda yatay ekrandayken telefonun üst bildirim paneli (status bar) tamamen gizlenir.
+    // Akıllı Tam Ekran & Bildirim Paneli Yönetimi:
+    // - BEHAVIOR_DEFAULT kullanılır: Telefonun üst bildirim paneline geçmek isterken takılma, kaybolma veya kaydırmanın yutulması sorunu çözülür.
+    // - Dikey modda durum çubuğu ve bildirim paneli her zaman açık ve tam erişilebilirdir.
+    // - Yatay modda video izlenirken kontroller kapalıyken net tam ekran sağlanır; kontroller açıldığında durum çubuğu ve bildirimlere erişim anında açılır.
     val window = (context as? Activity)?.window
     DisposableEffect(window, isLandscape, showControls) {
         if (window != null) {
             window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
             val insetsController = WindowCompat.getInsetsController(window, window.decorView)
             insetsController.systemBarsBehavior =
-                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                WindowInsetsControllerCompat.BEHAVIOR_DEFAULT
 
             if (isLandscape) {
-                // Yatay ekranda telefonun bildirim paneli ve gezinme tuşları tamamen gizlenir (Net Tam Ekran)
-                insetsController.hide(WindowInsetsCompat.Type.statusBars())
-                insetsController.hide(WindowInsetsCompat.Type.navigationBars())
-            } else {
-                // Dikey ekranda kanaldayken üst bildirim paneli gizlenir
-                insetsController.hide(WindowInsetsCompat.Type.statusBars())
-                if (!showControls) {
+                if (showControls) {
+                    // Kontroller açıkken durum çubuğunu göster (bildirim paneli, saat ve şarj doğrudan görülebilir/çekilebilir)
+                    insetsController.show(WindowInsetsCompat.Type.statusBars())
+                    insetsController.show(WindowInsetsCompat.Type.navigationBars())
+                } else {
+                    // Kontroller kapalıyken net sinematik tam ekran
+                    insetsController.hide(WindowInsetsCompat.Type.statusBars())
                     insetsController.hide(WindowInsetsCompat.Type.navigationBars())
                 }
+            } else {
+                // Dikey modda bildirim paneline erişim daima pürüzsüz ve açıktır
+                insetsController.show(WindowInsetsCompat.Type.statusBars())
+                insetsController.show(WindowInsetsCompat.Type.navigationBars())
             }
         }
         onDispose {
@@ -1571,6 +1604,35 @@ fun StreamPlayerScreen(
                                     color = if (isLandscape) LuxuryGoldPrimary else Color.White,
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+
+                        // Bildirim Paneli Açma Butonu (Tek dokunuşla bildirim çekmecesini indirir)
+                        Surface(
+                            shape = RoundedCornerShape(20.dp),
+                            color = Color.Black.copy(alpha = 0.65f),
+                            border = BorderStroke(1.dp, Color.White.copy(alpha = 0.22f)),
+                            modifier = Modifier.clickable {
+                                expandNotificationPanel(context)
+                            }
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.padding(horizontal = 11.dp, vertical = 6.dp),
+                                horizontalArrangement = Arrangement.spacedBy(5.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Notifications,
+                                    contentDescription = "Bildirim Panelini Aç",
+                                    tint = LuxuryGoldPrimary,
+                                    modifier = Modifier.size(15.dp)
+                                )
+                                Text(
+                                    text = "Bildirimler",
+                                    color = Color.White,
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.SemiBold
                                 )
                             }
                         }
