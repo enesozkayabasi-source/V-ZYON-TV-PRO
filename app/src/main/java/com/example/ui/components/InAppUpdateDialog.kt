@@ -1,6 +1,8 @@
 package com.example.ui.components
 
+import android.content.res.Configuration
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -10,18 +12,24 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ReceiptLong
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.OpenInBrowser
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.SystemUpdate
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -38,6 +46,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -70,6 +79,10 @@ fun InAppUpdateDialog(
     onOpenBrowser: () -> Unit,
     onDismiss: () -> Unit
 ) {
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+    val maxDialogHeight = if (isLandscape) 340.dp else 580.dp
+
     Dialog(
         onDismissRequest = {
             if (state == UpdateDialogState.DOWNLOADING) {
@@ -80,32 +93,38 @@ fun InAppUpdateDialog(
         },
         properties = DialogProperties(
             dismissOnBackPress = true,
-            dismissOnClickOutside = state != UpdateDialogState.DOWNLOADING
+            dismissOnClickOutside = state != UpdateDialogState.DOWNLOADING,
+            usePlatformDefaultWidth = false
         )
     ) {
         Card(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
+                .fillMaxWidth(0.92f)
+                .widthIn(max = 460.dp)
+                .heightIn(max = maxDialogHeight)
+                .padding(horizontal = 10.dp, vertical = 6.dp)
                 .testTag("in_app_update_dialog"),
-            shape = RoundedCornerShape(16.dp),
+            shape = RoundedCornerShape(18.dp),
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surface
             ),
-            elevation = CardDefaults.cardElevation(defaultElevation = 10.dp)
+            elevation = CardDefaults.cardElevation(defaultElevation = 14.dp)
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(20.dp)
+                    .padding(horizontal = 16.dp, vertical = 14.dp)
             ) {
-                // Header
+                // SABİT BAŞLIK (Fixed Header - Asla kaybolmaz)
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.weight(1f)
+                    ) {
                         Surface(
                             shape = CircleShape,
                             color = NeonAmber.copy(alpha = 0.2f),
@@ -154,107 +173,193 @@ fun InAppUpdateDialog(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(14.dp))
+                Spacer(modifier = Modifier.height(10.dp))
                 HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
-                Spacer(modifier = Modifier.height(14.dp))
+                Spacer(modifier = Modifier.height(10.dp))
 
-                // Content by State
+                // İÇERİK VE SABİTLENMİŞ ALT BUTONLAR BÖLGESİ
                 when (state) {
                     UpdateDialogState.PROMPT -> {
-                        Surface(
-                            shape = RoundedCornerShape(10.dp),
-                            color = NeonCyan.copy(alpha = 0.1f),
-                            border = androidx.compose.foundation.BorderStroke(1.dp, NeonCyan.copy(alpha = 0.3f)),
-                            modifier = Modifier.fillMaxWidth()
+                        // 1) KAYAN ORTA BÖLGE (Scrollable Content - Açıklama ne kadar uzun olursa olsun burası kayar)
+                        Column(
+                            modifier = Modifier
+                                .weight(1f, fill = false)
+                                .verticalScroll(rememberScrollState())
                         ) {
-                            Column(modifier = Modifier.padding(12.dp)) {
+                            // Sürüm Bilgi Kartı
+                            Surface(
+                                shape = RoundedCornerShape(10.dp),
+                                color = NeonCyan.copy(alpha = 0.1f),
+                                border = BorderStroke(1.dp, NeonCyan.copy(alpha = 0.3f)),
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
                                 Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Text(
-                                        text = "Mevcut Sürüm: $currentVersion",
+                                        text = "Mevcut: $currentVersion",
                                         fontSize = 12.sp,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
-                                    Text(
-                                        text = "Hedef: $targetVersion",
-                                        fontSize = 12.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = NeonCyan
-                                    )
-                                }
-                                if (changelog.isNotBlank()) {
-                                    Spacer(modifier = Modifier.height(6.dp))
-                                    Text(
-                                        text = changelog,
-                                        fontSize = 11.sp,
-                                        color = MaterialTheme.colorScheme.onSurface
-                                    )
+                                    Surface(
+                                        shape = RoundedCornerShape(6.dp),
+                                        color = NeonCyan.copy(alpha = 0.25f)
+                                    ) {
+                                        Text(
+                                            text = "Yeni: $targetVersion",
+                                            fontSize = 12.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = NeonCyan,
+                                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                                        )
+                                    }
                                 }
                             }
+
+                            Spacer(modifier = Modifier.height(10.dp))
+
+                            // KAYAN AÇIKLAMA MODU (Scrollable Changelog Container)
+                            if (changelog.isNotBlank()) {
+                                Surface(
+                                    shape = RoundedCornerShape(10.dp),
+                                    color = Color.Black.copy(alpha = 0.35f),
+                                    border = BorderStroke(1.dp, NeonAmber.copy(alpha = 0.35f)),
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Column(modifier = Modifier.padding(10.dp)) {
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                Icon(
+                                                    imageVector = Icons.AutoMirrored.Filled.ReceiptLong,
+                                                    contentDescription = null,
+                                                    tint = NeonAmber,
+                                                    modifier = Modifier.size(14.dp)
+                                                )
+                                                Spacer(modifier = Modifier.width(4.dp))
+                                                Text(
+                                                    text = "Sürüm Notları & Açıklama",
+                                                    fontSize = 11.sp,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = NeonAmber
+                                                )
+                                            }
+                                            Surface(
+                                                shape = RoundedCornerShape(4.dp),
+                                                color = Color.White.copy(alpha = 0.1f)
+                                            ) {
+                                                Text(
+                                                    text = "↕ Kayan Ekran",
+                                                    fontSize = 9.sp,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                    modifier = Modifier.padding(horizontal = 5.dp, vertical = 1.dp)
+                                                )
+                                            }
+                                        }
+
+                                        Spacer(modifier = Modifier.height(6.dp))
+
+                                        // İç kaydırma kutusu: Açıklama uzunluğundan bağımsız butonları korur
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .heightIn(min = 60.dp, max = if (isLandscape) 90.dp else 145.dp)
+                                                .verticalScroll(rememberScrollState())
+                                                .padding(end = 4.dp)
+                                        ) {
+                                            Text(
+                                                text = changelog.trim(),
+                                                fontSize = 11.sp,
+                                                lineHeight = 16.sp,
+                                                color = MaterialTheme.colorScheme.onSurface
+                                            )
+                                        }
+                                    }
+                                }
+                                Spacer(modifier = Modifier.height(10.dp))
+                            }
+
+                            Text(
+                                text = "Yeni sürümü doğrudan uygulama içerisinden indirip kurabilirsiniz; tarayıcı veya GitHub açmanıza gerek yoktur.",
+                                fontSize = 11.sp,
+                                lineHeight = 15.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Spacer(modifier = Modifier.height(10.dp))
                         }
 
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(
-                            text = "Yeni sürümü tarayıcıya yönlendirilmeden, doğrudan uygulama içerisinden indirip kurabilirsiniz.",
-                            fontSize = 12.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Spacer(modifier = Modifier.height(18.dp))
-
-                        // Primary Action: Start In-App Download
-                        Button(
-                            onClick = onStartDownload,
-                            colors = ButtonDefaults.buttonColors(containerColor = NeonAmber),
-                            shape = RoundedCornerShape(10.dp),
+                        // 2) SABİT ALT BUTONLAR (Sticky Bottom Actions - ASLA ALTA İTİLMEZ, DAİMA GÖRÜNÜR VE ERİŞİLEBİLİR)
+                        Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(44.dp)
-                                .testTag("btn_start_inapp_download")
+                                .padding(top = 4.dp)
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.Download,
-                                contentDescription = null,
-                                tint = Color.Black,
-                                modifier = Modifier.size(18.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = "Uygulama İçinden İndir & Kur",
-                                color = Color.Black,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 13.sp
-                            )
-                        }
+                            // Birincil Buton: Uygulama İçinden İndir & Kur
+                            Button(
+                                onClick = onStartDownload,
+                                colors = ButtonDefaults.buttonColors(containerColor = NeonAmber),
+                                shape = RoundedCornerShape(10.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(44.dp)
+                                    .testTag("btn_start_inapp_download")
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Download,
+                                    contentDescription = null,
+                                    tint = Color.Black,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "Uygulama İçinden İndir & Kur",
+                                    color = Color.Black,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 13.sp
+                                )
+                            }
 
-                        Spacer(modifier = Modifier.height(8.dp))
+                            Spacer(modifier = Modifier.height(6.dp))
 
-                        // Secondary Action: Open in Browser
-                        Button(
-                            onClick = onOpenBrowser,
-                            colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
-                            border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)),
-                            shape = RoundedCornerShape(10.dp),
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.OpenInBrowser,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.size(16.dp)
-                            )
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text(
-                                text = "Tarayıcıda / GitHub'da Aç",
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                fontSize = 12.sp
-                            )
+                            // İkincil Buton: Tarayıcıda / GitHub'da Aç
+                            Button(
+                                onClick = onOpenBrowser,
+                                colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)),
+                                shape = RoundedCornerShape(10.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(38.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.OpenInBrowser,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.size(15.dp)
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = "Tarayıcıda / GitHub'da Aç",
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    fontSize = 12.sp
+                                )
+                            }
                         }
                     }
 
                     UpdateDialogState.DOWNLOADING -> {
-                        Column(modifier = Modifier.fillMaxWidth()) {
+                        Column(
+                            modifier = Modifier
+                                .weight(1f, fill = false)
+                                .verticalScroll(rememberScrollState())
+                        ) {
                             Text(
                                 text = "Güncelleme Paketi İndiriliyor...",
                                 fontWeight = FontWeight.SemiBold,
@@ -299,46 +404,48 @@ fun InAppUpdateDialog(
                                 )
                             }
 
-                            Spacer(modifier = Modifier.height(12.dp))
+                            Spacer(modifier = Modifier.height(10.dp))
                             Text(
                                 text = "İndirme tamamlandığında Android yükleyici otomatik olarak açılacaktır. İsterseniz indirmeyi arka planda devam ettirebilirsiniz.",
                                 fontSize = 11.sp,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
+                            Spacer(modifier = Modifier.height(10.dp))
+                        }
 
-                            Spacer(modifier = Modifier.height(16.dp))
-
-                            // Action: Arka Planda Devam Et
-                            Button(
-                                onClick = onRunInBackground,
-                                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-                                border = androidx.compose.foundation.BorderStroke(1.dp, NeonCyan.copy(alpha = 0.5f)),
-                                shape = RoundedCornerShape(10.dp),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(44.dp)
-                                    .testTag("btn_run_download_in_background")
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.CloudDownload,
-                                    contentDescription = null,
-                                    tint = NeonCyan,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(
-                                    text = "Arka Planda Devam Et",
-                                    color = NeonCyan,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 13.sp
-                                )
-                            }
+                        // Sabit Buton: Arka Planda Devam Et
+                        Button(
+                            onClick = onRunInBackground,
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                            border = BorderStroke(1.dp, NeonCyan.copy(alpha = 0.5f)),
+                            shape = RoundedCornerShape(10.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(44.dp)
+                                .padding(top = 4.dp)
+                                .testTag("btn_run_download_in_background")
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.CloudDownload,
+                                contentDescription = null,
+                                tint = NeonCyan,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Arka Planda Devam Et",
+                                color = NeonCyan,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 13.sp
+                            )
                         }
                     }
 
                     UpdateDialogState.READY_TO_INSTALL -> {
                         Column(
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier
+                                .weight(1f, fill = false)
+                                .verticalScroll(rememberScrollState()),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Icon(
@@ -356,13 +463,19 @@ fun InAppUpdateDialog(
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = "Güncellemeyi tamamlamak için aşağıdaki butona basın.",
+                                text = "Güncellemeyi tamamlamak için aşağıdaki kur butonuna basın.",
                                 fontSize = 12.sp,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
+                            Spacer(modifier = Modifier.height(12.dp))
+                        }
 
-                            Spacer(modifier = Modifier.height(18.dp))
-
+                        // Sabit Butonlar: Paketi Yükle & Kapat
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 4.dp)
+                        ) {
                             Button(
                                 onClick = {
                                     onInstall()
@@ -383,13 +496,15 @@ fun InAppUpdateDialog(
                                 )
                             }
 
-                            Spacer(modifier = Modifier.height(8.dp))
+                            Spacer(modifier = Modifier.height(6.dp))
 
                             Button(
                                 onClick = onDismiss,
                                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
                                 shape = RoundedCornerShape(10.dp),
-                                modifier = Modifier.fillMaxWidth().height(40.dp)
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(38.dp)
                             ) {
                                 Text(
                                     text = "Daha Sonra / Kapat",
@@ -403,7 +518,9 @@ fun InAppUpdateDialog(
 
                     UpdateDialogState.ERROR -> {
                         Column(
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier
+                                .weight(1f, fill = false)
+                                .verticalScroll(rememberScrollState()),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Icon(
@@ -427,29 +544,43 @@ fun InAppUpdateDialog(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
-                            Spacer(modifier = Modifier.height(14.dp))
+                            Spacer(modifier = Modifier.height(12.dp))
+                        }
 
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        // Sabit Butonlar
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 4.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Button(
+                                onClick = onStartDownload,
+                                colors = ButtonDefaults.buttonColors(containerColor = NeonAmber),
+                                shape = RoundedCornerShape(8.dp),
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(42.dp)
                             ) {
-                                Button(
-                                    onClick = onStartDownload,
-                                    colors = ButtonDefaults.buttonColors(containerColor = NeonAmber),
-                                    shape = RoundedCornerShape(8.dp),
-                                    modifier = Modifier.weight(1f)
-                                ) {
-                                    Text("Tekrar Dene", color = Color.Black, fontWeight = FontWeight.Bold)
-                                }
+                                Icon(
+                                    imageVector = Icons.Default.Refresh,
+                                    contentDescription = null,
+                                    tint = Color.Black,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text("Tekrar Dene", color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                            }
 
-                                Button(
-                                    onClick = onOpenBrowser,
-                                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-                                    shape = RoundedCornerShape(8.dp),
-                                    modifier = Modifier.weight(1f)
-                                ) {
-                                    Text("Tarayıcıda İndir", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                }
+                            Button(
+                                onClick = onOpenBrowser,
+                                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                                shape = RoundedCornerShape(8.dp),
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(42.dp)
+                            ) {
+                                Text("Tarayıcıda İndir", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
                             }
                         }
                     }
