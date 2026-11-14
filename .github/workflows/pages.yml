@@ -17,9 +17,6 @@ concurrency:
 jobs:
   build_and_release:
     runs-on: ubuntu-latest
-    outputs:
-      version: ${{ steps.meta.outputs.version }}
-      apk_name: ${{ steps.meta.outputs.apk_name }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -29,9 +26,6 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
-
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
@@ -47,6 +41,12 @@ jobs:
           echo "apk_name=VIZYON.TV.${VERSION}.apk" >> "$GITHUB_OUTPUT"
           echo "changelog=$CHANGELOG" >> "$GITHUB_OUTPUT"
 
+      - name: Accept Android SDK licenses
+        run: |
+          if [ -d "$ANDROID_HOME/cmdline-tools/latest/bin" ]; then
+            yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null 2>&1 || true
+          fi
+
       - name: Ensure debug keystore exists
         run: |
           if [ ! -f debug.keystore ]; then
@@ -60,6 +60,7 @@ jobs:
         run: |
           mkdir -p dist_release web/releases
           cp app/build/outputs/apk/debug/app-debug.apk "dist_release/${{ steps.meta.outputs.apk_name }}"
+          cp app/build/outputs/apk/debug/app-debug.apk "dist_release/vizyontv.apk"
           cp app/build/outputs/apk/debug/app-debug.apk "web/releases/${{ steps.meta.outputs.apk_name }}"
           cp app/build/outputs/apk/debug/app-debug.apk "web/releases/vizyontv-latest.apk"
 
