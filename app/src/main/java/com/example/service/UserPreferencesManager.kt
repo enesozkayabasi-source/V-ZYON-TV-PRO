@@ -22,40 +22,75 @@ class UserPreferencesManager(context: Context) {
         private const val KEY_FAVORITES = "pref_favorites"
         private const val KEY_LAST_TAB = "pref_last_tab"
         private const val KEY_APP_VERSION = "pref_app_version"
-        const val LATEST_RELEASE_VERSION = "v3.2"
+        const val LATEST_RELEASE_VERSION = "v3.5"
         const val KEY_CUSTOM_GITHUB_URL = "pref_custom_github_url"
         const val KEY_CUSTOM_APK_URL = "pref_custom_apk_url"
+        const val KEY_CUSTOM_WEB_PORTAL_URL = "pref_custom_web_portal_url"
+        const val DEFAULT_WEB_PORTAL_URL = "https://enesozkayabasi-source.github.io/V-ZYON-TV-PRO/"
         const val DEFAULT_GITHUB_PAGE_URL = "https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO"
-        const val DEFAULT_APK_DOWNLOAD_URL = "https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO/releases/download/v3.2/VIZYON.TV.v3.2.apk"
+        const val DEFAULT_APK_DOWNLOAD_URL = "https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO/releases/download/v3.5/VIZYON.TV.v3.5.apk"
         const val OFFICIAL_UPDATE_URL = DEFAULT_APK_DOWNLOAD_URL
     }
 
+    fun getWebPortalUrl(): String {
+        val saved = prefs.getString(KEY_CUSTOM_WEB_PORTAL_URL, null)?.trim()
+        if (saved.isNullOrBlank() || (!saved.startsWith("http://") && !saved.startsWith("https://"))) {
+            return DEFAULT_WEB_PORTAL_URL
+        }
+        return saved
+    }
+
+    fun saveWebPortalUrl(url: String) {
+        val trimmed = url.trim()
+        if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+            prefs.edit().putString(KEY_CUSTOM_WEB_PORTAL_URL, trimmed).apply()
+        }
+    }
+
     fun getGithubPageUrl(): String {
-        val saved = prefs.getString(KEY_CUSTOM_GITHUB_URL, null)
-        if (saved.isNullOrBlank() || !saved.contains("enesozkayabasi-source")) {
+        val saved = prefs.getString(KEY_CUSTOM_GITHUB_URL, null)?.trim()
+        if (saved.isNullOrBlank() || (!saved.startsWith("http://") && !saved.startsWith("https://"))) {
             return DEFAULT_GITHUB_PAGE_URL
         }
         return saved
     }
 
     fun saveGithubPageUrl(url: String) {
-        prefs.edit().putString(KEY_CUSTOM_GITHUB_URL, url.trim()).apply()
+        val trimmed = url.trim()
+        if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+            prefs.edit().putString(KEY_CUSTOM_GITHUB_URL, trimmed).apply()
+        }
     }
 
     fun getApkDownloadUrl(): String {
-        val saved = prefs.getString(KEY_CUSTOM_APK_URL, null)
-        if (saved.isNullOrBlank() || !saved.contains("enesozkayabasi-source") || saved.contains("vizyontv.apk") || saved.contains("VIZYON.TV.3.apk") || saved.contains("v2.9.4") || saved.contains("v2.9.2") || saved.contains("v2.9.1")) {
+        val saved = prefs.getString(KEY_CUSTOM_APK_URL, null)?.trim()
+        if (saved.isNullOrBlank() ||
+            (!saved.startsWith("http://") && !saved.startsWith("https://")) ||
+            saved.contains("vizyontv.apk") ||
+            saved.contains("VIZYON.TV.3.apk") ||
+            saved.contains("v3.2") ||
+            saved.contains("v3.1") ||
+            saved.contains("v3.0") ||
+            saved.contains("v2.9.")
+        ) {
             return DEFAULT_APK_DOWNLOAD_URL
         }
         return saved
     }
 
     fun saveApkDownloadUrl(url: String) {
-        prefs.edit().putString(KEY_CUSTOM_APK_URL, url.trim()).apply()
+        val trimmed = url.trim()
+        if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+            prefs.edit().putString(KEY_CUSTOM_APK_URL, trimmed).apply()
+        }
     }
 
     fun getInstalledVersion(): String {
-        return prefs.getString(KEY_APP_VERSION, LATEST_RELEASE_VERSION) ?: LATEST_RELEASE_VERSION
+        return try {
+            "v${com.example.BuildConfig.VERSION_NAME}"
+        } catch (_: Exception) {
+            prefs.getString(KEY_APP_VERSION, LATEST_RELEASE_VERSION) ?: LATEST_RELEASE_VERSION
+        }
     }
 
     fun saveInstalledVersion(version: String) {

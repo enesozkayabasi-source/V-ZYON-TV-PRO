@@ -63,7 +63,7 @@ data class MediaItem(
     }
 
     val isHlsStream: Boolean
-        get() = yayin_url.contains(".m3u8", ignoreCase = true)
+        get() = isHlsStreamUrl(getActiveStreamUrl())
 
     val isSeries: Boolean
         get() = seasons.isNotEmpty()
@@ -113,6 +113,14 @@ data class MediaItem(
             )
         }
     }
+}
+
+fun isHlsStreamUrl(url: String): Boolean {
+    val lower = url.lowercase()
+    return lower.contains(".m3u8") ||
+        lower.contains("/hls/") ||
+        lower.contains("chunklist") ||
+        (lower.contains("playlist") && !lower.endsWith(".mp3") && !lower.endsWith(".aac"))
 }
 
 enum class MediaCollection(

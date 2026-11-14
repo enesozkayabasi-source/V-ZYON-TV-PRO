@@ -88,16 +88,18 @@ fun SettingsDialog(
     onImportM3u: (input: String, isUrl: Boolean) -> Unit,
     isDataSaverEnabled: Boolean = false,
     onToggleDataSaver: ((Boolean) -> Unit)? = null,
-    currentVersion: String = "v3.0",
-    latestVersion: String = "v3.0",
+    currentVersion: String = "v3.5",
+    latestVersion: String = "v3.5",
     hasUpdate: Boolean = false,
     isUpdating: Boolean = false,
     updateProgress: Float = 0f,
     updateStatus: String? = null,
+    webPortalUrl: String = UserPreferencesManager.DEFAULT_WEB_PORTAL_URL,
     githubPageUrl: String = UserPreferencesManager.DEFAULT_GITHUB_PAGE_URL,
     apkDownloadUrl: String = UserPreferencesManager.DEFAULT_APK_DOWNLOAD_URL,
     updateUrl: String = apkDownloadUrl,
     onSaveCustomUrls: ((githubUrl: String, apkUrl: String) -> Unit)? = null,
+    onSaveWebPortalUrl: ((webUrl: String) -> Unit)? = null,
     onCheckForUpdates: () -> Unit = {},
     onApplyUpdate: () -> Unit = {},
     onOpenUpdateLink: (String) -> Unit = {},
@@ -108,6 +110,7 @@ fun SettingsDialog(
     var m3uInputText by remember { mutableStateOf("") }
     var isUrlMode by remember { mutableStateOf(true) }
     var showUrlEditSection by remember { mutableStateOf(false) }
+    var customWebPortalInput by remember(webPortalUrl) { mutableStateOf(webPortalUrl) }
     var customGhInput by remember(githubPageUrl) { mutableStateOf(githubPageUrl) }
     var customApkInput by remember(apkDownloadUrl) { mutableStateOf(apkDownloadUrl) }
     var urlsSavedFeedback by remember { mutableStateOf(false) }
@@ -603,7 +606,7 @@ fun SettingsDialog(
 
                 // SECTION 5: GÜNCELLEME BAĞLANTISI & SÜRÜM YÖNETİMİ
                 val updateAccentColor = Color(0xFF22C55E) // Vibrant Green
-                SectionHeader(title = "Güncelleme Bağlantısı & Sürüm Denetimi (v3.0)", icon = Icons.Default.SystemUpdate, color = updateAccentColor)
+                SectionHeader(title = "Güncelleme Bağlantısı & Sürüm Denetimi (v3.5)", icon = Icons.Default.SystemUpdate, color = updateAccentColor)
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Card(
@@ -656,7 +659,7 @@ fun SettingsDialog(
                         if (hasUpdate) {
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                text = "Önceki bir sürüm kullanıyorsunuz! VİZYON TV yeni sürümünde haber ve çocuk kanallarının tamamı (%100 200 OK) test edildi, yeni canlı logolar ve açılış animasyonu aktifleştirildi.",
+                                text = "Önceki bir sürüm kullanıyorsunuz! VİZYON TV v3.5 ile tüm TV ve TRT radyo yayınları yenilendi, akıllı canlı yayın çözümleyici ve resmi web indirme portalı eklendi.",
                                 fontSize = 11.sp,
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.9f)
                             )
@@ -794,6 +797,33 @@ fun SettingsDialog(
 
                         Spacer(modifier = Modifier.height(8.dp))
 
+                        // Resmi Web Sitesi & QR İndirme Portalı Butonu
+                        Button(
+                            onClick = { onOpenUpdateLink(webPortalUrl) },
+                            colors = ButtonDefaults.buttonColors(containerColor = NeonCyan.copy(alpha = 0.16f)),
+                            border = androidx.compose.foundation.BorderStroke(1.2.dp, NeonCyan),
+                            shape = RoundedCornerShape(8.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .testTag("dialog_web_portal_button")
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Language,
+                                contentDescription = null,
+                                tint = NeonCyan,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = "Resmi Web Sitesi & QR İndirme Portalı",
+                                color = NeonCyan,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 11.sp
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
                         // GitHub / APK Bağlantısını Özelleştirme / Görüntüleme Bölümü
                         Button(
                             onClick = { showUrlEditSection = !showUrlEditSection },
@@ -834,12 +864,33 @@ fun SettingsDialog(
                                     modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
                                 ) {
                                     Text(
-                                        text = "✅ GitHub Release: İndirme bağlantısı GitHub v3.0 sürümündeki VIZYON.TV.v3.0.apk dosyasına bağlıdır. Tıklandığında doğrudan indirme başlar.",
+                                        text = "✅ Yayın Kaynağı: Varsayılan indirme adresi v3.5 (VIZYON.TV.v3.5.apk) sürümüne bağlıdır; kendi web siteniz veya GitHub üzerinden doğrudan .apk bağlantısı tanımlayabilirsiniz.",
                                         fontSize = 10.sp,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                         modifier = Modifier.padding(8.dp)
                                     )
                                 }
+
+                                Text(
+                                    text = "Bağımsız Web Sitesi / Portal Adresi (version.json):",
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF34D399)
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                OutlinedTextField(
+                                    value = customWebPortalInput,
+                                    onValueChange = { customWebPortalInput = it },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    singleLine = true,
+                                    textStyle = androidx.compose.ui.text.TextStyle(fontSize = 11.sp),
+                                    colors = OutlinedTextFieldDefaults.colors(
+                                        focusedBorderColor = Color(0xFF34D399),
+                                        unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                                    )
+                                )
+
+                                Spacer(modifier = Modifier.height(8.dp))
 
                                 Text(
                                     text = "Doğrudan APK İndirme Bağlantısı (.apk):",
@@ -863,7 +914,7 @@ fun SettingsDialog(
                                 Spacer(modifier = Modifier.height(8.dp))
 
                                 Text(
-                                    text = "GitHub Sürüm / Proje Sayfası:",
+                                    text = "Yedek Sürüm / Proje Sayfası:",
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = NeonCyan
@@ -889,6 +940,7 @@ fun SettingsDialog(
                                 ) {
                                     Button(
                                         onClick = {
+                                            onSaveWebPortalUrl?.invoke(customWebPortalInput)
                                             onSaveCustomUrls?.invoke(customGhInput, customApkInput)
                                             urlsSavedFeedback = true
                                         },
@@ -913,8 +965,10 @@ fun SettingsDialog(
 
                                     Button(
                                         onClick = {
+                                            customWebPortalInput = UserPreferencesManager.DEFAULT_WEB_PORTAL_URL
                                             customGhInput = UserPreferencesManager.DEFAULT_GITHUB_PAGE_URL
                                             customApkInput = UserPreferencesManager.DEFAULT_APK_DOWNLOAD_URL
+                                            onSaveWebPortalUrl?.invoke(UserPreferencesManager.DEFAULT_WEB_PORTAL_URL)
                                             onSaveCustomUrls?.invoke(UserPreferencesManager.DEFAULT_GITHUB_PAGE_URL, UserPreferencesManager.DEFAULT_APK_DOWNLOAD_URL)
                                             urlsSavedFeedback = true
                                         },
@@ -922,7 +976,7 @@ fun SettingsDialog(
                                         shape = RoundedCornerShape(8.dp)
                                     ) {
                                         Text(
-                                            text = "V-ZYON-TV-PRO'ya Sıfırla",
+                                            text = "Varsayılana Sıfırla",
                                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                                             fontWeight = FontWeight.Bold,
                                             fontSize = 10.sp

@@ -4,6 +4,8 @@ import android.util.Log
 import com.example.model.MediaCollection
 import com.example.model.MediaItem
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -47,11 +49,114 @@ class InternetChannelService {
         )
     )
 
+    private fun normalizeChannelKey(title: String): String {
+        return title.lowercase()
+            .replace(Regex("""^\d+\s*•\s*"""), "")
+            .replace(Regex("""\([^)]*\)"""), "")
+            .replace(Regex("""\[[^\]]*\]"""), "")
+            .replace("hd", "")
+            .replace("sd", "")
+            .replace("canlı", "")
+            .replace("canli", "")
+            .replace("türkiye", "")
+            .replace("turkiye", "")
+            .replace(Regex("""\s+"""), " ")
+            .trim()
+    }
+
+    /**
+     * NOW TV, TGRT Haber ve TRT Çocuk gibi zaman damgalı/geo-kısıtlı kanallar için
+     * resmi yayın sayfasından anlık güncel akış bağlantısını çözer.
+     */
+    suspend fun resolveFreshLiveStreamUrls(item: MediaItem): List<String> = withContext(Dispatchers.IO) {
+        val lower = item.baslik.lowercase()
+        val resolved = mutableListOf<String>()
+        try {
+            when {
+                lower.contains("now") -> {
+                    val req = Request.Builder()
+                        .url("https://www.nowtv.com.tr/canli-yayin")
+                        .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36")
+                        .build()
+                    client.newCall(req).execute().use { resp ->
+                        if (resp.isSuccessful) {
+                            val html = resp.body?.string().orEmpty()
+                            val matches = Regex("""https?://[^\s"'<>\\]+?(?:nowtv-live-ad\.ercdn\.net|nowtv\.daioncdn\.net)[^\s"'<>\\]*?\.m3u8[^\s"'<>\\]*""")
+                                .findAll(html)
+                                .map { it.value.replace("\\/", "/") }
+                                .distinct()
+                                .toList()
+                            resolved.addAll(matches)
+                        }
+                    }
+                }
+                lower.contains("tgrt haber") || (lower.contains("tgrt") && !lower.contains("belgesel")) -> {
+                    resolveYouTubeHandleLiveUrl("https://www.youtube.com/@tgrthaber/live")?.let { resolved.add(it) }
+                }
+                lower.contains("trt çocuk") || lower.contains("trt cocuk") -> {
+                    resolveYouTubeHandleLiveUrl("https://www.youtube.com/@trtcocuk/live")?.let { resolved.add(it) }
+                }
+            }
+        } catch (e: Exception) {
+            Log.w(tag, "Dinamik akış çözümleme uyarısı (${item.baslik}): ${e.message}")
+        }
+        resolved.distinct()
+    }
+
+    private fun resolveYouTubeHandleLiveUrl(handleLiveUrl: String): String? {
+        return try {
+            val req = Request.Builder()
+                .url(handleLiveUrl)
+                .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36")
+                .header("Cookie", "CONSENT=YES+cb.20210328-17-p0.en+FX+999; SOCS=CAI")
+                .build()
+            client.newCall(req).execute().use { resp ->
+                if (!resp.isSuccessful) return null
+                val html = resp.body?.string().orEmpty()
+                if (!html.contains("\"isLive\":true")) return null
+                val videoId = Regex(""""watchEndpoint":\{"videoId":"([A-Za-z0-9_-]{11})"""").find(html)?.groupValues?.getOrNull(1)
+                    ?: Regex(""""videoId":"([A-Za-z0-9_-]{11})"""").find(html)?.groupValues?.getOrNull(1)
+                if (!videoId.isNullOrBlank()) "https://www.youtube.com/watch?v=$videoId" else null
+            }
+        } catch (_: Exception) {
+            null
+        }
+    }
+
     /**
      * Doğrulanmış Türkiye açık yayınlarını döner
      */
     suspend fun fetchLiveChannelsFromInternet(): List<MediaItem> = withContext(Dispatchers.IO) {
-        val tkgsList = getTkgsFullChannelList()
+        val baseTkgs = getTkgsFullChannelList()
+        val (freshNowUrls, freshTgrtUrls, freshTrtCocukUrls) = coroutineScope {
+            val nowDeferred = async {
+                baseTkgs.firstOrNull { it.id == "live_06" }?.let { resolveFreshLiveStreamUrls(it) }.orEmpty()
+            }
+            val tgrtDeferred = async {
+                baseTkgs.firstOrNull { it.id == "live_25" }?.let { resolveFreshLiveStreamUrls(it) }.orEmpty()
+            }
+            val cocukDeferred = async {
+                baseTkgs.firstOrNull { it.id == "live_27" }?.let { resolveFreshLiveStreamUrls(it) }.orEmpty()
+            }
+            Triple(nowDeferred.await(), tgrtDeferred.await(), cocukDeferred.await())
+        }
+        val tkgsList = baseTkgs.map { ch ->
+            when {
+                ch.id == "live_06" && freshNowUrls.isNotEmpty() -> ch.copy(
+                    yayin_url = freshNowUrls.first(),
+                    backup_urls = (freshNowUrls.drop(1) + listOf(ch.yayin_url) + ch.backup_urls).distinct()
+                )
+                ch.id == "live_25" && freshTgrtUrls.isNotEmpty() -> ch.copy(
+                    yayin_url = freshTgrtUrls.first(),
+                    backup_urls = (freshTgrtUrls.drop(1) + ch.backup_urls + listOf(ch.yayin_url)).distinct()
+                )
+                ch.id == "live_27" && freshTrtCocukUrls.isNotEmpty() -> ch.copy(
+                    backup_urls = (freshTrtCocukUrls + ch.backup_urls.filterNot { it.contains("youtube.com") }).distinct()
+                )
+                else -> ch
+            }
+        }
+
         try {
             val request = Request.Builder()
                 .url("https://iptv-org.github.io/iptv/countries/tr.m3u")
@@ -63,9 +168,9 @@ class InternetChannelService {
                     val body = response.body?.string()
                     if (!body.isNullOrBlank()) {
                         val parsed = parseM3u(body)
-                        // Verified TKGS channels come FIRST, then additional unique parsed channels
-                        val combined = (tkgsList + parsed).distinctBy { it.baslik.lowercase().trim() }
-                        return@withContext combined
+                        val existingKeys = tkgsList.map { normalizeChannelKey(it.baslik) }.toSet()
+                        val uniqueParsed = parsed.filter { normalizeChannelKey(it.baslik) !in existingKeys }
+                        return@withContext (tkgsList + uniqueParsed).distinctBy { normalizeChannelKey(it.baslik) }
                     }
                 }
             }
@@ -132,7 +237,13 @@ class InternetChannelService {
                         lower.contains("bbc earth") || lower.contains("bengütürk") || lower.contains("benguturk") ||
                         lower.contains("line tv") || lower.contains("bursa tv") ||
                         lower.contains("cartoon network") || lower.contains("çizgi klasik") || lower.contains("cizgi klasik") ||
-                        urlLower.contains("mangeinde4.lat") || urlLower.contains("siteyaptim.live") || urlLower.contains("185.234.111.229") || urlLower.contains("win1.yayin.com.tr")
+                        lower.contains("[geo-blocked]") ||
+                        urlLower.contains("mangeinde4.lat") || urlLower.contains("siteyaptim.live") ||
+                        urlLower.contains("185.234.111.229") || urlLower.contains("win1.yayin.com.tr") ||
+                        urlLower.contains("dogus-live.daioncdn.net/kralpoptv") ||
+                        urlLower.contains("live.duhnet.tv/s2/hls_live/minikacocuk") ||
+                        urlLower.contains(".live.trt.com.tr") ||
+                        urlLower.contains("turkmedya.radyotvonline.com")
                     if (!isDeadOrExcluded) {
                         val mappedKat = mapCategory(currentGroup, currentTitle)
                         val colType = when (mappedKat) {
@@ -402,9 +513,10 @@ class InternetChannelService {
                 baslik = "TRT Spor HD",
                 kategori = "Ulusal Spor",
                 resim_url = getOfficialWebLogo("trt spor"),
-                yayin_url = "https://trt.daioncdn.net/trtspor/master.m3u8?app=web&platform=trtspor",
+                yayin_url = "https://trt.daioncdn.net/trtspor/master.m3u8?app=web",
                 backup_urls = listOf(
-                    "https://trt.daioncdn.net/trtspor-yildiz/master.m3u8?app=web&platform=trtspor"
+                    "https://tv-trtspor1.medya.trt.com.tr/master.m3u8",
+                    "https://trt.daioncdn.net/trtspor-yildiz/master.m3u8?app=web"
                 ),
                 description = "Milli Maçlar, Trendyol 1. Lig & Spor Gündemi",
                 collectionType = MediaCollection.SPOR
@@ -414,9 +526,10 @@ class InternetChannelService {
                 baslik = "TRT Spor Yıldız HD",
                 kategori = "Genel Spor",
                 resim_url = getOfficialWebLogo("trt spor yıldız"),
-                yayin_url = "https://trt.daioncdn.net/trtspor-yildiz/master.m3u8?app=web&platform=trtspor",
+                yayin_url = "https://trt.daioncdn.net/trtspor-yildiz/master.m3u8?app=web",
                 backup_urls = listOf(
-                    "https://trt.daioncdn.net/trtspor/master.m3u8?app=web&platform=trtspor"
+                    "https://tv-trtspor2.medya.trt.com.tr/master.m3u8",
+                    "https://trt.daioncdn.net/trtspor/master.m3u8?app=web"
                 ),
                 description = "Voleybol, Basketbol & Branş Sporları",
                 collectionType = MediaCollection.SPOR
@@ -503,7 +616,6 @@ class InternetChannelService {
                 yayin_url = "https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/ahaber/ahaber_720p.m3u8",
                 backup_urls = listOf(
                     "https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/ahaber/ahaber.m3u8",
-                    "http://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/ahaber/ahaber_720p.m3u8",
                     "https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/ahaber/ahaber_360p.m3u8"
                 ),
                 collectionType = MediaCollection.HABER
@@ -555,7 +667,8 @@ class InternetChannelService {
                 baslik = "TGRT Haber HD",
                 kategori = "Gündem",
                 resim_url = getOfficialWebLogo("tgrt"),
-                yayin_url = "https://canli.tgrthaber.com/tgrt.m3u8",
+                yayin_url = "https://www.youtube.com/watch?v=IXFMr2wmv2k",
+                backup_urls = listOf("https://canli.tgrthaber.com/tgrt.m3u8"),
                 collectionType = MediaCollection.HABER
             ),
             MediaItem(
@@ -591,9 +704,7 @@ class InternetChannelService {
                 yayin_url = "https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/apara/apara_720p.m3u8",
                 backup_urls = listOf(
                     "https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/apara/apara.m3u8",
-                    "http://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/apara/apara_720p.m3u8",
-                    "https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/apara/apara_360p.m3u8",
-                    "https://www.youtube.com/watch?v=joHdBJd_jQA"
+                    "https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/apara/apara_360p.m3u8"
                 ),
                 collectionType = MediaCollection.HABER
             ),
@@ -627,9 +738,10 @@ class InternetChannelService {
                 baslik = "TRT Çocuk Canlı",
                 kategori = "Çizgi Dizi & Eğlence",
                 resim_url = getOfficialWebLogo("trt çocuk"),
-                yayin_url = "https://tv-trtcocuk.medya.trt.com.tr/master_720.m3u8",
+                yayin_url = "https://tv-trtcocuk.medya.trt.com.tr/master.m3u8",
                 backup_urls = listOf(
-                    "https://tv-trtcocuk.medya.trt.com.tr/master.m3u8"
+                    "https://tv-trtcocuk.medya.trt.com.tr/master_720.m3u8",
+                    "https://www.youtube.com/watch?v=Pot0eKg0dJY"
                 ),
                 collectionType = MediaCollection.COCUK
             ),
@@ -641,7 +753,6 @@ class InternetChannelService {
                 yayin_url = "https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/minikago_cocuk/minikago_cocuk_720p.m3u8",
                 backup_urls = listOf(
                     "https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/minikago_cocuk/minikago_cocuk.m3u8",
-                    "http://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/minikago_cocuk/minikago_cocuk_720p.m3u8",
                     "https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/minikago_cocuk/minikago_cocuk_360p.m3u8"
                 ),
                 collectionType = MediaCollection.COCUK
@@ -651,10 +762,8 @@ class InternetChannelService {
                 baslik = "Minika GO HD",
                 kategori = "Çizgi Dizi",
                 resim_url = getOfficialWebLogo("minika go"),
-                yayin_url = "https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/minikago/minikago_720p.m3u8",
+                yayin_url = "https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/minikago/minikago.m3u8",
                 backup_urls = listOf(
-                    "https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/minikago/minikago.m3u8",
-                    "http://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/minikago/minikago_720p.m3u8",
                     "https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/minikago/minikago_360p.m3u8"
                 ),
                 collectionType = MediaCollection.COCUK
@@ -693,9 +802,9 @@ class InternetChannelService {
                 baslik = "Disney Channel TR",
                 kategori = "Çocuk",
                 resim_url = getOfficialWebLogo("disney"),
-                yayin_url = "https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/minikago/minikago_720p.m3u8",
+                yayin_url = "https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/minikago/minikago.m3u8",
                 backup_urls = listOf(
-                    "https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/minikago/minikago.m3u8"
+                    "https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/minikago/minikago_360p.m3u8"
                 ),
                 description = "Disney dünyasından çizgi filmler ve eğlenceli çocuk dizileri",
                 collectionType = MediaCollection.COCUK
@@ -714,8 +823,8 @@ class InternetChannelService {
                 baslik = "01 • TRT 1 HD",
                 kategori = "Ulusal",
                 resim_url = getOfficialWebLogo("trt 1"),
-                yayin_url = "https://tv-trt1.medya.trt.com.tr/master.m3u8",
-                backup_urls = listOf("https://trt.daioncdn.net/trt-1/master.m3u8?app=web&platform=trt1"),
+                yayin_url = "https://trt.daioncdn.net/trt-1/master.m3u8?app=web&platform=trt1",
+                backup_urls = listOf("https://tv-trt1.medya.trt.com.tr/master.m3u8"),
                 collectionType = MediaCollection.CANLI_TV
             ),
             MediaItem(
@@ -726,9 +835,7 @@ class InternetChannelService {
                 yayin_url = "https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/atv/atv_720p.m3u8",
                 backup_urls = listOf(
                     "https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/atv/atv.m3u8",
-                    "http://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/atv/atv_720p.m3u8",
-                    "https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/atv/atv_360p.m3u8",
-                    "http://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/atv/atv.m3u8"
+                    "https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/atv/atv_360p.m3u8"
                 ),
                 collectionType = MediaCollection.CANLI_TV
             ),
@@ -756,7 +863,10 @@ class InternetChannelService {
                 kategori = "Ulusal",
                 resim_url = getOfficialWebLogo("tv8"),
                 yayin_url = "https://tv8.daioncdn.net/tv8/tv8.m3u8?app=7ddc255a-ef47-4e81-ab14-c0e5f2949788&ce=3",
-                backup_urls = listOf("https://beyaztv-live.daioncdn.net/beyaztv/beyaztv.m3u8"),
+                backup_urls = listOf(
+                    "https://tv8.daioncdn.net/tv8/tv8.m3u8?app=tv8_web",
+                    "https://tv8.daioncdn.net/tv8/tv8_720p.m3u8?app=tv8_web"
+                ),
                 collectionType = MediaCollection.CANLI_TV
             ),
             MediaItem(
@@ -765,7 +875,6 @@ class InternetChannelService {
                 kategori = "Ulusal",
                 resim_url = getOfficialWebLogo("now"),
                 yayin_url = "https://uycyyuuzyh.turknet.ercdn.net/nphindgytw/nowtv/nowtv.m3u8",
-                backup_urls = listOf("https://turkmedya-live.ercdn.net/tv360/tv360.m3u8"),
                 collectionType = MediaCollection.CANLI_TV
             ),
             MediaItem(
@@ -791,17 +900,23 @@ class InternetChannelService {
                 baslik = "09 • TRT Spor HD",
                 kategori = "Spor",
                 resim_url = getOfficialWebLogo("trt spor"),
-                yayin_url = "https://trt.daioncdn.net/trtspor/master.m3u8?app=web&platform=trtspor",
-                backup_urls = listOf("https://trt.daioncdn.net/trtspor-yildiz/master.m3u8?app=web&platform=trtspor"),
+                yayin_url = "https://trt.daioncdn.net/trtspor/master.m3u8?app=web",
+                backup_urls = listOf(
+                    "https://tv-trtspor1.medya.trt.com.tr/master.m3u8",
+                    "https://trt.daioncdn.net/trtspor-yildiz/master.m3u8?app=web"
+                ),
                 collectionType = MediaCollection.CANLI_TV
             ),
             MediaItem(
                 id = "live_10",
                 baslik = "10 • TRT Spor Yıldız",
                 kategori = "Spor",
-                resim_url = getOfficialWebLogo("trt spor"),
-                yayin_url = "https://trt.daioncdn.net/trtspor-yildiz/master.m3u8?app=web&platform=trtspor",
-                backup_urls = listOf("https://trt.daioncdn.net/trtspor/master.m3u8?app=web&platform=trtspor"),
+                resim_url = getOfficialWebLogo("trt spor yıldız"),
+                yayin_url = "https://trt.daioncdn.net/trtspor-yildiz/master.m3u8?app=web",
+                backup_urls = listOf(
+                    "https://tv-trtspor2.medya.trt.com.tr/master.m3u8",
+                    "https://trt.daioncdn.net/trtspor/master.m3u8?app=web"
+                ),
                 collectionType = MediaCollection.CANLI_TV
             ),
             MediaItem(
@@ -812,7 +927,6 @@ class InternetChannelService {
                 yayin_url = "https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/aspor/aspor_720p.m3u8",
                 backup_urls = listOf(
                     "https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/aspor/aspor.m3u8",
-                    "http://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/aspor/aspor_720p.m3u8",
                     "https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/aspor/aspor_360p.m3u8"
                 ),
                 collectionType = MediaCollection.CANLI_TV
@@ -831,10 +945,6 @@ class InternetChannelService {
                 kategori = "Spor",
                 resim_url = getOfficialWebLogo("fb tv"),
                 yayin_url = "https://1hskrdto.rocketcdn.com/fenerbahcetv.smil/playlist.m3u8",
-                backup_urls = listOf(
-                    "http://1hskrdto.rocketcdn.com/fenerbahcetv.smil/playlist.m3u8",
-                    "https://trt.daioncdn.net/trtspor/master.m3u8?app=web&platform=trtspor"
-                ),
                 collectionType = MediaCollection.CANLI_TV
             ),
             MediaItem(
@@ -881,7 +991,6 @@ class InternetChannelService {
                 yayin_url = "https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/ahaber/ahaber_720p.m3u8",
                 backup_urls = listOf(
                     "https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/ahaber/ahaber.m3u8",
-                    "http://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/ahaber/ahaber_720p.m3u8",
                     "https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/ahaber/ahaber_360p.m3u8"
                 ),
                 collectionType = MediaCollection.CANLI_TV
@@ -920,8 +1029,7 @@ class InternetChannelService {
                 resim_url = getOfficialWebLogo("a2"),
                 yayin_url = "https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/a2tv/a2tv_720p.m3u8",
                 backup_urls = listOf(
-                    "https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/a2tv/a2tv.m3u8",
-                    "http://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/a2tv/a2tv_720p.m3u8",
+                    "https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/a2tv/a2tv_480p.m3u8",
                     "https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/a2tv/a2tv_360p.m3u8"
                 ),
                 collectionType = MediaCollection.CANLI_TV
@@ -948,7 +1056,8 @@ class InternetChannelService {
                 baslik = "25 • TGRT Haber HD",
                 kategori = "Haber",
                 resim_url = getOfficialWebLogo("tgrt"),
-                yayin_url = "https://canli.tgrthaber.com/tgrt.m3u8",
+                yayin_url = "https://www.youtube.com/watch?v=IXFMr2wmv2k",
+                backup_urls = listOf("https://canli.tgrthaber.com/tgrt.m3u8"),
                 collectionType = MediaCollection.CANLI_TV
             ),
             MediaItem(
@@ -964,9 +1073,10 @@ class InternetChannelService {
                 baslik = "27 • TRT Çocuk Canlı",
                 kategori = "Çocuk",
                 resim_url = getOfficialWebLogo("trt çocuk"),
-                yayin_url = "https://tv-trtcocuk.medya.trt.com.tr/master_720.m3u8",
+                yayin_url = "https://tv-trtcocuk.medya.trt.com.tr/master.m3u8",
                 backup_urls = listOf(
-                    "https://tv-trtcocuk.medya.trt.com.tr/master.m3u8"
+                    "https://tv-trtcocuk.medya.trt.com.tr/master_720.m3u8",
+                    "https://www.youtube.com/watch?v=Pot0eKg0dJY"
                 ),
                 collectionType = MediaCollection.CANLI_TV
             ),
@@ -975,9 +1085,10 @@ class InternetChannelService {
                 baslik = "28 • Minika Çocuk HD",
                 kategori = "Çocuk",
                 resim_url = getOfficialWebLogo("minika"),
-                yayin_url = "https://live.duhnet.tv/S2/HLS_LIVE/minikacocuk/playlist.m3u8",
+                yayin_url = "https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/minikago_cocuk/minikago_cocuk_720p.m3u8",
                 backup_urls = listOf(
-                    "https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/minikago_cocuk/minikago_cocuk.m3u8"
+                    "https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/minikago_cocuk/minikago_cocuk.m3u8",
+                    "https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/minikago_cocuk/minikago_cocuk_360p.m3u8"
                 ),
                 collectionType = MediaCollection.CANLI_TV
             ),
@@ -986,10 +1097,8 @@ class InternetChannelService {
                 baslik = "29 • Minika GO HD",
                 kategori = "Çocuk",
                 resim_url = getOfficialWebLogo("minika go"),
-                yayin_url = "https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/minikago/minikago_720p.m3u8",
+                yayin_url = "https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/minikago/minikago.m3u8",
                 backup_urls = listOf(
-                    "https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/minikago/minikago.m3u8",
-                    "http://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/minikago/minikago_720p.m3u8",
                     "https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/minikago/minikago_360p.m3u8"
                 ),
                 collectionType = MediaCollection.CANLI_TV
@@ -1028,9 +1137,9 @@ class InternetChannelService {
                 baslik = "33 • Disney Channel TR",
                 kategori = "Çocuk",
                 resim_url = getOfficialWebLogo("disney"),
-                yayin_url = "https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/minikago/minikago_720p.m3u8",
+                yayin_url = "https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/minikago/minikago.m3u8",
                 backup_urls = listOf(
-                    "https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/minikago/minikago.m3u8"
+                    "https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/minikago/minikago_360p.m3u8"
                 ),
                 collectionType = MediaCollection.CANLI_TV
             ),
@@ -1039,9 +1148,10 @@ class InternetChannelService {
                 baslik = "34 • Kral Pop TV HD",
                 kategori = "Müzik",
                 resim_url = getOfficialWebLogo("kral pop"),
-                yayin_url = "https://dogus-live.daioncdn.net/kralpoptv/playlist.m3u8",
+                yayin_url = "https://dygvideo.dygdigital.com/live/hls/kralpop-snappy",
                 backup_urls = listOf(
-                    "https://livetv.powerapp.com.tr/powerTV/powerhd.smil/playlist.m3u8"
+                    "https://dygvideo.dygdigital.com/live/hls/kralpop",
+                    "https://dygedge.radyotvonline.net/kralpop/playlist.m3u8"
                 ),
                 collectionType = MediaCollection.CANLI_TV
             ),
@@ -1060,7 +1170,6 @@ class InternetChannelService {
                 kategori = "Müzik",
                 resim_url = getOfficialWebLogo("dream"),
                 yayin_url = "https://live.duhnet.tv/S2/HLS_LIVE/dreamturknp/playlist.m3u8",
-                backup_urls = listOf("https://moondigitaledge2.radyotvonline.net/slowturk/playlist.m3u8"),
                 collectionType = MediaCollection.CANLI_TV
             ),
             MediaItem(
@@ -1078,7 +1187,7 @@ class InternetChannelService {
                 kategori = "Müzik",
                 resim_url = getOfficialWebLogo("trt müzik"),
                 yayin_url = "https://tv-trtmuzik.medya.trt.com.tr/master.m3u8",
-                backup_urls = listOf("https://radio-trtnagme.live.trt.com.tr/master.m3u8"),
+                backup_urls = listOf("https://tv-trtmuzik.medya.trt.com.tr/master_720.m3u8"),
                 collectionType = MediaCollection.CANLI_TV
             ),
             MediaItem(
@@ -1087,7 +1196,7 @@ class InternetChannelService {
                 kategori = "Ulusal",
                 resim_url = getOfficialWebLogo("trt türk"),
                 yayin_url = "https://tv-trtturk.medya.trt.com.tr/master.m3u8",
-                backup_urls = listOf("https://tv-trt1.medya.trt.com.tr/master.m3u8"),
+                backup_urls = listOf("https://trt.daioncdn.net/trt-1/master.m3u8?app=web&platform=trt1"),
                 collectionType = MediaCollection.CANLI_TV
             ),
             MediaItem(
@@ -1105,7 +1214,7 @@ class InternetChannelService {
                 kategori = "Ulusal",
                 resim_url = getOfficialWebLogo("trt kurdi"),
                 yayin_url = "https://tv-trtkurdi.medya.trt.com.tr/master.m3u8",
-                backup_urls = listOf("https://tv-trt1.medya.trt.com.tr/master.m3u8"),
+                backup_urls = listOf("https://trt.daioncdn.net/trt-1/master.m3u8?app=web&platform=trt1"),
                 collectionType = MediaCollection.CANLI_TV
             ),
             MediaItem(
@@ -1174,9 +1283,22 @@ class InternetChannelService {
                 baslik = "TRT Radyo 1",
                 kategori = "Haber",
                 resim_url = getOfficialWebLogo("trt radyo 1"),
-                yayin_url = "https://radio-trtradyo1.live.trt.com.tr/master.m3u8",
-                backup_urls = listOf("https://trt.radyotvonline.net/trt1"),
+                yayin_url = "https://rd-trtradyo1.medya.trt.com.tr/master.m3u8",
+                backup_urls = listOf(
+                    "https://rd-trtradyo1.medya.trt.com.tr/master_128.m3u8",
+                    "https://trt.radyotvonline.net/trt1"
+                ),
                 description = "Türkiye'nin köklü haber, kültür ve bilgi radyosu",
+                collectionType = MediaCollection.RADYO
+            ),
+            MediaItem(
+                id = "radio_trt_haber",
+                baslik = "TRT Radyo Haber",
+                kategori = "Haber",
+                resim_url = getOfficialWebLogo("trt radyo haber"),
+                yayin_url = "https://trt.radyotvonline.net/trthaber",
+                backup_urls = listOf("https://rd-trtradyo1.medya.trt.com.tr/master.m3u8"),
+                description = "TRT 24 saat canlı haber ve gündem radyosu",
                 collectionType = MediaCollection.RADYO
             ),
             MediaItem(
@@ -1246,7 +1368,7 @@ class InternetChannelService {
                 kategori = "Müzik",
                 resim_url = getOfficialWebLogo("kral pop"),
                 yayin_url = "https://dygedge.radyotvonline.net/kralpop/playlist.m3u8",
-                backup_urls = listOf("https://dogus-live.daioncdn.net/kralpoptv/playlist.m3u8"),
+                backup_urls = listOf("https://dygvideo.dygdigital.com/live/hls/kralpop-snappy"),
                 description = "Pop müziğin zirvesindeki hit şarkılar",
                 collectionType = MediaCollection.RADYO
             ),
@@ -1266,7 +1388,7 @@ class InternetChannelService {
                 kategori = "Müzik",
                 resim_url = getOfficialWebLogo("power türk"),
                 yayin_url = "https://listen.powerapp.com.tr/powerturk/128/chunks.m3u8",
-                backup_urls = listOf("https://livetv.powerapp.com.tr/powerTV/powerhd.smil/playlist.m3u8"),
+                backup_urls = listOf("https://live.powerapp.com.tr/powerturk/abr/playlist.m3u8"),
                 description = "Önce müzik, en iyi Türkçe pop",
                 collectionType = MediaCollection.RADYO
             ),
@@ -1275,8 +1397,11 @@ class InternetChannelService {
                 baslik = "Power FM",
                 kategori = "Müzik",
                 resim_url = getOfficialWebLogo("power fm"),
-                yayin_url = "https://listen.powerapp.com.tr/powerfm/128/chunks.m3u8",
-                backup_urls = listOf("https://livetv.powerapp.com.tr/powerTV/powerhd.smil/playlist.m3u8"),
+                yayin_url = "https://live.powerapp.com.tr/powerfmadver/abr/playlist.m3u8",
+                backup_urls = listOf(
+                    "https://live.powerapp.com.tr/powerfmadver/128/playlist.m3u8",
+                    "https://live.powerapp.com.tr/powerfmadver/96/playlist.m3u8"
+                ),
                 description = "Dünya hitleri ve en yeni yabancı parçalar",
                 collectionType = MediaCollection.RADYO
             ),
@@ -1286,7 +1411,6 @@ class InternetChannelService {
                 kategori = "Müzik",
                 resim_url = getOfficialWebLogo("slow türk"),
                 yayin_url = "https://radyo.duhnet.tv/ak_dtvh_slowturk",
-                backup_urls = listOf("https://moondigitaledge2.radyotvonline.net/slowturk/playlist.m3u8"),
                 description = "Aşkın ve duygusal şarkıların frekansı",
                 collectionType = MediaCollection.RADYO
             ),
@@ -1364,9 +1488,6 @@ class InternetChannelService {
                 kategori = "Müzik",
                 resim_url = getOfficialWebLogo("alem fm"),
                 yayin_url = "https://turkmedya.radyotvonline.net/alemfmaac",
-                backup_urls = listOf(
-                    "https://edge1.radyotvonline.net/shoutcast/play/alemfm"
-                ),
                 description = "Cümle alem burada sloganıyla Türkçe pop",
                 collectionType = MediaCollection.RADYO
             ),
@@ -1407,8 +1528,11 @@ class InternetChannelService {
                 baslik = "TRT FM",
                 kategori = "Müzik",
                 resim_url = getOfficialWebLogo("trt fm"),
-                yayin_url = "https://radio-trtfm.live.trt.com.tr/master.m3u8",
-                backup_urls = listOf("https://radio-trtradyo1.live.trt.com.tr/master.m3u8"),
+                yayin_url = "https://rd-trtfm.medya.trt.com.tr/master.m3u8",
+                backup_urls = listOf(
+                    "https://rd-trtfm.medya.trt.com.tr/master_128.m3u8",
+                    "https://trt.radyotvonline.net/trtfm"
+                ),
                 description = "Yılların eskimeyen müzik ve eğlence radyosu",
                 collectionType = MediaCollection.RADYO
             ),
@@ -1417,8 +1541,8 @@ class InternetChannelService {
                 baslik = "TRT Türkü",
                 kategori = "Müzik",
                 resim_url = getOfficialWebLogo("trt türkü"),
-                yayin_url = "https://radio-trtturku.live.trt.com.tr/master.m3u8",
-                backup_urls = listOf("https://radio-trtnagme.live.trt.com.tr/master.m3u8"),
+                yayin_url = "https://rd-trtturku.medya.trt.com.tr/master.m3u8",
+                backup_urls = listOf("https://rd-trtturku.medya.trt.com.tr/master_128.m3u8"),
                 description = "Anadolu'nun zengin türkü hazinesi",
                 collectionType = MediaCollection.RADYO
             ),
@@ -1427,8 +1551,8 @@ class InternetChannelService {
                 baslik = "TRT Nağme",
                 kategori = "Müzik",
                 resim_url = getOfficialWebLogo("trt nağme"),
-                yayin_url = "https://radio-trtnagme.live.trt.com.tr/master.m3u8",
-                backup_urls = listOf("https://radio-trtturku.live.trt.com.tr/master.m3u8"),
+                yayin_url = "https://rd-trtnagme.medya.trt.com.tr/master.m3u8",
+                backup_urls = listOf("https://rd-trtnagme.medya.trt.com.tr/master_128.m3u8"),
                 description = "Klasik Türk Sanat Müziği eserleri",
                 collectionType = MediaCollection.RADYO
             ),
@@ -1437,8 +1561,8 @@ class InternetChannelService {
                 baslik = "TRT Radyo 3",
                 kategori = "Müzik",
                 resim_url = getOfficialWebLogo("trt radyo 3"),
-                yayin_url = "https://radio-trtradyo3.live.trt.com.tr/master.m3u8",
-                backup_urls = listOf("https://radio-trtradyo1.live.trt.com.tr/master.m3u8"),
+                yayin_url = "https://rd-trtradyo3.medya.trt.com.tr/master.m3u8",
+                backup_urls = listOf("https://rd-trtradyo3.medya.trt.com.tr/master_128.m3u8"),
                 description = "Klasik batı müziği ve cazın seçkin örnekleri",
                 collectionType = MediaCollection.RADYO
             ),
@@ -1572,7 +1696,7 @@ class InternetChannelService {
                 baslik = "Lig Radyo",
                 kategori = "Spor",
                 resim_url = getOfficialWebLogo("lig radyo"),
-                yayin_url = "http://turkmedya.radyotvonline.com/turkmedya/ligradyo.stream/playlist.m3u8",
+                yayin_url = "https://ligradyo.radyotvonline.net/ligradyo",
                 description = "Futbol sevgisi ve liglerin nabzı",
                 collectionType = MediaCollection.RADYO
             )

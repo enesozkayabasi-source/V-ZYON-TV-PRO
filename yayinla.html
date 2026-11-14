@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VİZYON TV PRO — Bağımsız Sürüm Yayınlama Stüdyosu</title>
+  <meta name="theme-color" content="#060911">
+  <link rel="icon" type="image/png" href="web/logo.png">
+  <style>
+    :root { --bg: #060911; --card: rgba(15, 22, 38, 0.86); --border: rgba(56, 189, 248, 0.22); --gold: #FBBF24; --cyan: #00E5FF; --green: #34D399; --text: #F8FAFC; --muted: #94A3B8; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: radial-gradient(ellipse 80% 50% at 15% 10%, rgba(0, 229, 255, 0.12), transparent 60%), radial-gradient(ellipse 65% 45% at 85% 15%, rgba(251, 191, 36, 0.10), transparent 55%), var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif; line-height: 1.55; min-height: 100vh; }
+    .container { max-width: 1160px; margin: 0 auto; padding: 24px 20px 60px; }
+    .topbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 28px; }
+    .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; color: #fff; }
+    .brand img { width: 42px; height: 42px; border-radius: 12px; border: 1px solid rgba(56,189,248,0.45); }
+    .brand h1 { font-size: 18px; font-weight: 900; }
+    .brand small { display: block; color: var(--cyan); font-size: 11.5px; font-weight: 700; }
+    .back-btn { padding: 10px 16px; border-radius: 12px; text-decoration: none; font-weight: 800; font-size: 13px; color: var(--cyan); background: rgba(0,229,255,0.12); border: 1px solid rgba(0,229,255,0.4); }
+    .grid { display: grid; grid-template-columns: 1.25fr 0.75fr; gap: 24px; align-items: start; }
+    .panel { background: var(--card); border: 1px solid var(--border); border-radius: 22px; padding: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.55); }
+    .panel h2 { font-size: 20px; font-weight: 900; margin-bottom: 6px; }
+    .panel p.sub { color: var(--muted); font-size: 13px; margin-bottom: 18px; }
+    .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .field { margin-bottom: 14px; }
+    .field label { display: block; font-size: 12px; font-weight: 800; color: var(--cyan); margin-bottom: 6px; }
+    .field input, .field textarea { width: 100%; background: rgba(4, 7, 14, 0.75); border: 1px solid rgba(255,255,255,0.14); border-radius: 12px; padding: 11px 13px; color: #fff; font-size: 13.5px; outline: none; font-family: inherit; }
+    .field input:focus, .field textarea:focus { border-color: var(--gold); }
+    .field textarea { min-height: 92px; resize: vertical; }
+    .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
+    .btn { border: none; border-radius: 12px; padding: 13px 18px; font-weight: 800; font-size: 13.5px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
+    .btn-gold { background: linear-gradient(135deg, var(--gold), #EA8C00); color: #060911; }
+    .btn-cyan { background: rgba(0,229,255,0.14); color: var(--cyan); border: 1px solid rgba(0,229,255,0.45); }
+    .btn-ghost { background: rgba(255,255,255,0.06); color: #fff; border: 1px solid rgba(255,255,255,0.14); }
+    .qr-box { background: #fff; border-radius: 18px; padding: 18px; text-align: center; color: #090D16; margin-bottom: 16px; }
+    #preview-qr svg { width: 100%; max-width: 220px; height: auto; margin: 10px auto; display: block; }
+    .preview-meta { font-size: 12.5px; color: var(--muted); background: rgba(0,0,0,0.35); border-radius: 12px; padding: 12px; margin-bottom: 14px; }
+    .preview-meta code { color: var(--cyan); word-break: break-all; font-size: 11.5px; }
+    .steps-box { margin-top: 20px; background: rgba(52, 211, 153, 0.08); border: 1px solid rgba(52, 211, 153, 0.28); border-radius: 16px; padding: 16px; font-size: 12.5px; color: var(--muted); }
+    .steps-box strong { color: var(--green); display: block; margin-bottom: 6px; font-size: 13px; }
+    .steps-box ol { padding-left: 18px; } .steps-box li { margin-bottom: 5px; }
+    .toast { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%) translateY(80px); background: #0F172A; border: 1px solid var(--green); color: #fff; padding: 11px 18px; border-radius: 12px; font-size: 13px; font-weight: 700; opacity: 0; transition: all 0.25s; }
+    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+    @media (max-width: 900px) { .grid, .row2 { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <a href="index.html" class="brand"><img src="web/logo.png" alt="Logo" onerror="this.onerror=null;this.src='logo.png'"><div><h1>VİZYON TV PRO — Sürüm Yayınlama Stüdyosu</h1><small>GitHub'dan %100 Bağımsız Sürüm & QR Güncelleme Paneli</small></div></a>
+      <a href="index.html" class="back-btn">← Ana Web Sitesine Dön</a>
+    </div>
+    <div class="grid">
+      <div class="panel">
+        <h2>Yeni Sürüm Oluştur & Yayınla</h2>
+        <p class="sub">Yeni APK çıkardığınızda buradan bilgileri güncelleyip <strong>version.json</strong> dosyasını indirin. Web sitenizdeki indirme butonları, QR kodları, sürüm geçmişi ve Android uygulamasındaki canlı güncelleme kontrolü bu dosyayı okur.</p>
+        <div class="row2"><div class="field"><label for="f-ver">Yeni Sürüm Etiketi</label><input id="f-ver" type="text" value="v3.6"></div><div class="field"><label for="f-code">Sürüm Kodu (versionCode)</label><input id="f-code" type="number" value="360"></div></div>
+        <div class="row2"><div class="field"><label for="f-date">Yayın Tarihi</label><input id="f-date" type="date"></div><div class="field"><label for="f-size">APK Boyutu</label><input id="f-size" type="text" value="38.5 MB"></div></div>
+        <div class="field"><label for="f-apk">APK Dosya Yolu veya Doğrudan İndirme Linki</label><input id="f-apk" type="text" value="./releases/VIZYON.TV.v3.6.apk"></div>
+        <div class="field"><label for="f-fast">Yedek Ayna (Mirror) APK Bağlantısı</label><input id="f-fast" type="text" value="./releases/vizyontv-latest.apk"></div>
+        <div class="field"><label for="f-summary">Uygulama İçi Güncelleme Özeti</label><input id="f-summary" type="text" value="VİZYON TV v3.6: Yeni kanal iyileştirmeleri ve performans geliştirmeleri."></div>
+        <div class="field"><label for="f-notes">Yenilik Maddeleri (Her satıra 1 madde yazın)</label><textarea id="f-notes">Tüm canlı yayın bağlantıları güncellendi ve yedek sunucular eklendi
+Video oynatıcı açılış hızı artırıldı
+Yeni sürüm performans ve kararlılık iyileştirmeleri</textarea></div>
+        <div class="actions">
+          <button id="btn-download-json" class="btn btn-gold">⬇️ Güncel version.json İndir</button>
+          <button id="btn-copy-json" class="btn btn-cyan">📋 JSON Kodunu Kopyala</button>
+          <button id="btn-download-qr" class="btn btn-ghost">🖼️ Yeni Sürüm QR İndir (PNG)</button>
+        </div>
+        <div class="steps-box">
+          <strong>🚀 GitHub Olmadan 3 Adımda Yayınlama (Netlify Drop / Vercel / Kendi Sunucunuz)</strong>
+          <ol>
+            <li>Yeni APK dosyanızı <code>web/releases/</code> klasörüne koyun (veya yukarıya doğrudan dış indirme linki yazın).</li>
+            <li><strong>"Güncel version.json İndir"</strong> butonuna basıp inen <code>version.json</code> dosyasını sunucunuzdakiyle değiştirin.</li>
+            <li><code>web/</code> klasörünü <strong>app.netlify.com/drop</strong>, <strong>Vercel</strong> veya cPanel/FTP alanınıza yükleyin (Not: APK ~38 MB olduğu için 25 MB sınırı olan Cloudflare Pages yerine Netlify Drop veya kendi sunucunuz önerilir).</li>
+          </ol>
+        </div>
+      </div>
+      <div class="panel">
+        <h2>Canlı QR & Yayın Önizlemesi</h2>
+        <p class="sub">QR kodu, yazdığınız APK yolunu otomatik olarak mevcut site alan adınızla birleştirir.</p>
+        <div class="qr-box"><div style="font-weight: 900; font-size: 14px;" id="prev-title">VİZYON TV PRO v3.6</div><div id="preview-qr"></div><div style="font-size: 11px; font-weight: 800; color: #0284C7;" id="prev-sub">DOĞRUDAN APK İNDİRME QR'I</div></div>
+        <div class="preview-meta"><div style="margin-bottom: 6px; font-weight: 800; color: #fff;">QR'ın Kodladığı Tam Adres:</div><code id="prev-url">-</code></div>
+        <div class="preview-meta"><div style="margin-bottom: 6px; font-weight: 800; color: #fff;">Kayıtlı Arşiv Sürümleri:</div><div id="prev-history">Yükleniyor...</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="toast" id="toast"></div>
+  <script>
+    const QRGen = (() => {
+      const EXP = new Uint8Array(512), LOG = new Uint8Array(256); let x = 1;
+      for (let i = 0; i < 255; i++) { EXP[i] = x; LOG[x] = i; x <<= 1; if (x & 256) x ^= 0x11d; }
+      for (let i = 255; i < 512; i++) EXP[i] = EXP[i - 255];
+      const mul = (a, b) => (a && b) ? EXP[LOG[a] + LOG[b]] : 0;
+      function rsGenPoly(deg) { let p = [1]; for (let i = 0; i < deg; i++) { const next = new Array(p.length + 1).fill(0); for (let j = 0; j < p.length; j++) { next[j] ^= p[j]; next[j + 1] ^= mul(p[j], EXP[i]); } p = next; } return p; }
+      function rsEncode(data, ecLen) { const gen = rsGenPoly(ecLen), buf = data.concat(new Array(ecLen).fill(0)); for (let i = 0; i < data.length; i++) { const c = buf[i]; if (c !== 0) for (let j = 0; j < gen.length; j++) buf[i + j] ^= mul(gen[j], c); } return buf.slice(data.length); }
+      const SPECS = [null,[16,10,1,16,0,0,[]],[28,16,1,28,0,0,[6,18]],[44,26,1,44,0,0,[6,22]],[64,18,2,32,0,0,[6,26]],[86,24,2,43,0,0,[6,30]],[108,16,4,27,0,0,[6,34]],[124,18,4,31,0,0,[6,22,38]],[154,22,2,38,2,39,[6,24,42]],[182,22,3,36,2,37,[6,26,46]],[216,26,4,43,1,44,[6,28,50]],[254,30,1,50,4,51,[6,30,54]],[290,22,6,36,2,37,[6,32,58]]];
+      function formatBits(mask) { const data = (0 << 3) | mask; let rem = data << 10; for (let i = 14; i >= 10; i--) if ((rem >> i) & 1) rem ^= (0x537 << (i - 10)); return ((data << 10) | rem) ^ 0x5412; }
+      function versionBits(ver) { let rem = ver << 12; for (let i = 17; i >= 12; i--) if ((rem >> i) & 1) rem ^= (0x1f25 << (i - 12)); return (ver << 12) | rem; }
+      function encode(text) {
+        const bytes = Array.from(new TextEncoder().encode(text)); let ver = 1; while (ver < SPECS.length) { const cap = SPECS[ver][0], ccBits = ver < 10 ? 8 : 16; if (Math.ceil((4 + ccBits + bytes.length * 8) / 8) <= cap) break; ver++; }
+        if (ver >= SPECS.length) ver = SPECS.length - 1;
+        const [totalData, ecPerBlock, g1B, g1D, g2B, g2D, align] = SPECS[ver];
+        const bits = [], pushBits = (val, len) => { for (let i = len - 1; i >= 0; i--) bits.push((val >> i) & 1); };
+        pushBits(0b0100, 4); pushBits(bytes.length, ver < 10 ? 8 : 16); for (const b of bytes) pushBits(b, 8);
+        const maxBits = totalData * 8; for (let i = 0; i < 4 && bits.length < maxBits; i++) bits.push(0); while (bits.length % 8 !== 0) bits.push(0);
+        let padIdx = 0; while (bits.length < maxBits) { pushBits(padIdx % 2 === 0 ? 0xec : 0x11, 8); padIdx++; }
+        const dataBytes = []; for (let i = 0; i < bits.length; i += 8) { let v = 0; for (let j = 0; j < 8; j++) v = (v << 1) | bits[i + j]; dataBytes.push(v); }
+        const blocks = [], ecBlocks = []; let off = 0;
+        for (let i = 0; i < g1B; i++) { const b = dataBytes.slice(off, off + g1D); off += g1D; blocks.push(b); ecBlocks.push(rsEncode(b, ecPerBlock)); }
+        for (let i = 0; i < g2B; i++) { const b = dataBytes.slice(off, off + g2D); off += g2D; blocks.push(b); ecBlocks.push(rsEncode(b, ecPerBlock)); }
+        const finalBytes = [], maxD = Math.max(g1D, g2D);
+        for (let i = 0; i < maxD; i++) for (const b of blocks) if (i < b.length) finalBytes.push(b[i]);
+        for (let i = 0; i < ecPerBlock; i++) for (const eb of ecBlocks) finalBytes.push(eb[i]);
+        const size = ver * 4 + 17, mod = Array.from({ length: size }, () => new Int8Array(size).fill(-1)), isFunc = Array.from({ length: size }, () => new Uint8Array(size)), setFunc = (r, c, v) => { mod[r][c] = v ? 1 : 0; isFunc[r][c] = 1; };
+        const drawFinder = (r, c) => { for (let dr = -1; dr <= 7; dr++) for (let dc = -1; dc <= 7; dc++) { const rr = r + dr, cc = c + dc; if (rr < 0 || rr >= size || cc < 0 || cc >= size) continue; const on = (dr >= 0 && dr <= 6 && dc >= 0 && dc <= 6) && (dr === 0 || dr === 6 || dc === 0 || dc === 6 || (dr >= 2 && dr <= 4 && dc >= 2 && dc <= 4)); setFunc(rr, cc, on); } };
+        drawFinder(0, 0); drawFinder(0, size - 7); drawFinder(size - 7, 0);
+        for (let i = 8; i < size - 8; i++) { setFunc(6, i, i % 2 === 0); setFunc(i, 6, i % 2 === 0); } setFunc(size - 8, 8, 1);
+        if (align.length > 0) for (const r of align) for (const c of align) { if ((r <= 8 && c <= 8) || (r <= 8 && c >= size - 8) || (r >= size - 8 && c <= 8)) continue; for (let dr = -2; dr <= 2; dr++) for (let dc = -2; dc <= 2; dc++) setFunc(r + dr, c + dc, Math.max(Math.abs(dr), Math.abs(dc)) !== 1); }
+        for (let i = 0; i < 9; i++) { if (i !== 6) { isFunc[8][i] = 1; isFunc[i][8] = 1; } if (i < 8) { isFunc[8][size - 1 - i] = 1; isFunc[size - 1 - i][8] = 1; } }
+        if (ver >= 7) { const vb = versionBits(ver); for (let i = 0; i < 18; i++) { const bit = (vb >> i) & 1, a = Math.floor(i / 3), b = i % 3; setFunc(a, size - 11 + b, bit); setFunc(size - 11 + b, a, bit); } }
+        const bitStream = []; for (const b of finalBytes) for (let i = 7; i >= 0; i--) bitStream.push((b >> i) & 1);
+        let bitIdx = 0, up = true;
+        for (let col = size - 1; col >= 1; col -= 2) { if (col === 6) col--; for (let step = 0; step < size; step++) { const r = up ? size - 1 - step : step; for (let dc = 0; dc < 2; dc++) { const c = col - dc; if (!isFunc[r][c]) mod[r][c] = bitIdx < bitStream.length ? bitStream[bitIdx++] : 0; } } up = !up; }
+        const maskFns = [(r,c)=>(r+c)%2===0,(r,c)=>r%2===0,(r,c)=>c%3===0,(r,c)=>(r+c)%3===0,(r,c)=>(Math.floor(r/2)+Math.floor(c/3))%2===0,(r,c)=>((r*c)%2+(r*c)%3)===0,(r,c)=>(((r*c)%2+(r*c)%3)%2)===0,(r,c)=>(((r+c)%2+(r*c)%3)%2)===0];
+        let bestScore = Infinity, bestGrid = null;
+        for (let m = 0; m < 8; m++) {
+          const g = mod.map((row, r) => row.map((v, c) => isFunc[r][c] ? v : (v ^ (maskFns[m](r, c) ? 1 : 0))));
+          const fb = formatBits(m);
+          for (let i = 0; i < 15; i++) { const bit = (fb >> (14 - i)) & 1; if (i < 6) g[8][i] = bit; else if (i === 6) g[8][7] = bit; else if (i === 7) g[8][8] = bit; else if (i === 8) g[7][8] = bit; else g[14 - i][8] = bit; if (i < 7) g[size - 1 - i][8] = bit; else g[8][size - 15 + i] = bit; }
+          let score = 0;
+          for (let r = 0; r < size; r++) { let run = 1; for (let c = 1; c < size; c++) { if (g[r][c] === g[r][c - 1]) { run++; if (run === 5) score += 3; else if (run > 5) score++; } else run = 1; } }
+          for (let c = 0; c < size; c++) { let run = 1; for (let r = 1; r < size; r++) { if (g[r][c] === g[r - 1][c]) { run++; if (run === 5) score += 3; else if (run > 5) score++; } else run = 1; } }
+          if (score < bestScore) { bestScore = score; bestGrid = g; }
+        }
+        return { size, grid: bestGrid };
+      }
+      return { encode };
+    })();
+    let baseManifest = { appName: "VİZYON TV PRO", packageId: "com.aistudio.applet.kwnemt", minSdk: 24, releases: [] }, currentQr = null;
+    function showToast(msg) { const t = document.getElementById("toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(window._tt); window._tt = setTimeout(() => t.classList.remove("show"), 2600); }
+    function resolveUrl(raw) { if (!raw) return window.location.href; try { if (/^https?:\/\//i.test(raw)) return raw; return new URL(raw, window.location.href).href; } catch { return raw; } }
+    function buildManifest() {
+      const ver = document.getElementById("f-ver").value.trim() || "v3.6", code = parseInt(document.getElementById("f-code").value, 10) || 360, date = document.getElementById("f-date").value || new Date().toISOString().slice(0, 10), size = document.getElementById("f-size").value.trim() || "38.5 MB", apkUrl = document.getElementById("f-apk").value.trim() || `./releases/VIZYON.TV.${ver}.apk`, fastApkUrl = document.getElementById("f-fast").value.trim() || "./releases/vizyontv-latest.apk", changelog = document.getElementById("f-summary").value.trim() || `VİZYON TV ${ver} güncellemesi.`, highlights = document.getElementById("f-notes").value.split("\n").map(s => s.trim()).filter(Boolean);
+      const filteredHistory = (baseManifest.releases || []).filter(r => r.version !== ver).map((r, idx) => ({ ...r, tag: idx === 0 ? "ÖNCEKİ SÜRÜM" : "ARŞİV" }));
+      const newEntry = { version: ver, versionCode: code, releaseDate: date, apkSize: size, apkUrl, tag: "GÜNCEL SÜRÜM", highlights };
+      const mbNum = parseFloat(size.replace(",", ".")), apkSizeBytes = !isNaN(mbNum) ? Math.round(mbNum * 1024 * 1024) : 39845888;
+      return { appName: "VİZYON TV PRO", packageId: "com.aistudio.applet.kwnemt", minSdk: 24, version: ver, versionCode: code, releaseDate: date, apkSize: size, apkSizeBytes, apkUrl, fastApkUrl, changelog, releases: [newEntry, ...filteredHistory] };
+    }
+    function updatePreview() {
+      const ver = document.getElementById("f-ver").value.trim() || "v3.6", rawApk = document.getElementById("f-apk").value.trim() || `./releases/VIZYON.TV.${ver}.apk`, fullUrl = resolveUrl(rawApk);
+      document.getElementById("prev-title").textContent = `VİZYON TV PRO ${ver}`; document.getElementById("prev-url").textContent = fullUrl;
+      const qr = QRGen.encode(fullUrl); currentQr = qr; const qz = 3, dim = qr.size + qz * 2; let rects = "";
+      for (let r = 0; r < qr.size; r++) for (let c = 0; c < qr.size; c++) if (qr.grid[r][c] === 1) rects += `<rect x="${c + qz}" y="${r + qz}" width="1" height="1" fill="#090D16"/>`;
+      document.getElementById("preview-qr").innerHTML = `<svg viewBox="0 0 ${dim} ${dim}" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges"><rect width="${dim}" height="${dim}" fill="#FFFFFF"/>${rects}</svg>`;
+    }
+    async function loadExistingManifest() {
+      document.getElementById("f-date").value = new Date().toISOString().slice(0, 10);
+      try {
+        const res = await fetch("./version.json?t=" + Date.now());
+        if (res.ok) {
+          const data = await res.json(); baseManifest = data; const curNum = parseFloat((data.version || "v3.5").replace(/^v/i, ""));
+          if (!isNaN(curNum)) { const nextVer = "v" + (curNum + 0.1).toFixed(1); document.getElementById("f-ver").value = nextVer; document.getElementById("f-code").value = Math.round((curNum + 0.1) * 100); document.getElementById("f-apk").value = `./releases/VIZYON.TV.${nextVer}.apk`; }
+          const list = Array.isArray(data.releases) ? data.releases : [];
+          document.getElementById("prev-history").innerHTML = list.length ? list.map(r => `<div>• <b>${r.version}</b> (${r.releaseDate}) — ${r.apkSize || ""}</div>`).join("") : "Henüz arşiv kaydı yok.";
+        }
+      } catch { document.getElementById("prev-history").textContent = "Yerel dosya modunda çalışıyor; yeni manifest hazır."; }
+      updatePreview();
+    }
+    ["f-ver", "f-apk"].forEach(id => document.getElementById(id).addEventListener("input", () => { if (id === "f-ver") { const v = document.getElementById("f-ver").value.trim(), num = parseFloat(v.replace(/^v/i, "")); if (!isNaN(num)) document.getElementById("f-code").value = Math.round(num * 100); document.getElementById("f-apk").value = `./releases/VIZYON.TV.${v}.apk`; } updatePreview(); }));
+    document.getElementById("btn-download-json").addEventListener("click", () => { const blob = new Blob([JSON.stringify(buildManifest(), null, 2)], { type: "application/json" }); const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "version.json"; a.click(); showToast("✓ Güncel version.json indirildi! Web klasörüne yükleyin."); });
+    document.getElementById("btn-copy-json").addEventListener("click", async () => { try { await navigator.clipboard.writeText(JSON.stringify(buildManifest(), null, 2)); showToast("✓ JSON içeriği panoya kopyalandı!"); } catch { showToast("Kopyalama desteklenmiyor, İndir butonunu kullanın."); } });
+    document.getElementById("btn-download-qr").addEventListener("click", () => { if (!currentQr) return; const ver = document.getElementById("f-ver").value.trim() || "v3.6", scale = 14, pad = 42, qrPx = currentQr.size * scale, w = qrPx + pad * 2, h = qrPx + pad * 2 + 120; const canvas = document.createElement("canvas"); canvas.width = w; canvas.height = h; const ctx = canvas.getContext("2d"); ctx.fillStyle = "#FFFFFF"; ctx.fillRect(0, 0, w, h); ctx.fillStyle = "#090D16"; ctx.font = "900 26px sans-serif"; ctx.textAlign = "center"; ctx.fillText(`VİZYON TV PRO ${ver}`, w / 2, 46); ctx.fillStyle = "#0284C7"; ctx.font = "700 15px sans-serif"; ctx.fillText("APK İndirmek İçin Kamerayla Okutun", w / 2, 74); ctx.fillStyle = "#090D16"; for (let r = 0; r < currentQr.size; r++) for (let c = 0; c < currentQr.size; c++) if (currentQr.grid[r][c] === 1) ctx.fillRect(pad + c * scale, 92 + r * scale, scale, scale); ctx.fillStyle = "#475569"; ctx.font = "700 14px sans-serif"; ctx.fillText("Android TV • TV Box • Telefon (Android 7.0+)", w / 2, h - 24); const a = document.createElement("a"); a.download = `VIZYON-TV-PRO-${ver}-QR.png`; a.href = canvas.toDataURL("image/png"); a.click(); showToast(`✓ ${ver} QR PNG olarak indirildi!`); });
+    loadExistingManifest();
+  </script>
+</body>
+</html>

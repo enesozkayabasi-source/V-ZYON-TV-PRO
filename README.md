@@ -3,17 +3,17 @@
 # 📺 VİZYON TV PRO
 ### Android TV, TV Box, Tablet ve Telefonlar için Yeni Nesil Medya Platformu
 
-[![Sürüm](https://img.shields.io/badge/S%C3%BCr%C3%BCm-v3.2-00F5FF?style=for-the-badge&logo=android)](https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO/releases/tag/v3.2)
-[![Android TV](https://img.shields.io/badge/Android%20TV-Uyumlu-3DDC84?style=for-the-badge&logo=android)](https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO/releases/tag/v3.2)
-[![ExoPlayer](https://img.shields.io/badge/Oynat%C4%B1c%C4%B1-ExoPlayer%202.19-FF6F00?style=for-the-badge)](https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO)
+[![Sürüm](https://img.shields.io/badge/S%C3%BCr%C3%BCm-v3.5-00F5FF?style=for-the-badge&logo=android)](https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO/releases/tag/v3.5)
+[![Web Sitesi](https://img.shields.io/badge/Web%20Sitesi-Canl%C4%B1%20Portal%20%26%20QR-FBBF24?style=for-the-badge&logo=googlechrome)](https://enesozkayabasi-source.github.io/V-ZYON-TV-PRO/)
+[![Android TV](https://img.shields.io/badge/Android%20TV-Uyumlu-3DDC84?style=for-the-badge&logo=android)](https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO/releases/tag/v3.5)
+[![ExoPlayer](https://img.shields.io/badge/Oynat%C4%B1c%C4%B1-ExoPlayer%20Media3-FF6F00?style=for-the-badge)](https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO)
 [![Durum](https://img.shields.io/badge/Yay%C4%B1n-Aktif%20%26%20Kesintisiz-brightgreen?style=for-the-badge)](https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO)
-[![Boyut](https://img.shields.io/badge/APK%20Boyutu-37%20MB-blueviolet?style=for-the-badge)](https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO/releases/download/v3.2/VIZYON.TV.v3.2.apk)
 
 <br/>
 
-**[ 📲 VİZYON TV PRO v3.2 APK İNDİR (Doğrudan Bağlantı) ](https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO/releases/download/v3.2/VIZYON.TV.v3.2.apk)**
+**[ 🌐 RESMİ WEB SİTESİ & QR İNDİRME MERKEZİ ](https://enesozkayabasi-source.github.io/V-ZYON-TV-PRO/)** • **[ 📲 VİZYON TV PRO v3.5 APK İNDİR ](https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO/releases/download/v3.5/VIZYON.TV.v3.5.apk)**
 
-**[ ⚡ Alternatif Hızlı İndir (vizyontv.apk) ](https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO/raw/main/vizyontv.apk)** • **[ 📦 Tüm Sürümler & Değişiklik Günlüğü ](https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO/releases)** • **[ 🌐 Web Portalı ](https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO/blob/main/web/index.html)**
+**[ ⚡ Alternatif Hızlı İndir (vizyontv.apk) ](https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO/raw/main/vizyontv.apk)** • **[ 📦 Tüm Sürümler & Değişiklik Günlüğü ](https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO/releases)** • **[ 🖥️ Yerel Web Kaynağı (`web/index.html`) ](web/index.html)**
 
 ---
 
@@ -21,55 +21,29 @@
 
 ## 🌟 VİZYON TV PRO Nedir?
 
-**VİZYON TV PRO**, Android ekosistemi için sıfırdan geliştirilmiş, yüksek performanslı ve akıcı bir canlı yayın deneyimi sunan medya uygulamasıdır. Canlı ulusal televizyon kanalları, açık spor yayınları, haber, çocuk ve kesintisiz arka plan radyo oynatıcısı tek bir modern arayüzde bir araya getirilmiştir. 
+**VİZYON TV PRO**, Android ekosistemi için sıfırdan geliştirilmiş, yüksek performanslı ve akıcı bir canlı yayın deneyimi sunan medya uygulamasıdır. Canlı ulusal televizyon kanalları, açık spor yayınları, haber, çocuk ve 40+ kesintisiz radyo istasyonu tek bir modern arayüzde bir araya getirilmiştir.
 
 Gelişmiş kumanda (D-Pad) optimizasyonu sayesinde hem **Android TV** ve **TV Box** cihazlarında hem de **akıllı telefon ve tabletlerde** en üst düzey kullanıcı deneyimi sunar.
 
 ---
 
-## 🚀 Sürüm v3.2 ile Gelen Yenilikler
+## 🚀 Sürüm v3.5 ile Gelen Yenilikler
 
-- 📱 **Gerçek Tam Ekran (Immersive Mode) & Bildirim Paneli Gizleme:**
-  - Telefonda yatay ekranda video ve kanal izlerken üstte beliren sistem bildirim paneli (status bar) ve alt gezinme tuşları tamamen gizlendi.
-  - Görüntüyü hiçbir sistem çubuğunun kesmediği, sinematik ve net tam ekran video deneyimi sağlandı (`BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE`).
-- 🎮 **Android TV Kumandası Kanal Listesi Serbest Gezinme Modu:**
-  - Kanal izlerken kumandada `OK` tuşuna basıldığında açılan kanal listesinde yukarı/aşağı tuşları artık anında kanal değiştirmez.
-  - Liste üzerinde serbestçe gezinip odaklanabilir, yalnızca istediğiniz kanalın üstündeyken `OK / Enter` bastığınızda o kanala geçiş yapabilirsiniz. Mevcut yayın arkada kesintisiz oynamaya devam eder.
-- ⚡ **Eski ve Düşük Donanımlı Cihazlar İçin Sıfır Gecikmeli Akıcı Form:**
-  - Düşük RAM ve zayıf GPU'ya sahip telefon ve TV Box cihazlarında buton tıklama gecikmeleri giderildi.
-  - Çift grid animasyon yükü kaldırılarak sekmeler arası geçiş anlık (0ms gecikmeli) hale getirildi.
-  - Kanal kartlarındaki ağır GPU donanım gölgeleri optimize edilerek kaydırma akıcılığı 60 FPS seviyesine çıkarıldı.
-  - Android TV kumandalarında `OK` tuşunun 2-3 defa üst üste tıklama yapıp yayını dondurması engellendi.
-- 🖤 **Siyah Dynamic Island Yüzen Dock (Obsidian Black Glass):**
-  - Alt gezinme adasının arka planı derin parlak siyah cam kaplama (`#0D111A` ➔ `#000000`) ile yenilendi.
-  - Kristal kenar ışığı korundu; Canlı TV (Cyan), Haber (Mercan), Çocuk (Güneş Sarısı), Spor (Stadyum Yeşili) ve Radyo (Neon Mor) butonları siyah ada üzerinde maksimum kontrast ve canlılıkla parlar.
-  - Butonlar arası kayan sıvı cam hapındaki siyah gölge kutu silueti tamamen kaldırıldı; buton geçişleri pürüzsüz ve akıcı hale getirildi.
-  - Kanallar, şık siyah yüzen adanın altından kesintisiz akmaya devam eder.
-- 📱 **Tam Ekran Kamera Adası (Display Cutout) Entegrasyonu:**
-  - Modern telefonlardaki kamera adası / çentik (punch-hole) etrafında oluşan siyah şeritler ve kısıklıklar giderildi.
-  - Android 9+ ve Android 11+ için `LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS` desteği eklendi.
-  - Dinamik atmosferik degrade zemin ekranın en üst fiziksel pikseline kadar uzanırken, başlık ve butonlar kamera deliğinin altına güvenle hizalanır.
-- 🖥️ **Yatay Ekran (TV/Telefon) Kusursuz Sol Panel:**
-  - Sol navigasyon panelinin en üstünde kalan siyah boşluk tamamen giderildi; panel zemin rengi ekranın en üst piksellerine kadar kesintisiz bütünlendi.
-  - Yatay modda dikey alanı daraltan logo kaldırıldı.
-  - Paneldeki gereksiz Ayarlar ve Kanal Ekle butonları kaldırılarak (üst bardan doğrudan erişilebilir) Canlı TV, Haber, Çocuk, Spor, Radyo ve Favoriler sekmeleri daha geniş ve ergonomik butonlarla yerleştirildi.
-  - Panele `verticalScroll` ve dengeli aralıklar eklenerek tüm ekranlarda kusursuz akış sağlandı.
-- 🎨 **Kategoriye Özel Dinamik Canlı Renk Kimliği:**
-  - Haber: Canlı Mercan Kırmızı (`#FB7185`)
-  - Çocuk: Neşeli Güneş Sarısı (`#FBBF24`)
-  - Spor: Çim Zümrüt Yeşili (`#4ADE80`)
-  - Radyo: Kozmik Mor (`#C084FC`)
-  - Canlı TV: Gökyüzü Mavisi (`#38BDF8`)
-- ⚙️ **Renkli & Ferah Ayarlar Arayüzü:**
-  - Her ayar sekmesine özel semantik renk paleti (Görünüm: Mavi, Tema: Mor, Dil: Altın, Veri Tasarrufu: Yeşil, IPTV: Turuncu/Mercan, Güncelleme: Zümrüt).
-- 🏆 **Doğrulanmış Canlı Spor Kanalları:**
-  - HT Spor HD, TRT Spor HD, TRT Spor Yıldız HD, A Spor HD, TJK TV HD ve FB TV HD kanalları yedekli canlı HLS yayın akışlarıyla optimize edildi.
-- ⚡ **Arka Planda Güncelleme İndirme & Kesintisiz Oynatma:**
-  - Güncelleme penceresinde "Arka Planda Devam Et" butonu ile indirme ana ekranda canlı yüzde göstergesiyle izlenebilir.
-- 📻 **Karnaval Kesintisiz Radyo Yayını:**
-  - Süper FM, Metro FM, Joy FM, Joy Türk, Virgin Radio ve popüler ulusal radyolar. Ekran kapalıyken veya başka uygulamalar açıkken kesintisiz arka planda oynatma.
-- 🎮 **Tam Android TV Kumanda Desteği:**
-  - D-Pad yön tuşları, odaklama halkası (Focus Ring) ve OK tuşu ile zahmetsiz TV navigasyonu.
+- 🌐 **GitHub'dan Bağımsız Resmi Web Sitesi, Sürüm Yayınlama Stüdyosu & QR Merkezi:**
+  - Uygulama için sıfır harici bağımlılıklı resmi web portalı (`web/index.html`) ve tarayıcı içi saf JavaScript QR indirme merkezi (SVG + PNG afiş indirme) oluşturuldu.
+  - Kod yazmadan yeni sürümleri (`version.json` ve QR PNG) hazırlamayı sağlayan **Sürüm Yayınlama Stüdyosu (`web/yayinla.html`)** eklendi.
+  - Web paketi (`web/`) içinde hazır **v3.5 APK** yer alır; Netlify Drop, Vercel veya cPanel/FTP üzerine doğrudan yüklenebilir ve uygulama içi **Ayarlar → Bağımsız Web Sitesi / Portal Adresi** üzerinden yönetilebilir.
+- 📻 **40+ Doğrulanmış Radyo & TRT Radyo Yenilemesi:**
+  - **TRT Türkü, TRT FM, TRT Radyo 1, TRT Nağme, TRT Radyo 3** yeni resmi `rd-*.medya.trt.com.tr` ve `trt.radyotvonline.net` adresleriyle yenilendi; **TRT Radyo Haber** eklendi.
+  - **Power FM, Power Türk, Kral Pop Radyo, Lig Radyo, Slow Türk, Alem FM** dahil 40 radyo istasyonu %100 HTTP 200 ve kesintisiz yedek geçişiyle (failover) doğrulandı.
+- 📡 **Akıllı Canlı TV Çözümleyici & Kırık Kanal Temizliği:**
+  - **Kral Pop TV HD, NOW TV HD, TGRT Haber HD, TV8 HD, Minika Çocuk HD, Minika GO HD** ve **TRT kanalları** güncel yayın adresleriyle yenilendi; uzantısız `/live/hls/` akışları desteklendi.
+  - **NOW TV, TGRT Haber ve TRT Çocuk** için açılışta güncel akış linkini çözen dinamik canlı yayın çözümleyici güçlendirildi.
+- 📱 **Gerçek Tam Ekran (Immersive Mode) & Akıllı Bildirim Erişimi:**
+  - Telefonda yatay ekranda video ve kanal izlerken sistem bildirim çubuğu gizlenir; kontrollere dokunulduğunda bildirim paneline geçiş sorunsuz açılır.
+- 🎮 **Android TV Kumanda & Eski Cihaz Optimizasyonu:**
+  - Kanal izlerken `OK` tuşuyla açılan kanal listesinde mevcut yayın bozulmadan serbestçe gezinebilirsiniz.
+  - Düşük RAM ve eski TV Box cihazlarında Siyah Dynamic Island arayüzü 60 FPS akıcılıkta çalışır.
 
 ---
 
@@ -78,26 +52,26 @@ Gelişmiş kumanda (D-Pad) optimizasyonu sayesinde hem **Android TV** ve **TV Bo
 | Kategori | Örnek Kanallar ve İçerikler |
 | :--- | :--- |
 | **🏆 Canlı Spor** | HT Spor HD, TRT Spor HD, TRT Spor Yıldız HD, A Spor HD, TJK TV HD, FB TV HD |
-| **📡 Ulusal Kanallar** | TRT 1, ATV, Kanal D, Show TV, Star TV, NOW (Fox), TV8, Kanal 7, Beyaz TV, Teve2 |
-| **📰 Haber & Ekonomi** | NTV, Habertürk, CNN Türk, TRT Haber, A Haber, Sözcü TV, Bloomberg HT, Halk TV, Tele1 |
-| **🎨 Çocuk & Aile** | TRT Çocuk, Cartoon Network, Minika Çocuk, Minika GO, Disney Junior içerikleri |
-| **📻 Kesintisiz Radyolar** | Süper FM, Metro FM, Joy FM, Joy Türk, Virgin Radio, Power FM, TRT FM, Kral FM |
+| **📡 Ulusal Kanallar** | TRT 1, ATV, Kanal D, Star TV, TV8, NOW TV, Kanal 7, Beyaz TV, A2 TV, 360 TV, Kral Pop TV |
+| **📰 Haber & Ekonomi** | TRT Haber, NTV, Habertürk, A Haber, Sözcü TV, Halk TV, Haber Global, TV100, TGRT Haber, Bloomberg HT, CNBC-e |
+| **🎨 Çocuk & Aile** | TRT Çocuk, TRT Diyanet Çocuk, Minika Çocuk HD, Minika GO HD, Zarok TV |
+| **📻 40+ Kesintisiz Radyo** | TRT Türkü, TRT FM, TRT Radyo 1/3/Haber, TRT Nağme, Power FM, Kral Pop, Süper FM, Metro FM, Lig Radyo, Diyanet Radyo |
 
 ---
 
 ## 📲 Kurulum Rehberi
 
 ### 1. Akıllı Telefon ve Tabletler (Android)
-1. Yukarıdaki **[v3.1 APK İndir](https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO/releases/download/v3.1/VIZYON.TV.v3.1.apk)** bağlantısına tıklayarak APK dosyasını indirin.
-2. İndirilen `VIZYON.TV.v3.1.apk` dosyasına dokunun.
+1. **[Resmi Web Sitesinden](https://enesozkayabasi-source.github.io/V-ZYON-TV-PRO/)** QR kodu okutun veya **[v3.5 APK İndir](https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO/releases/download/v3.5/VIZYON.TV.v3.5.apk)** bağlantısına dokunun.
+2. İndirilen `VIZYON.TV.v3.5.apk` dosyasına dokunun.
 3. Tarayıcınız veya dosya yöneticiniz için "Bilinmeyen kaynaklardan uygulama yükleme" iznini onaylayın.
-4. **"Yükle"** butonuna basarak kurulumu tamamlayın.
+4. **"Yükle / Güncelle"** butonuna basarak kurulumu tamamlayın.
 
 ### 2. Android TV & TV Box Cihazları
 1. TV'nizdeki Google Play Store'dan **"Downloader by AFTVnews"** uygulamasını yükleyin.
 2. Downloader arama çubuğuna şu doğrudan indirme bağlantısını yazın:
    ```text
-   https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO/releases/download/v3.1/VIZYON.TV.v3.1.apk
+   https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO/releases/download/v3.5/VIZYON.TV.v3.5.apk
    ```
    veya kısa doğrudan bağlantı:
    ```text
@@ -116,7 +90,7 @@ Gelişmiş kumanda (D-Pad) optimizasyonu sayesinde hem **Android TV** ve **TV Bo
 - **Medya Motoru:** Google ExoPlayer (Media3 / HLS / MPEG-TS / AAC / MP3)
 - **Ağ ve Güvenlik:** TLS 1.3 / HTTPS güvenli akış protokolleri
 - **Paket Adı:** `com.aistudio.applet.kwnemt`
-- **Sürüm Kodu:** `310` (v3.1)
+- **Sürüm Kodu:** `350` (v3.5)
 
 ---
 
@@ -130,6 +104,6 @@ Gelişmiş kumanda (D-Pad) optimizasyonu sayesinde hem **Android TV** ve **TV Bo
 
 <div align="center">
 
-**VİZYON TV PRO** © 2026 • Gelişmiş Canlı Medya Çözümleri
+**VİZYON TV PRO v3.5** © 2026 • Gelişmiş Canlı Medya Çözümleri
 
 </div>

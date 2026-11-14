@@ -218,6 +218,7 @@ fun HomeScreen(
     val isUpdating by viewModel.isUpdating.collectAsState()
     val updateProgress by viewModel.updateProgress.collectAsState()
     val updateStatus by viewModel.updateStatus.collectAsState()
+    val webPortalUrl by viewModel.webPortalUrl.collectAsState()
     val githubPageUrl by viewModel.githubPageUrl.collectAsState()
     val apkDownloadUrl by viewModel.apkDownloadUrl.collectAsState()
 
@@ -832,6 +833,7 @@ fun HomeScreen(
             isUpdating = isUpdating,
             updateProgress = updateProgress,
             updateStatus = updateStatus,
+            webPortalUrl = webPortalUrl,
             githubPageUrl = githubPageUrl,
             apkDownloadUrl = apkDownloadUrl,
             updateUrl = apkDownloadUrl,
@@ -839,8 +841,11 @@ fun HomeScreen(
                 viewModel.updateCustomGithubUrl(gh)
                 viewModel.updateCustomApkUrl(apk)
                 scope.launch {
-                    snackbarHostState.showSnackbar("GitHub ve APK indirme bağlantıları güncellendi!")
+                    snackbarHostState.showSnackbar("İndirme ve yayın bağlantıları güncellendi!")
                 }
+            },
+            onSaveWebPortalUrl = { portal ->
+                viewModel.updateCustomWebPortalUrl(portal)
             },
             onCheckForUpdates = {
                 viewModel.checkForUpdates { isNew, msg ->
@@ -1075,7 +1080,7 @@ private fun TopBarHeader(
                             border = BorderStroke(0.8.dp, currentTabColor.copy(alpha = 0.6f))
                         ) {
                             Text(
-                                text = "PRO v3.2",
+                                text = "PRO v3.5",
                                 fontSize = 9.sp,
                                 fontWeight = FontWeight.ExtraBold,
                                 color = currentTabColor,

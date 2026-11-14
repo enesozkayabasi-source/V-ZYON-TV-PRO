@@ -128,6 +128,9 @@ class StreamViewModel(
     val currentVersion: StateFlow<String> = _currentVersion.asStateFlow()
 
     val latestReleaseVersion: String = UserPreferencesManager.LATEST_RELEASE_VERSION
+    private val _webPortalUrl = MutableStateFlow(userPrefs.getWebPortalUrl())
+    val webPortalUrl: StateFlow<String> = _webPortalUrl.asStateFlow()
+
     private val _githubPageUrl = MutableStateFlow(userPrefs.getGithubPageUrl())
     val githubPageUrl: StateFlow<String> = _githubPageUrl.asStateFlow()
 
@@ -135,6 +138,14 @@ class StreamViewModel(
     val apkDownloadUrl: StateFlow<String> = _apkDownloadUrl.asStateFlow()
 
     val updateDownloadUrl: String get() = _apkDownloadUrl.value
+
+    fun updateCustomWebPortalUrl(url: String) {
+        val trimmed = url.trim()
+        if (trimmed.isNotBlank()) {
+            _webPortalUrl.value = trimmed
+            userPrefs.saveWebPortalUrl(trimmed)
+        }
+    }
 
     fun updateCustomGithubUrl(url: String) {
         val trimmed = url.trim()
@@ -191,7 +202,7 @@ class StreamViewModel(
     private val _targetReleaseVersion = MutableStateFlow(latestReleaseVersion)
     val targetReleaseVersion: StateFlow<String> = _targetReleaseVersion.asStateFlow()
 
-    private val _releaseChangelog = MutableStateFlow("VİZYON TV v3.2: Tam ekran yatay modda bildirim paneli gizleme (Immersive Mode), TV kumandası kanal listesinde gezinirken kanal değiştirmeyi engelleyen seçim modu ve ultra akıcı arayüz optimizasyonları.")
+    private val _releaseChangelog = MutableStateFlow("VİZYON TV v3.5: Tüm TV kanalları ve TRT radyo/TV yayınları yenilendi, 40+ canlı radyo doğrulandı, akıllı canlı yayın çözümleyici güçlendirildi ve resmi web yayın portalı + QR indirme sistemi eklendi.")
     val releaseChangelog: StateFlow<String> = _releaseChangelog.asStateFlow()
 
     private var downloadedApkFile: File? = null
@@ -692,7 +703,10 @@ class StreamViewModel(
         viewModelScope.launch {
             _isCheckingOnlineUpdate.value = true
             try {
-                val info = appUpdateManager.checkForUpdatesOnline(_currentVersion.value)
+                val info = appUpdateManager.checkForUpdatesOnline(
+                    currentVersion = _currentVersion.value,
+                    webPortalUrl = _webPortalUrl.value
+                )
                 _targetReleaseVersion.value = info.latestVersion
                 _releaseChangelog.value = info.changelog
                 if (info.apkDownloadUrl.isNotBlank()) {

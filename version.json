@@ -1,0 +1,54 @@
+{
+  "appName": "VİZYON TV PRO",
+  "packageId": "com.aistudio.applet.kwnemt",
+  "minSdk": 24,
+  "version": "v3.5",
+  "versionCode": 350,
+  "releaseDate": "2026-11-14",
+  "apkSize": "38.1 MB",
+  "apkSizeBytes": 38113787,
+  "apkUrl": "./releases/VIZYON.TV.v3.5.apk",
+  "fastApkUrl": "./releases/vizyontv-latest.apk",
+  "changelog": "VİZYON TV v3.5: Tüm TV kanalları ve TRT radyo/TV yayınları yenilendi, 40+ canlı radyo doğrulandı, akıllı canlı yayın çözümleyici güçlendirildi ve bağımsız web yayın portalı + QR indirme sistemi eklendi.",
+  "releases": [
+    {
+      "version": "v3.5",
+      "versionCode": 350,
+      "releaseDate": "2026-11-14",
+      "apkSize": "38.0 MB",
+      "apkUrl": "./releases/VIZYON.TV.v3.5.apk",
+      "tag": "GÜNCEL SÜRÜM",
+      "highlights": [
+        "TRT Türkü, TRT FM, TRT Radyo 1/3/Haber, TRT Nağme ve 40+ canlı radyo yeni CDN adresleriyle doğrulandı",
+        "NOW TV, TGRT Haber, Kral Pop TV, Minika GO, Minika Çocuk ve TV8 canlı yayın çözümleyicisi yenilendi",
+        "GitHub'dan tamamen bağımsız resmi web sitesi, Sürüm Yayınlama Stüdyosu ve akıllı QR indirme merkezi eklendi",
+        "Uygulama içi güncelleme motoru doğrudan web portalı version.json manifestosuyla entegre edildi"
+      ]
+    },
+    {
+      "version": "v3.2",
+      "versionCode": 320,
+      "releaseDate": "2026-10-18",
+      "apkSize": "37.4 MB",
+      "apkUrl": "./releases/VIZYON.TV.v3.2.apk",
+      "tag": "ÖNCEKİ SÜRÜM",
+      "highlights": [
+        "Yatay video modunda bildirim çubuğu gizlenerek tam ekran deneyimi netleştirildi",
+        "Kayan ekran modu ile uygulama içi güncelleme kur butonunun görünürlüğü düzeltildi",
+        "Android TV OK tuşu kanal listesinde yayın kesintisi olmadan gezinme eklendi"
+      ]
+    },
+    {
+      "version": "v3.1",
+      "versionCode": 310,
+      "releaseDate": "2026-09-29",
+      "apkSize": "36.8 MB",
+      "apkUrl": "./releases/VIZYON.TV.v3.1.apk",
+      "tag": "ARŞİV",
+      "highlights": [
+        "Eski telefon ve TV Box cihazlar için 60 FPS Siyah Dynamic Island optimizasyonu",
+        "Yatay sol panel düzeni sadeleştirildi ve gereksiz butonlar temizlendi"
+      ]
+    }
+  ]
+}

@@ -232,16 +232,21 @@ fun StreamPlayerScreen(
         }
     }
 
-    // Çoklu Sunucu Yönetimi: Kanala ait tüm sunucular (birincil + yedekler)
-    val serverList = remember(item) {
+    // Çoklu Sunucu Yönetimi: Kanala ait tüm sunucular (birincil + yedekler + anlık çözümlenen canlı adresler)
+    val baseServerList = remember(item) {
         val list = item.getAllStreamUrls().filter { it.isNotBlank() }
         if (list.isEmpty()) listOf(item.yayin_url).filter { it.isNotBlank() } else list
     }
+    var resolvedExtraUrls by remember(item.id) { mutableStateOf<List<String>>(emptyList()) }
+    val serverList = remember(baseServerList, resolvedExtraUrls) {
+        (resolvedExtraUrls + baseServerList).distinct()
+    }
     var currentServerIndex by remember(item.id) { mutableIntStateOf(0) }
     var activeStreamUrl by remember(item.id, item.yayin_url) {
-        mutableStateOf(serverList.getOrNull(0) ?: item.yayin_url)
+        mutableStateOf(baseServerList.getOrNull(0) ?: item.yayin_url)
     }
     var serverNotice by remember { mutableStateOf<String?>(null) }
+    var dynamicResolveAttempted by remember(item.id) { mutableStateOf(false) }
 
     val userPrefs = remember { com.example.service.UserPreferencesManager(context) }
     var isDataSaver by remember { mutableStateOf(userPrefs.isDataSaverEnabled()) }
@@ -437,11 +442,27 @@ fun StreamPlayerScreen(
     }
 
     // Keep activeStreamUrl in sync with item changes (reset to primary server on channel switch)
+    // NOW TV gibi anlık token üreten kanallar için canlı adresi arka planda otomatik yeniler
     LaunchedEffect(item.id) {
         currentServerIndex = 0
-        val firstUrl = serverList.getOrNull(0) ?: item.yayin_url
+        resolvedExtraUrls = emptyList()
+        dynamicResolveAttempted = false
+        val firstUrl = baseServerList.getOrNull(0) ?: item.yayin_url
         if (firstUrl.isNotBlank() && activeStreamUrl != firstUrl) {
             activeStreamUrl = firstUrl
+        }
+        val lowerName = item.baslik.lowercase()
+        val needsDynamicInit =
+            (lowerName.contains("now") && !firstUrl.contains("nowtv-live-ad.ercdn.net") && !firstUrl.contains("nowtv.daioncdn.net")) ||
+            (lowerName.contains("tgrt haber") || (lowerName.contains("tgrt") && !lowerName.contains("belgesel")))
+        if (needsDynamicInit) {
+            dynamicResolveAttempted = true
+            val fresh = com.example.service.InternetChannelService().resolveFreshLiveStreamUrls(item)
+            if (fresh.isNotEmpty()) {
+                resolvedExtraUrls = fresh
+                currentServerIndex = 0
+                activeStreamUrl = fresh.first()
+            }
         }
     }
 
@@ -465,7 +486,7 @@ fun StreamPlayerScreen(
         errorMessage = null
         try {
             val uri = Uri.parse(activeStreamUrl)
-            val isHls = activeStreamUrl.contains(".m3u8", ignoreCase = true) || item.isHlsStream
+            val isHls = com.example.model.isHlsStreamUrl(activeStreamUrl) || item.isHlsStream
             val exoItem = ExoMediaItem.Builder()
                 .setUri(uri)
                 .build()
@@ -532,10 +553,10 @@ fun StreamPlayerScreen(
                     return
                 }
 
-                // 2. Özel bilinen kanallar için akıllı acil durum yedekleri:
+                // 2. Özel bilinen kanallar için akıllı acil durum yedekleri ve anlık yayın çözümleyici:
                 if (activeStreamUrl.contains("/atv/", ignoreCase = true) && !activeStreamUrl.contains("atv_360p")) {
                     serverNotice = "Alternatif hızlı ATV sunucusuna aktarılıyor..."
-                    activeStreamUrl = "http://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/atv/atv_720p.m3u8"
+                    activeStreamUrl = "https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/atv/atv_360p.m3u8"
                     isBuffering = true
                     errorMessage = null
                     return
@@ -545,6 +566,26 @@ fun StreamPlayerScreen(
                     activeStreamUrl = "https://tv-trtcocuk.medya.trt.com.tr/master.m3u8"
                     isBuffering = true
                     errorMessage = null
+                    return
+                }
+                if (!dynamicResolveAttempted) {
+                    dynamicResolveAttempted = true
+                    isBuffering = true
+                    errorMessage = null
+                    coroutineScope.launch {
+                        val fresh = com.example.service.InternetChannelService().resolveFreshLiveStreamUrls(item)
+                        val unseen = fresh.firstOrNull { it != activeStreamUrl && !serverList.contains(it) }
+                        if (unseen != null) {
+                            resolvedExtraUrls = (resolvedExtraUrls + fresh).distinct()
+                            serverNotice = "${item.baslik} için güncel canlı yayın bulundu..."
+                            activeStreamUrl = unseen
+                        } else {
+                            isBuffering = false
+                            val reason = error.localizedMessage ?: "Bağlantı zaman aşımı"
+                            val serverInfo = if (serverList.size > 1) " (${serverList.size} sunucu denendi)" else ""
+                            errorMessage = "${item.baslik} yayını şu anda çevrimdışı$serverInfo ($reason)"
+                        }
+                    }
                     return
                 }
 
@@ -753,10 +794,12 @@ fun StreamPlayerScreen(
     ) {
         // Video View: YouTube Embed or ExoPlayer
         if (isYouTube && !youtubeVideoId.isNullOrBlank()) {
-            YouTubePlayerView(
-                videoId = youtubeVideoId,
-                modifier = Modifier.fillMaxSize()
-            )
+            androidx.compose.runtime.key(youtubeVideoId) {
+                YouTubePlayerView(
+                    videoId = youtubeVideoId,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
         } else {
             AndroidView(
                 modifier = Modifier.fillMaxSize(),

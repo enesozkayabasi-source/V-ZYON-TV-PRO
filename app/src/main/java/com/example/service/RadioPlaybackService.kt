@@ -319,23 +319,25 @@ class RadioPlaybackService : Service() {
                     }
 
                     override fun onPlayerError(error: PlaybackException) {
-                        Log.w("RadioPlaybackService", "Radyo yayın hatası: ${error.message}")
+                        Log.w("RadioPlaybackService", "Radyo yayın hatası ($activeStreamUrl): ${error.message}")
                         reconnectJob?.cancel()
-                        if (retryCount < 3) {
+
+                        val isHttpTerminalError = generateSequence<Throwable>(error) { it.cause }
+                            .filterIsInstance<androidx.media3.datasource.HttpDataSource.InvalidResponseCodeException>()
+                            .any { it.responseCode in listOf(401, 403, 404, 410) }
+
+                        if (!isHttpTerminalError && retryCount < 1) {
                             retryCount++
-                            val delayMs = when (retryCount) {
-                                1 -> 800L
-                                2 -> 1500L
-                                else -> 2500L
-                            }
                             _isBuffering.value = true
+                            val urlToRetry = activeStreamUrl
                             reconnectJob = serviceScope.launch {
-                                delay(delayMs)
-                                startStreamPlayback(activeStreamUrl)
+                                delay(800L)
+                                startStreamPlayback(urlToRetry)
                             }
                         } else if (currentBackupIndex < activeBackupUrls.size) {
                             val nextUrl = activeBackupUrls[currentBackupIndex]
                             currentBackupIndex++
+                            activeStreamUrl = nextUrl
                             retryCount = 0
                             _isBuffering.value = true
                             startStreamPlayback(nextUrl)
@@ -359,9 +361,11 @@ class RadioPlaybackService : Service() {
                 val backups = intent.getStringArrayListExtra(EXTRA_BACKUP_URLS) ?: arrayListOf()
 
                 activeStreamUrl = streamUrl
-                activeBackupUrls = backups
+                activeBackupUrls = backups.filter { it.isNotBlank() && it != streamUrl }.distinct()
                 currentBackupIndex = 0
                 retryCount = 0
+                _errorMessage.value = null
+                _isBuffering.value = true
                 reconnectJob?.cancel()
 
                 startForegroundNotification(title)
@@ -499,7 +503,7 @@ class RadioPlaybackService : Service() {
             .setUserAgent("Karnaval/6.0 (Android; Mobile; rv:125.0) ExoPlayerLib/2.19.1")
 
         val mediaItem = ExoMediaItem.fromUri(url)
-        val isHls = url.contains(".m3u8", ignoreCase = true)
+        val isHls = com.example.model.isHlsStreamUrl(url)
         val mediaSource = if (isHls) {
             HlsMediaSource.Factory(httpSourceFactory)
                 .setAllowChunklessPreparation(true)

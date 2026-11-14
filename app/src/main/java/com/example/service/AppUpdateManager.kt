@@ -28,15 +28,44 @@ class AppUpdateManager(private val context: Context) {
     companion object {
         private const val GITHUB_API_LATEST_RELEASE =
             "https://api.github.com/repos/enesozkayabasi-source/V-ZYON-TV-PRO/releases/latest"
+        private const val WEB_PORTAL_VERSION_JSON =
+            "https://enesozkayabasi-source.github.io/V-ZYON-TV-PRO/version.json"
         private const val DEFAULT_FALLBACK_APK_URL =
-            "https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO/releases/download/v3.2/VIZYON.TV.v3.2.apk"
+            "https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO/releases/download/v3.5/VIZYON.TV.v3.5.apk"
+        private const val DEFAULT_V35_CHANGELOG =
+            "VİZYON TV v3.5: Tüm TV kanalları ve TRT radyo/TV yayınları yenilendi, 40+ canlı radyo doğrulandı, akıllı canlı yayın çözümleyici güçlendirildi ve resmi web yayın portalı + QR indirme sistemi eklendi."
     }
 
     /**
-     * GitHub Releases API üzerinden güncellemeleri kontrol eder
+     * Bağımsız Web Portalı (version.json) ve GitHub Releases API üzerinden güncellemeleri kontrol eder
      */
-    suspend fun checkForUpdatesOnline(currentVersion: String, forceCheckUrl: String? = null): UpdateInfo = withContext(Dispatchers.IO) {
-        try {
+    suspend fun checkForUpdatesOnline(
+        currentVersion: String,
+        forceCheckUrl: String? = null,
+        webPortalUrl: String = UserPreferencesManager.DEFAULT_WEB_PORTAL_URL
+    ): UpdateInfo = withContext(Dispatchers.IO) {
+        val webInfo = if (forceCheckUrl == null) fetchFromWebPortalManifest(currentVersion, webPortalUrl) else null
+        val githubInfo = fetchFromGitHubRelease(currentVersion, forceCheckUrl)
+
+        when {
+            webInfo != null && githubInfo != null -> {
+                if (isNewerVersion(githubInfo.latestVersion, webInfo.latestVersion)) githubInfo else webInfo
+            }
+            webInfo != null -> webInfo
+            githubInfo != null -> githubInfo
+            else -> UpdateInfo(
+                isUpdateAvailable = isNewerVersion("v3.5", currentVersion),
+                latestVersion = "v3.5",
+                currentVersion = currentVersion,
+                apkDownloadUrl = DEFAULT_FALLBACK_APK_URL,
+                changelog = DEFAULT_V35_CHANGELOG,
+                assetSize = 0L
+            )
+        }
+    }
+
+    private fun fetchFromGitHubRelease(currentVersion: String, forceCheckUrl: String?): UpdateInfo? {
+        return try {
             val url = URL(forceCheckUrl ?: GITHUB_API_LATEST_RELEASE)
             val conn = (url.openConnection() as HttpURLConnection).apply {
                 connectTimeout = 4000
@@ -49,8 +78,8 @@ class AppUpdateManager(private val context: Context) {
             if (conn.responseCode in 200..299) {
                 val responseText = conn.inputStream.bufferedReader().use { it.readText() }
                 val json = JSONObject(responseText)
-                val tagName = json.optString("tag_name", "v3.2")
-                val body = json.optString("body", "VİZYON TV v3.2: Tam ekran yatay modda bildirim paneli gizleme (Immersive Mode), Android TV kumandasında kanal listesinde gezinirken kanal değiştirmeyi engelleyen seçim modu ve ultra akıcı arayüz optimizasyonları.")
+                val tagName = json.optString("tag_name", "v3.5")
+                val body = json.optString("body", DEFAULT_V35_CHANGELOG)
 
                 var apkUrl = DEFAULT_FALLBACK_APK_URL
                 var apkSize = 0L
@@ -68,9 +97,8 @@ class AppUpdateManager(private val context: Context) {
                     }
                 }
 
-                val hasUpdate = isNewerVersion(tagName, currentVersion)
                 UpdateInfo(
-                    isUpdateAvailable = hasUpdate,
+                    isUpdateAvailable = isNewerVersion(tagName, currentVersion),
                     latestVersion = tagName,
                     currentVersion = currentVersion,
                     apkDownloadUrl = apkUrl,
@@ -78,25 +106,56 @@ class AppUpdateManager(private val context: Context) {
                     assetSize = apkSize
                 )
             } else {
-                // API cevap vermezse varsayılan fallback
-                UpdateInfo(
-                    isUpdateAvailable = currentVersion != "v3.2",
-                    latestVersion = "v3.2",
-                    currentVersion = currentVersion,
-                    apkDownloadUrl = DEFAULT_FALLBACK_APK_URL,
-                    changelog = "VİZYON TV v3.2: Tam ekran yatay modda bildirim çubuğu gizleme, TV kumandası kanal listesi serbest gezinme modu ve performans optimizasyonları.",
-                    assetSize = 0L
-                )
+                null
             }
         } catch (_: Exception) {
-            UpdateInfo(
-                isUpdateAvailable = currentVersion != "v3.2",
-                latestVersion = "v3.2",
-                currentVersion = currentVersion,
-                apkDownloadUrl = DEFAULT_FALLBACK_APK_URL,
-                changelog = "VİZYON TV v3.2: Tam ekran yatay modda bildirim çubuğu gizleme, TV kumandası kanal listesi serbest gezinme modu ve performans optimizasyonları.",
-                assetSize = 0L
-            )
+            null
+        }
+    }
+
+    private fun fetchFromWebPortalManifest(currentVersion: String, webPortalUrl: String): UpdateInfo? {
+        return try {
+            val cleanBase = webPortalUrl.trim().let {
+                when {
+                    it.endsWith("version.json", ignoreCase = true) -> it
+                    it.endsWith(".html", ignoreCase = true) -> it.substringBeforeLast("/") + "/version.json"
+                    else -> it.trimEnd('/') + "/version.json"
+                }
+            }
+            val manifestUrl = URL(cleanBase)
+            val conn = (manifestUrl.openConnection() as HttpURLConnection).apply {
+                connectTimeout = 4000
+                readTimeout = 4000
+                requestMethod = "GET"
+                setRequestProperty("User-Agent", "Mozilla/5.0 (Android; Mobile; VIZYON-TV-PRO)")
+                setRequestProperty("Accept", "application/json")
+            }
+
+            if (conn.responseCode in 200..299) {
+                val responseText = conn.inputStream.bufferedReader().use { it.readText() }
+                val json = JSONObject(responseText)
+                val version = json.optString("version", "v3.5")
+                val rawApkUrl = json.optString("apkUrl", DEFAULT_FALLBACK_APK_URL)
+                val resolvedApkUrl = if (rawApkUrl.startsWith("http://") || rawApkUrl.startsWith("https://")) {
+                    rawApkUrl
+                } else {
+                    URL(manifestUrl, rawApkUrl).toString()
+                }
+                val changelog = json.optString("changelog", DEFAULT_V35_CHANGELOG)
+                val size = json.optLong("apkSizeBytes", 0L)
+                UpdateInfo(
+                    isUpdateAvailable = isNewerVersion(version, currentVersion),
+                    latestVersion = version,
+                    currentVersion = currentVersion,
+                    apkDownloadUrl = resolvedApkUrl,
+                    changelog = changelog,
+                    assetSize = size
+                )
+            } else {
+                null
+            }
+        } catch (_: Exception) {
+            null
         }
     }
 
