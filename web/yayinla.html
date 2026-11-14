@@ -92,10 +92,10 @@
   <div class="container">
     <div class="topbar">
       <a href="index.html" class="brand">
-        <img src="logo.png" alt="Logo">
+        <img src="logo.png" alt="Logo" onerror="this.onerror=null;this.src='web/logo.png'">
         <div>
           <h1>VİZYON TV PRO — Sürüm Yayınlama Stüdyosu</h1>
-          <small>GitHub'dan %100 Bağımsız Sürüm & QR Güncelleme Paneli</small>
+          <small>www.vizyontv4201.com.tr • Bağımsız Sürüm & QR Güncelleme Paneli</small>
         </div>
       </a>
       <a href="index.html" class="back-btn">← Ana Web Sitesine Dön</a>
@@ -401,6 +401,8 @@ Yeni sürüm performans ve kararlılık iyileştirmeleri</textarea>
 
       return {
         appName: "VİZYON TV PRO",
+        officialDomain: "www.vizyontv4201.com.tr",
+        portalUrl: "https://www.vizyontv4201.com.tr/",
         packageId: "com.aistudio.applet.kwnemt",
         minSdk: 24,
         version: ver,
@@ -501,7 +503,7 @@ Yeni sürüm performans ve kararlılık iyileştirmeleri</textarea>
       ctx.fillStyle = "#090D16"; ctx.font = "900 26px sans-serif"; ctx.textAlign = "center";
       ctx.fillText(`VİZYON TV PRO ${ver}`, w / 2, 46);
       ctx.fillStyle = "#0284C7"; ctx.font = "700 15px sans-serif";
-      ctx.fillText("APK İndirmek İçin Kamerayla Okutun", w / 2, 74);
+      ctx.fillText("www.vizyontv4201.com.tr • Kamerayla Okutun", w / 2, 74);
       ctx.fillStyle = "#090D16";
       for (let r = 0; r < currentQr.size; r++) for (let c = 0; c < currentQr.size; c++) {
         if (currentQr.grid[r][c] === 1) ctx.fillRect(pad + c * scale, 92 + r * scale, scale, scale);

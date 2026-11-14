@@ -29,22 +29,31 @@ class AppUpdateManager(private val context: Context) {
         private const val GITHUB_API_LATEST_RELEASE =
             "https://api.github.com/repos/enesozkayabasi-source/V-ZYON-TV-PRO/releases/latest"
         private const val WEB_PORTAL_VERSION_JSON =
-            "https://enesozkayabasi-source.github.io/V-ZYON-TV-PRO/version.json"
+            "https://www.vizyontv4201.com.tr/version.json"
+        private const val BACKUP_WEB_PORTAL_URL =
+            "https://enesozkayabasi-source.github.io/V-ZYON-TV-PRO/"
         private const val DEFAULT_FALLBACK_APK_URL =
+            "https://www.vizyontv4201.com.tr/releases/VIZYON.TV.v3.5.apk"
+        private const val BACKUP_GITHUB_APK_URL =
             "https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO/releases/download/v3.5/VIZYON.TV.v3.5.apk"
         private const val DEFAULT_V35_CHANGELOG =
-            "VİZYON TV v3.5: Tüm TV kanalları ve TRT radyo/TV yayınları yenilendi, 40+ canlı radyo doğrulandı, akıllı canlı yayın çözümleyici güçlendirildi ve resmi web yayın portalı + QR indirme sistemi eklendi."
+            "VİZYON TV v3.5: Tüm TV kanalları ve TRT radyo/TV yayınları yenilendi, 40+ canlı radyo doğrulandı, akıllı canlı yayın çözümleyici güçlendirildi ve www.vizyontv4201.com.tr resmi web yayın portalı + QR indirme sistemi eklendi."
     }
 
     /**
-     * Bağımsız Web Portalı (version.json) ve GitHub Releases API üzerinden güncellemeleri kontrol eder
+     * Öncelikle www.vizyontv4201.com.tr (veya kayıtlı portal version.json) üzerinden,
+     * erişilemezse yedek yayın sunucularından güncellemeleri kontrol eder.
      */
     suspend fun checkForUpdatesOnline(
         currentVersion: String,
         forceCheckUrl: String? = null,
         webPortalUrl: String = UserPreferencesManager.DEFAULT_WEB_PORTAL_URL
     ): UpdateInfo = withContext(Dispatchers.IO) {
-        val webInfo = if (forceCheckUrl == null) fetchFromWebPortalManifest(currentVersion, webPortalUrl) else null
+        val primaryWebInfo = if (forceCheckUrl == null) fetchFromWebPortalManifest(currentVersion, webPortalUrl) else null
+        val backupWebInfo = if (primaryWebInfo == null && forceCheckUrl == null && !webPortalUrl.contains("enesozkayabasi-source.github.io")) {
+            fetchFromWebPortalManifest(currentVersion, BACKUP_WEB_PORTAL_URL)
+        } else null
+        val webInfo = primaryWebInfo ?: backupWebInfo
         val githubInfo = fetchFromGitHubRelease(currentVersion, forceCheckUrl)
 
         when {
@@ -166,66 +175,80 @@ class AppUpdateManager(private val context: Context) {
         downloadUrl: String,
         onProgress: (bytesDownloaded: Long, totalBytes: Long, progressFraction: Float) -> Unit
     ): Result<File> = withContext(Dispatchers.IO) {
-        try {
-            val updateDir = File(context.cacheDir, "updates")
-            if (!updateDir.exists()) {
-                updateDir.mkdirs()
-            }
-            val destinationFile = File(updateDir, "vizyontv_update.apk")
-            if (destinationFile.exists()) {
-                destinationFile.delete()
-            }
-
-            var currentUrl = downloadUrl
-            var connection: HttpURLConnection
-            var redirects = 0
-            while (true) {
-                val urlObj = URL(currentUrl)
-                connection = (urlObj.openConnection() as HttpURLConnection).apply {
-                    connectTimeout = 8000
-                    readTimeout = 15000
-                    instanceFollowRedirects = false
-                    setRequestProperty("User-Agent", "Mozilla/5.0 (Android; Mobile; VIZYON-TV-PRO)")
-                }
-                val code = connection.responseCode
-                if (code in 300..399 && redirects < 5) {
-                    val location = connection.getHeaderField("Location")
-                    if (!location.isNullOrBlank()) {
-                        currentUrl = location
-                        redirects++
-                        continue
-                    }
-                }
-                break
-            }
-
-            val totalBytes = connection.contentLength.toLong()
-            var bytesDownloaded = 0L
-
-            connection.inputStream.use { input ->
-                FileOutputStream(destinationFile).use { output ->
-                    val buffer = ByteArray(32 * 1024)
-                    var bytesRead: Int
-                    while (input.read(buffer).also { bytesRead = it } != -1) {
-                        output.write(buffer, 0, bytesRead)
-                        bytesDownloaded += bytesRead
-
-                        val fraction = if (totalBytes > 0) {
-                            (bytesDownloaded.toFloat() / totalBytes.toFloat()).coerceIn(0f, 1f)
-                        } else {
-                            0.5f
-                        }
-                        onProgress(bytesDownloaded, totalBytes, fraction)
-                    }
-                    output.flush()
-                }
-            }
-
-            onProgress(bytesDownloaded, totalBytes, 1.0f)
-            Result.success(destinationFile)
-        } catch (e: Exception) {
-            Result.failure(e)
+        val candidates = if (downloadUrl.contains("vizyontv4201.com.tr")) {
+            listOf(downloadUrl, BACKUP_GITHUB_APK_URL)
+        } else {
+            listOf(downloadUrl)
         }
+
+        var lastError: Exception? = null
+        for (candidateUrl in candidates) {
+            try {
+                val updateDir = File(context.cacheDir, "updates")
+                if (!updateDir.exists()) {
+                    updateDir.mkdirs()
+                }
+                val destinationFile = File(updateDir, "vizyontv_update.apk")
+                if (destinationFile.exists()) {
+                    destinationFile.delete()
+                }
+
+                var currentUrl = candidateUrl
+                var connection: HttpURLConnection
+                var redirects = 0
+                while (true) {
+                    val urlObj = URL(currentUrl)
+                    connection = (urlObj.openConnection() as HttpURLConnection).apply {
+                        connectTimeout = 8000
+                        readTimeout = 15000
+                        instanceFollowRedirects = false
+                        setRequestProperty("User-Agent", "Mozilla/5.0 (Android; Mobile; VIZYON-TV-PRO)")
+                    }
+                    val code = connection.responseCode
+                    if (code in 300..399 && redirects < 5) {
+                        val location = connection.getHeaderField("Location")
+                        if (!location.isNullOrBlank()) {
+                            currentUrl = location
+                            redirects++
+                            continue
+                        }
+                    }
+                    break
+                }
+
+                if (connection.responseCode !in 200..299) {
+                    throw IllegalStateException("Sunucu yanıtı: HTTP ${connection.responseCode}")
+                }
+
+                val totalBytes = connection.contentLength.toLong()
+                var bytesDownloaded = 0L
+
+                connection.inputStream.use { input ->
+                    FileOutputStream(destinationFile).use { output ->
+                        val buffer = ByteArray(32 * 1024)
+                        var bytesRead: Int
+                        while (input.read(buffer).also { bytesRead = it } != -1) {
+                            output.write(buffer, 0, bytesRead)
+                            bytesDownloaded += bytesRead
+
+                            val fraction = if (totalBytes > 0) {
+                                (bytesDownloaded.toFloat() / totalBytes.toFloat()).coerceIn(0f, 1f)
+                            } else {
+                                0.5f
+                            }
+                            onProgress(bytesDownloaded, totalBytes, fraction)
+                        }
+                        output.flush()
+                    }
+                }
+
+                onProgress(bytesDownloaded, totalBytes, 1.0f)
+                return@withContext Result.success(destinationFile)
+            } catch (e: Exception) {
+                lastError = e
+            }
+        }
+        Result.failure(lastError ?: IllegalStateException("APK indirilemedi."))
     }
 
     /**

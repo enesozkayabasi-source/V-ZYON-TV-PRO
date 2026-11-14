@@ -1,28 +1,30 @@
 {
   "appName": "VİZYON TV PRO",
+  "officialDomain": "www.vizyontv4201.com.tr",
+  "portalUrl": "https://www.vizyontv4201.com.tr/",
   "packageId": "com.aistudio.applet.kwnemt",
   "minSdk": 24,
   "version": "v3.5",
   "versionCode": 350,
   "releaseDate": "2026-11-14",
   "apkSize": "38.1 MB",
-  "apkSizeBytes": 38113787,
+  "apkSizeBytes": 38113772,
   "apkUrl": "./releases/VIZYON.TV.v3.5.apk",
   "fastApkUrl": "./releases/vizyontv-latest.apk",
-  "changelog": "VİZYON TV v3.5: Tüm TV kanalları ve TRT radyo/TV yayınları yenilendi, 40+ canlı radyo doğrulandı, akıllı canlı yayın çözümleyici güçlendirildi ve bağımsız web yayın portalı + QR indirme sistemi eklendi.",
+  "changelog": "VİZYON TV v3.5: Tüm TV kanalları ve TRT radyo/TV yayınları yenilendi, 40+ canlı radyo doğrulandı, akıllı canlı yayın çözümleyici güçlendirildi ve www.vizyontv4201.com.tr resmi web portalı + QR indirme sistemi eklendi.",
   "releases": [
     {
       "version": "v3.5",
       "versionCode": 350,
       "releaseDate": "2026-11-14",
-      "apkSize": "38.0 MB",
+      "apkSize": "38.1 MB",
       "apkUrl": "./releases/VIZYON.TV.v3.5.apk",
       "tag": "GÜNCEL SÜRÜM",
       "highlights": [
         "TRT Türkü, TRT FM, TRT Radyo 1/3/Haber, TRT Nağme ve 40+ canlı radyo yeni CDN adresleriyle doğrulandı",
         "NOW TV, TGRT Haber, Kral Pop TV, Minika GO, Minika Çocuk ve TV8 canlı yayın çözümleyicisi yenilendi",
-        "GitHub'dan tamamen bağımsız resmi web sitesi, Sürüm Yayınlama Stüdyosu ve akıllı QR indirme merkezi eklendi",
-        "Uygulama içi güncelleme motoru doğrudan web portalı version.json manifestosuyla entegre edildi"
+        "www.vizyontv4201.com.tr premium resmi web sitesi, Sürüm Yayınlama Stüdyosu ve akıllı QR indirme merkezi eklendi",
+        "Uygulama içi güncelleme motoru doğrudan www.vizyontv4201.com.tr version.json manifestosuyla entegre edildi"
       ]
     },
     {

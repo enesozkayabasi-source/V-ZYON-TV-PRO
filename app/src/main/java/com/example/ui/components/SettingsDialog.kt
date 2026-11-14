@@ -815,7 +815,7 @@ fun SettingsDialog(
                             )
                             Spacer(modifier = Modifier.width(6.dp))
                             Text(
-                                text = "Resmi Web Sitesi & QR İndirme Portalı",
+                                text = "Resmi Web Sitesi (www.vizyontv4201.com.tr) & QR Portalı",
                                 color = NeonCyan,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 11.sp
@@ -864,7 +864,7 @@ fun SettingsDialog(
                                     modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
                                 ) {
                                     Text(
-                                        text = "✅ Yayın Kaynağı: Varsayılan indirme adresi v3.5 (VIZYON.TV.v3.5.apk) sürümüne bağlıdır; kendi web siteniz veya GitHub üzerinden doğrudan .apk bağlantısı tanımlayabilirsiniz.",
+                                        text = "✅ Resmi Yayın Kaynağı: Uygulama varsayılan olarak https://www.vizyontv4201.com.tr/ portalına ve VIZYON.TV.v3.5.apk sürümüne bağlıdır; dilerseniz özel alan adı tanımlayabilirsiniz.",
                                         fontSize = 10.sp,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                         modifier = Modifier.padding(8.dp)

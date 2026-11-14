@@ -4,16 +4,16 @@
 ### Android TV, TV Box, Tablet ve Telefonlar için Yeni Nesil Medya Platformu
 
 [![Sürüm](https://img.shields.io/badge/S%C3%BCr%C3%BCm-v3.5-00F5FF?style=for-the-badge&logo=android)](https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO/releases/tag/v3.5)
-[![Web Sitesi](https://img.shields.io/badge/Web%20Sitesi-Canl%C4%B1%20Portal%20%26%20QR-FBBF24?style=for-the-badge&logo=googlechrome)](https://enesozkayabasi-source.github.io/V-ZYON-TV-PRO/)
+[![Web Sitesi](https://img.shields.io/badge/Resmi%20Site-www.vizyontv4201.com.tr-FBBF24?style=for-the-badge&logo=googlechrome)](https://www.vizyontv4201.com.tr/)
 [![Android TV](https://img.shields.io/badge/Android%20TV-Uyumlu-3DDC84?style=for-the-badge&logo=android)](https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO/releases/tag/v3.5)
 [![ExoPlayer](https://img.shields.io/badge/Oynat%C4%B1c%C4%B1-ExoPlayer%20Media3-FF6F00?style=for-the-badge)](https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO)
 [![Durum](https://img.shields.io/badge/Yay%C4%B1n-Aktif%20%26%20Kesintisiz-brightgreen?style=for-the-badge)](https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO)
 
 <br/>
 
-**[ 🌐 RESMİ WEB SİTESİ & QR İNDİRME MERKEZİ ](https://enesozkayabasi-source.github.io/V-ZYON-TV-PRO/)** • **[ 📲 VİZYON TV PRO v3.5 APK İNDİR ](https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO/releases/download/v3.5/VIZYON.TV.v3.5.apk)**
+**[ 🌐 RESMİ WEB SİTESİ (www.vizyontv4201.com.tr) ](https://www.vizyontv4201.com.tr/)** • **[ 📲 VİZYON TV PRO v3.5 APK İNDİR ](https://www.vizyontv4201.com.tr/releases/VIZYON.TV.v3.5.apk)**
 
-**[ ⚡ Alternatif Hızlı İndir (vizyontv.apk) ](https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO/raw/main/vizyontv.apk)** • **[ 📦 Tüm Sürümler & Değişiklik Günlüğü ](https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO/releases)** • **[ 🖥️ Yerel Web Kaynağı (`web/index.html`) ](web/index.html)**
+**[ 🔗 Yedek Web Portalı ](https://enesozkayabasi-source.github.io/V-ZYON-TV-PRO/)** • **[ ⚡ Yedek APK (GitHub Release) ](https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO/releases/download/v3.5/VIZYON.TV.v3.5.apk)** • **[ 📦 Tüm Sürümler ](https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO/releases)**
 
 ---
 
@@ -29,10 +29,10 @@ Gelişmiş kumanda (D-Pad) optimizasyonu sayesinde hem **Android TV** ve **TV Bo
 
 ## 🚀 Sürüm v3.5 ile Gelen Yenilikler
 
-- 🌐 **GitHub'dan Bağımsız Resmi Web Sitesi, Sürüm Yayınlama Stüdyosu & QR Merkezi:**
-  - Uygulama için sıfır harici bağımlılıklı resmi web portalı (`web/index.html`) ve tarayıcı içi saf JavaScript QR indirme merkezi (SVG + PNG afiş indirme) oluşturuldu.
+- 🌐 **www.vizyontv4201.com.tr Premium Web Sitesi, Sürüm Yayınlama Stüdyosu & QR Merkezi:**
+  - `https://www.vizyontv4201.com.tr/` resmi alan adıyla premium OLED Sinema & Altın temalı portal (`web/index.html`) ve tarayıcı içi saf JavaScript QR indirme merkezi oluşturuldu.
   - Kod yazmadan yeni sürümleri (`version.json` ve QR PNG) hazırlamayı sağlayan **Sürüm Yayınlama Stüdyosu (`web/yayinla.html`)** eklendi.
-  - Web paketi (`web/`) içinde hazır **v3.5 APK** yer alır; Netlify Drop, Vercel veya cPanel/FTP üzerine doğrudan yüklenebilir ve uygulama içi **Ayarlar → Bağımsız Web Sitesi / Portal Adresi** üzerinden yönetilebilir.
+  - Android uygulaması varsayılan olarak `www.vizyontv4201.com.tr` portalına kaydedildi; yedek sunucu geçişiyle %100 kesintisiz çalışır.
 - 📻 **40+ Doğrulanmış Radyo & TRT Radyo Yenilemesi:**
   - **TRT Türkü, TRT FM, TRT Radyo 1, TRT Nağme, TRT Radyo 3** yeni resmi `rd-*.medya.trt.com.tr` ve `trt.radyotvonline.net` adresleriyle yenilendi; **TRT Radyo Haber** eklendi.
   - **Power FM, Power Türk, Kral Pop Radyo, Lig Radyo, Slow Türk, Alem FM** dahil 40 radyo istasyonu %100 HTTP 200 ve kesintisiz yedek geçişiyle (failover) doğrulandı.

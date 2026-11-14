@@ -23,18 +23,23 @@ class UserPreferencesManager(context: Context) {
         private const val KEY_LAST_TAB = "pref_last_tab"
         private const val KEY_APP_VERSION = "pref_app_version"
         const val LATEST_RELEASE_VERSION = "v3.5"
+        const val OFFICIAL_DOMAIN = "www.vizyontv4201.com.tr"
         const val KEY_CUSTOM_GITHUB_URL = "pref_custom_github_url"
         const val KEY_CUSTOM_APK_URL = "pref_custom_apk_url"
         const val KEY_CUSTOM_WEB_PORTAL_URL = "pref_custom_web_portal_url"
-        const val DEFAULT_WEB_PORTAL_URL = "https://enesozkayabasi-source.github.io/V-ZYON-TV-PRO/"
+        const val DEFAULT_WEB_PORTAL_URL = "https://www.vizyontv4201.com.tr/"
         const val DEFAULT_GITHUB_PAGE_URL = "https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO"
-        const val DEFAULT_APK_DOWNLOAD_URL = "https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO/releases/download/v3.5/VIZYON.TV.v3.5.apk"
+        const val DEFAULT_APK_DOWNLOAD_URL = "https://www.vizyontv4201.com.tr/releases/VIZYON.TV.v3.5.apk"
+        const val BACKUP_GITHUB_APK_URL = "https://github.com/enesozkayabasi-source/V-ZYON-TV-PRO/releases/download/v3.5/VIZYON.TV.v3.5.apk"
         const val OFFICIAL_UPDATE_URL = DEFAULT_APK_DOWNLOAD_URL
     }
 
     fun getWebPortalUrl(): String {
         val saved = prefs.getString(KEY_CUSTOM_WEB_PORTAL_URL, null)?.trim()
-        if (saved.isNullOrBlank() || (!saved.startsWith("http://") && !saved.startsWith("https://"))) {
+        if (saved.isNullOrBlank() ||
+            (!saved.startsWith("http://") && !saved.startsWith("https://")) ||
+            saved.contains("enesozkayabasi-source.github.io")
+        ) {
             return DEFAULT_WEB_PORTAL_URL
         }
         return saved
@@ -66,6 +71,7 @@ class UserPreferencesManager(context: Context) {
         val saved = prefs.getString(KEY_CUSTOM_APK_URL, null)?.trim()
         if (saved.isNullOrBlank() ||
             (!saved.startsWith("http://") && !saved.startsWith("https://")) ||
+            saved.contains("enesozkayabasi-source") ||
             saved.contains("vizyontv.apk") ||
             saved.contains("VIZYON.TV.3.apk") ||
             saved.contains("v3.2") ||
